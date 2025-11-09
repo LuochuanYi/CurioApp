@@ -164,411 +164,304 @@ const HomeScreen = ({ navigation }) => {
       flex: 1, 
       backgroundColor: CURIO_THEME.colors.surface 
     }}>
-      {/* Curio Branding Header */}
-      <View style={{
-        marginTop: CURIO_THEME.spacing.md,
-        borderRadius: 20,
-        overflow: 'hidden',
-        ...CURIO_THEME.shadows.card,
-        backgroundColor: CURIO_THEME.colors.surface,
-        height: 140,
-      }}>
+      {/* Curio Branding Header - Mobile Style */}
+      <View style={styles.brandingHeader}>
         <Image
           source={require('../assets/images/curio-branding.png')}
-          style={{
-            width: '100%',
-            height: '100%',
-            resizeMode: 'contain',
-          }}
+          style={styles.brandingImage}
           accessible={true}
           accessibilityLabel="Curio branding - Nurture imagination, together!"
         />
       </View>
 
-      {/* Quick Actions Bar - Curio Style */}
-      <View style={{
-        paddingHorizontal: CURIO_THEME.spacing.screenPadding,
-        paddingVertical: CURIO_THEME.spacing.md,
-      }}>
-        <Text style={[TEXT_STYLES.cardTitle, { marginBottom: CURIO_THEME.spacing.md }]}>
-          Quick Actions
+      {/* Welcome hint */}
+      {(!featuredContent.hasRecentActivity && userProgress.stats.storiesCompleted === 0) && (
+        <View style={styles.welcomeHint}>
+          <Text style={styles.welcomeIcon}>👋</Text>
+          <View style={styles.welcomeTextContainer}>
+            <Text style={styles.welcomeTitle}>Welcome to Curio!</Text>
+            <Text style={styles.welcomeText}>
+              Start by exploring our Quick Actions below, or tap "Explore Content" to browse all stories and songs.
+            </Text>
+          </View>
+        </View>
+      )}
+
+      {/* Quick Actions Section */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionIcon}>⚡</Text>
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+        </View>
+        <Text style={styles.sectionDescription}>
+          Jump right into activities tailored for this time of day
         </Text>
-        <View style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          gap: CURIO_THEME.spacing.sm,
-        }}>
-          <CurioButton
-            title={isBedtime() ? 'Bedtime' : 'Surprise Me'}
-            variant="primary"
-            size="small"
+        <View style={styles.sectionContent}>
+          <TouchableOpacity
+            style={styles.actionItem}
             onPress={() => handleQuickAction(isBedtime() ? 'bedtime_song' : 'surprise_me')}
-            style={{ flex: 1 }}
-          />
-          
-          <CurioButton
-            title="Continue"
-            variant="secondary"
-            size="small"
+            accessible={true}
+            accessibilityLabel={`${isBedtime() ? 'Bedtime' : 'Surprise Me'} quick action`}
+            accessibilityRole="button"
+          >
+            <Text style={styles.actionIcon}>{isBedtime() ? '😴' : '🎲'}</Text>
+            <View style={styles.actionTextContainer}>
+              <Text style={styles.actionText}>{isBedtime() ? 'Bedtime Stories' : 'Surprise Me'}</Text>
+              <Text style={styles.actionSubtitle}>
+                {isBedtime() ? 'Calming content for sleepy time' : 'Random story or song just for you'}
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionItem}
             onPress={() => handleQuickAction('continue_story')}
-            style={{ flex: 1 }}
-          />
-          
-          <CurioButton
-            title="Explore"
-            variant="primary"
-            size="small"
+            accessible={true}
+            accessibilityLabel="Continue story quick action"
+            accessibilityRole="button"
+          >
+            <Text style={styles.actionIcon}>📖</Text>
+            <View style={styles.actionTextContainer}>
+              <Text style={styles.actionText}>Continue Reading</Text>
+              <Text style={styles.actionSubtitle}>
+                {featuredContent.inProgress.length > 0 ? 
+                  `Pick up where you left off` : 
+                  'Start a new adventure together'
+                }
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionItem}
             onPress={() => navigation?.navigate('Engage')}
-            style={{ 
-              flex: 1, 
-              backgroundColor: CURIO_THEME.colors.goldenYellow,
-            }}
-          />
+            accessible={true}
+            accessibilityLabel="Explore content quick action"
+            accessibilityRole="button"
+          >
+            <Text style={styles.actionIcon}>🚀</Text>
+            <View style={styles.actionTextContainer}>
+              <Text style={styles.actionText}>Explore Content</Text>
+              <Text style={styles.actionSubtitle}>
+                Browse all stories, songs & activities
+              </Text>
+            </View>
+          </TouchableOpacity>
         </View>
       </View>
 
-      {/* Featured Content Section - Curio Style */}
-      <View style={{
-        paddingHorizontal: CURIO_THEME.spacing.screenPadding,
-        paddingVertical: CURIO_THEME.spacing.md,
-      }}>
-        <View style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: CURIO_THEME.spacing.md,
-        }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={{ fontSize: 24, marginRight: CURIO_THEME.spacing.xs }}>
-              {featuredContent.hasRecentActivity ? '⭐' : '🎉'}
-            </Text>
-            <Text style={TEXT_STYLES.cardTitle}>
-              {featuredContent.hasRecentActivity ? 'Recent Activity' : 'Featured Content'}
-            </Text>
-          </View>
+      {/* Stories Section */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionIcon}>📚</Text>
+          <Text style={styles.sectionTitle}>
+            {featuredContent.hasRecentActivity ? 'Recent Stories' : 'Featured Stories'}
+          </Text>
           {userProgress.stats.currentStreak > 0 && (
-            <View style={{
-              backgroundColor: CURIO_THEME.colors.accentOrange,
-              paddingHorizontal: CURIO_THEME.spacing.md,
-              paddingVertical: CURIO_THEME.spacing.xs,
-              borderRadius: CURIO_THEME.radius.badge,
-            }}>
-              <Text style={[TEXT_STYLES.caption, { color: CURIO_THEME.colors.textInverse }]}>
-                🔥 {userProgress.stats.currentStreak} day streak
-              </Text>
+            <View style={styles.streakBadge}>
+              <Text style={styles.streakText}>🔥 {userProgress.stats.currentStreak}</Text>
             </View>
           )}
         </View>
+        <Text style={styles.sectionDescription}>
+          {featuredContent.hasRecentActivity ? 
+            'Continue where you left off or discover what\'s new' :
+            'Handpicked stories perfect for you and your child'
+          }
+        </Text>
         
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false} 
-          contentContainerStyle={{ paddingRight: CURIO_THEME.spacing.screenPadding }}
-        >
-          {/* Featured Stories - Opened Book Shape */}
-          {featuredContent.stories.map((item, index) => {
-            const story = STORY_LIBRARY.find(s => s.id === item.storyId);
-            if (!story) return null;
-            
-            const categoryColor = STORY_CATEGORIES[story.category.toUpperCase()]?.color || CURIO_THEME.colors.softMint;
-            
-            return (
-              <View key={`story-${story.id}`} style={{ marginRight: CURIO_THEME.spacing.md, alignItems: 'center' }}>
-                {/* Opened Book Shape */}
+        {featuredContent.stories.length > 0 ? (
+          <View style={styles.gridContainer}>
+            {featuredContent.stories.map((item, index) => {
+              const story = STORY_LIBRARY.find(s => s.id === item.storyId);
+              if (!story) return null;
+              
+              const categoryInfo = STORY_CATEGORIES[story.category.toUpperCase()] || {};
+              const isInProgress = featuredContent.inProgress.some(p => p.storyId === story.id);
+              const progressData = isInProgress ? featuredContent.inProgress.find(p => p.storyId === story.id) : null;
+              
+              return (
                 <TouchableOpacity
+                  key={`story-${story.id}`}
                   onPress={() => handleStoryPress(story.id)}
-                  style={{
-                    width: 100,
-                    height: 75,
-                    backgroundColor: `${categoryColor}25`, // 25% opacity for transparency
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    padding: CURIO_THEME.spacing.xs,
-                    ...CURIO_THEME.shadows.card,
-                    // Book shape with spine in the middle
-                    borderRadius: 8,
-                    borderWidth: 1.5,
-                    borderColor: `${categoryColor}60`, // 60% opacity border
-                    position: 'relative',
-                    // Slight tilt like an open book
-                    transform: [{ rotate: '-2deg' }],
-                  }}
+                  style={styles.gridItem}
                   accessible={true}
-                  accessibilityLabel={`${story.title} story, ${story.duration}, ${story.category}`}
+                  accessibilityLabel={`${story.title} story, ${story.duration}, ${story.category}${isInProgress ? ', in progress' : ''}`}
                   accessibilityRole="button"
                 >
-                  {/* Book Spine (Center Line) */}
-                  <View style={{
-                    position: 'absolute',
-                    top: 0,
-                    bottom: 0,
-                    left: '50%',
-                    width: 2,
-                    backgroundColor: `${categoryColor}80`, // Darker line for spine
-                    marginLeft: -1, // Center the line
-                  }} />
-                  
-                  {/* Left Page Content */}
-                  <View style={{
-                    position: 'absolute',
-                    left: 4,
-                    top: 8,
-                    width: 40,
-                    alignItems: 'center',
-                  }}>
-                    <Text style={{ fontSize: 16, marginBottom: 1 }}>
-                      {STORY_CATEGORIES[story.category.toUpperCase()]?.icon || '📚'}
+                  <View style={[styles.iconContainer, { backgroundColor: categoryInfo.color || CURIO_THEME.colors.skyBlue }]}>
+                    <Text style={styles.gridIcon}>
+                      {categoryInfo.icon || '📚'}
                     </Text>
+                    {isInProgress && (
+                      <View style={styles.progressBadge}>
+                        <Text style={styles.progressText}>📍</Text>
+                      </View>
+                    )}
                   </View>
-                  
-                  {/* Right Page Content */}
-                  <View style={{
-                    position: 'absolute',
-                    right: 4,
-                    top: 6,
-                    width: 40,
-                    alignItems: 'center',
-                  }}>
-                    <Text style={[TEXT_STYLES.bodySmall, { 
-                      textAlign: 'center', 
-                      fontSize: 8, 
-                      fontWeight: 'bold',
-                      color: CURIO_THEME.colors.textPrimary,
-                      lineHeight: 10,
-                    }]} numberOfLines={3}>
-                      {story.title}
-                    </Text>
-                    <Text style={[TEXT_STYLES.caption, { 
-                      textAlign: 'center', 
-                      fontSize: 6, 
-                      color: CURIO_THEME.colors.textSecondary,
-                      marginTop: 2
-                    }]}>
-                      {story.duration}
-                    </Text>
-                  </View>
-                  
-                  {/* Book Pages Lines (Decoration) */}
-                  <View style={{
-                    position: 'absolute',
-                    left: 8,
-                    bottom: 15,
-                    width: 35,
-                    height: 1,
-                    backgroundColor: `${categoryColor}40`,
-                  }} />
-                  <View style={{
-                    position: 'absolute',
-                    left: 8,
-                    bottom: 12,
-                    width: 30,
-                    height: 1,
-                    backgroundColor: `${categoryColor}30`,
-                  }} />
-                  <View style={{
-                    position: 'absolute',
-                    right: 8,
-                    bottom: 15,
-                    width: 35,
-                    height: 1,
-                    backgroundColor: `${categoryColor}40`,
-                  }} />
-                  <View style={{
-                    position: 'absolute',
-                    right: 8,
-                    bottom: 12,
-                    width: 30,
-                    height: 1,
-                    backgroundColor: `${categoryColor}30`,
-                  }} />
+                  <Text style={styles.gridTitle} numberOfLines={2}>
+                    {story.title}
+                  </Text>
+                  <Text style={styles.gridSubtitle}>
+                    {isInProgress ? `Continue • ${progressData?.progress || 50}% complete` : story.duration}
+                  </Text>
+                  {isInProgress && (
+                    <View style={styles.progressBar}>
+                      <View style={[styles.progressFill, { width: `${progressData?.progress || 50}%` }]} />
+                    </View>
+                  )}
                 </TouchableOpacity>
-                
-                {/* Badges */}
-                {item.isNew && (
-                  <View style={{
-                    position: 'absolute',
-                    top: 3,
-                    right: 3,
-                    backgroundColor: CURIO_THEME.colors.accentOrange,
-                    paddingHorizontal: 3,
-                    paddingVertical: 1,
-                    borderRadius: CURIO_THEME.radius.sm,
-                  }}>
-                    <Text style={[TEXT_STYLES.caption, { color: CURIO_THEME.colors.textInverse, fontSize: 7 }]}>NEW</Text>
-                  </View>
-                )}
-                {item.completionPercentage > 0 && item.completionPercentage < 100 && (
-                  <View style={{
-                    position: 'absolute',
-                    bottom: 3,
-                    left: 8,
-                    right: 8,
-                    height: 2,
-                    backgroundColor: 'rgba(255,255,255,0.3)',
-                    borderRadius: 1,
-                  }}>
-                    <View style={{
-                      height: 2,
-                      backgroundColor: CURIO_THEME.colors.primary,
-                      borderRadius: 1,
-                      width: `${item.completionPercentage}%`,
-                    }} />
-                  </View>
-                )}
-              </View>
-            );
-          })}
-          
-          {/* Featured Songs - Simple List Style */}
-          {featuredContent.songs.map((item, index) => {
-            const song = SONGS_LIBRARY.find(s => s.id === item.songId);
-            if (!song) return null;
-            
-            return (
-              <TouchableOpacity
-                key={`song-${song.id}`}
-                onPress={() => handleSongPress(song.id)}
-                style={{
-                  width: 140,
-                  marginRight: CURIO_THEME.spacing.md,
-                  backgroundColor: `${song.color || CURIO_THEME.colors.goldenYellow}25`, // 25% opacity for transparency
-                  paddingHorizontal: CURIO_THEME.spacing.sm,
-                  paddingVertical: CURIO_THEME.spacing.xs,
-                  borderRadius: CURIO_THEME.radius.md,
-                  borderWidth: 1,
-                  borderColor: `${song.color || CURIO_THEME.colors.goldenYellow}40`,
-                  ...CURIO_THEME.shadows.card,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                }}
-                accessible={true}
-                accessibilityLabel={`${song.title} song, ${song.duration}, ${song.category}`}
-                accessibilityRole="button"
-              >
-                {/* Music Symbol Icon */}
-                <Text style={{ 
-                  fontSize: 20, 
-                  marginRight: CURIO_THEME.spacing.xs,
-                  color: song.color || CURIO_THEME.colors.goldenYellow 
-                }}>
-                  🎵
-                </Text>
-                
-                {/* Song Details */}
-                <View style={{ flex: 1 }}>
-                  <Text style={[TEXT_STYLES.bodySmall, { 
-                    fontSize: 12, 
-                    fontWeight: 'bold',
-                    color: CURIO_THEME.colors.textPrimary,
-                  }]} numberOfLines={1}>
-                    {song.title}
-                  </Text>
-                  <Text style={[TEXT_STYLES.caption, { 
-                    fontSize: 9, 
-                    color: CURIO_THEME.colors.textSecondary,
-                  }]}>
-                    {song.duration}
-                  </Text>
-                </View>
-                
-                {/* Badges */}
-                {item.isNew && (
-                  <View style={{
-                    backgroundColor: CURIO_THEME.colors.accentOrange,
-                    paddingHorizontal: 4,
-                    paddingVertical: 2,
-                    borderRadius: CURIO_THEME.radius.sm,
-                    marginLeft: CURIO_THEME.spacing.xs,
-                  }}>
-                    <Text style={[TEXT_STYLES.caption, { color: CURIO_THEME.colors.textInverse, fontSize: 7 }]}>NEW</Text>
-                  </View>
-                )}
-                {item.playCount > 0 && (
-                  <View style={{
-                    backgroundColor: CURIO_THEME.colors.primary,
-                    paddingHorizontal: 4,
-                    paddingVertical: 2,
-                    borderRadius: CURIO_THEME.radius.sm,
-                    marginLeft: CURIO_THEME.spacing.xs,
-                  }}>
-                    <Text style={[TEXT_STYLES.caption, { color: CURIO_THEME.colors.textInverse, fontSize: 7 }]}>♪ {item.playCount}</Text>
-                  </View>
-                )}
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
+              );
+            })}
+          </View>
+        ) : (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateIcon}>📚</Text>
+            <Text style={styles.emptyStateTitle}>No stories yet!</Text>
+            <Text style={styles.emptyStateText}>
+              Tap "Explore Content" above to discover amazing stories waiting for you
+            </Text>
+          </View>
+        )}
       </View>
 
-      {/* Air Quality Section - Curio Style */}
-      <View style={{ paddingHorizontal: CURIO_THEME.spacing.screenPadding }}>
-        <CurioCard
-          title="Air Quality"
-          subtitle={airQualityLoading ? 'Loading...' : `Alert ${airQualityData?.status || 'moderate'}`}
+      {/* Songs Section */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionIcon}>🎵</Text>
+          <Text style={styles.sectionTitle}>Featured Songs</Text>
+        </View>
+        <Text style={styles.sectionDescription}>
+          Sing-along favorites and musical adventures for every mood
+        </Text>
+        {featuredContent.songs.length > 0 ? (
+          <View style={styles.gridContainer}>
+            {featuredContent.songs.map((item, index) => {
+              const song = SONGS_LIBRARY.find(s => s.id === item.songId);
+              if (!song) return null;
+              
+              const songColors = [
+                CURIO_THEME.colors.goldenYellow,
+                CURIO_THEME.colors.softMint,
+                CURIO_THEME.colors.accentOrange,
+                CURIO_THEME.colors.skyBlue
+              ];
+              
+              return (
+                <TouchableOpacity
+                  key={`song-${song.id}`}
+                  onPress={() => handleSongPress(song.id)}
+                  style={styles.gridItem}
+                  accessible={true}
+                  accessibilityLabel={`${song.title} song, ${song.duration}, ${song.category}`}
+                  accessibilityRole="button"
+                >
+                  <View style={[styles.iconContainer, { backgroundColor: songColors[index % songColors.length] }]}>
+                    <Text style={styles.gridIcon}>🎵</Text>
+                    {item.isNew && (
+                      <View style={styles.newBadge}>
+                        <Text style={styles.newBadgeText}>NEW</Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text style={styles.gridTitle} numberOfLines={2}>
+                    {song.title}
+                  </Text>
+                  <Text style={styles.gridSubtitle}>
+                    {song.duration} • {song.category}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        ) : (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateIcon}>🎵</Text>
+            <Text style={styles.emptyStateTitle}>No songs yet!</Text>
+            <Text style={styles.emptyStateText}>
+              Tap "Explore Content" to find songs perfect for singing along
+            </Text>
+          </View>
+        )}
+      </View>
+
+      {/* Air Quality Section - Enhanced with better hierarchy */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionIcon}>🌱</Text>
+          <Text style={styles.sectionTitle}>Today's Air Quality</Text>
+        </View>
+        <Text style={styles.sectionDescription}>
+          Monitor air quality to plan outdoor activities safely
+        </Text>
+        
+        <TouchableOpacity
+          style={styles.airQualityCard}
           onPress={handleAirQualityPress}
-          variant="alert"
-          style={{ backgroundColor: CURIO_THEME.colors.background }}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel="View detailed air quality information"
         >
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: CURIO_THEME.spacing.md }}>
-            <Text style={{ fontSize: 24, marginRight: CURIO_THEME.spacing.sm }}>🌳</Text>
-            <Text style={{ fontSize: 24, marginRight: CURIO_THEME.spacing.sm }}>🌳</Text>
-            <Text style={{ fontSize: 24 }}>🌱</Text>
-          </View>
-
-          <View style={{
-            backgroundColor: CURIO_THEME.colors.surface,
-            borderRadius: CURIO_THEME.radius.sm,
-            padding: CURIO_THEME.spacing.md,
-            marginBottom: CURIO_THEME.spacing.sm,
-          }}>
-            <View style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'flex-end',
-              height: 60,
-              marginBottom: CURIO_THEME.spacing.sm,
-            }}>
-              {(airQualityData?.chartData || [30, 45, 28, 38, 52, 41, 35]).map((value, index) => (
-                <View
-                  key={index}
-                  style={{
-                    width: 20,
-                    height: `${(value / 100) * 80}%`,
-                    backgroundColor: value < 40 ? CURIO_THEME.colors.success : 
-                                   value < 70 ? CURIO_THEME.colors.warning : 
-                                   CURIO_THEME.colors.error,
-                    borderRadius: 2,
-                  }}
-                />
-              ))}
-            </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <Text style={TEXT_STYLES.caption}>12am</Text>
-              <Text style={TEXT_STYLES.caption}>6am</Text>
-              <Text style={TEXT_STYLES.caption}>12pm</Text>
-            </View>
-          </View>
-
-          <View style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            backgroundColor: CURIO_THEME.colors.lightGray,
-            padding: CURIO_THEME.spacing.sm,
-            borderRadius: CURIO_THEME.radius.sm,
-          }}>
-            <Text style={{ fontSize: 20, marginRight: CURIO_THEME.spacing.sm }}>⚠️</Text>
-            <View style={{ flex: 1 }}>
-              <Text style={TEXT_STYLES.bodyMedium}>
-                Air quality {airQualityData?.status || 'moderate'}!
+          <View style={styles.airQualityHeader}>
+            <View style={styles.airQualityStatus}>
+              <Text style={styles.airQualityLevel}>
+                {airQualityLoading ? 'Loading...' : (airQualityData?.status || 'moderate').toUpperCase()}
               </Text>
-              <Text style={TEXT_STYLES.caption}>
+              <Text style={styles.airQualityDate}>
                 {airQualityData?.alertDate || new Date().toLocaleDateString()}
               </Text>
             </View>
-            <Text style={[TEXT_STYLES.h3, { color: CURIO_THEME.colors.textSecondary }]}>›</Text>
+            <View style={[styles.statusIndicator, {
+              backgroundColor: airQualityData?.status === 'low' ? CURIO_THEME.colors.success :
+                             airQualityData?.status === 'moderate' ? CURIO_THEME.colors.warning :
+                             CURIO_THEME.colors.error
+            }]}>
+              <Text style={styles.statusEmoji}>
+                {airQualityData?.status === 'low' ? '✅' : 
+                 airQualityData?.status === 'moderate' ? '⚠️' : '🚫'}
+              </Text>
+            </View>
           </View>
-        </CurioCard>
+
+          <View style={styles.chartContainer}>
+            <Text style={styles.chartTitle}>24-Hour Trend</Text>
+            <View style={styles.chartBars}>
+              {(airQualityData?.chartData || [30, 45, 28, 38, 52, 41, 35]).map((value, index) => (
+                <View key={index} style={styles.chartBarContainer}>
+                  <View
+                    style={[styles.chartBar, {
+                      height: `${(value / 100) * 80}%`,
+                      backgroundColor: value < 40 ? CURIO_THEME.colors.success : 
+                                     value < 70 ? CURIO_THEME.colors.warning : 
+                                     CURIO_THEME.colors.error,
+                    }]}
+                  />
+                </View>
+              ))}
+            </View>
+            <View style={styles.chartLabels}>
+              <Text style={styles.chartLabel}>12am</Text>
+              <Text style={styles.chartLabel}>6am</Text>
+              <Text style={styles.chartLabel}>12pm</Text>
+              <Text style={styles.chartLabel}>6pm</Text>
+            </View>
+          </View>
+
+          <View style={styles.airQualityFooter}>
+            <Text style={styles.tapToViewText}>Tap to view detailed recommendations</Text>
+            <Text style={styles.arrowIcon}>→</Text>
+          </View>
+        </TouchableOpacity>
       </View>
+
+      {/* Navigation Hint for first-time users */}
+      {(!featuredContent.hasRecentActivity && userProgress.stats.storiesCompleted === 0) && (
+        <View style={styles.navigationHint}>
+          <Text style={styles.navigationHintText}>
+            💡 Try tapping "Engage" below to discover all our stories and songs!
+          </Text>
+        </View>
+      )}
 
       {/* Bottom Navigation - Curio Style */}
       <View style={{
@@ -630,5 +523,364 @@ const HomeScreen = ({ navigation }) => {
     </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  // Branding Header
+  brandingHeader: {
+    marginTop: 20,
+    marginHorizontal: 20,
+    borderRadius: 20,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+  },
+  brandingImage: {
+    width: '100%',
+    height: 120,
+    resizeMode: 'contain',
+  },
+
+  // Welcome hint
+  welcomeHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: CURIO_THEME.colors.surface,
+    marginHorizontal: CURIO_THEME.spacing.screenPadding,
+    padding: CURIO_THEME.spacing.md,
+    borderRadius: CURIO_THEME.radius.md,
+    borderLeftWidth: 4,
+    borderLeftColor: CURIO_THEME.colors.primary,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+  },
+  welcomeIcon: {
+    fontSize: 28,
+    marginRight: CURIO_THEME.spacing.md,
+  },
+  welcomeTextContainer: {
+    flex: 1,
+  },
+  welcomeTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: CURIO_THEME.colors.textPrimary,
+    marginBottom: 4,
+  },
+  welcomeText: {
+    fontSize: 14,
+    color: CURIO_THEME.colors.textSecondary,
+    lineHeight: 18,
+  },
+
+  // Section Styles
+  section: {
+    paddingHorizontal: CURIO_THEME.spacing.screenPadding,
+    marginBottom: CURIO_THEME.spacing.lg,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: CURIO_THEME.spacing.md,
+  },
+  sectionIcon: {
+    fontSize: 28,
+    marginRight: CURIO_THEME.spacing.sm,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: CURIO_THEME.colors.textPrimary,
+    flex: 1,
+  },
+  sectionDescription: {
+    fontSize: 14,
+    color: CURIO_THEME.colors.textSecondary,
+    marginBottom: CURIO_THEME.spacing.md,
+    lineHeight: 20,
+  },
+  sectionContent: {
+    gap: CURIO_THEME.spacing.sm,
+  },
+  
+  // Action Items (keep as horizontal for quick actions)
+  actionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: CURIO_THEME.colors.surface,
+    padding: CURIO_THEME.spacing.md,
+    borderRadius: CURIO_THEME.radius.md,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+  },
+  actionIcon: {
+    fontSize: 32,
+    marginRight: CURIO_THEME.spacing.md,
+  },
+  actionTextContainer: {
+    flex: 1,
+  },
+  actionText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: CURIO_THEME.colors.textPrimary,
+    marginBottom: 2,
+  },
+  actionSubtitle: {
+    fontSize: 12,
+    color: CURIO_THEME.colors.textSecondary,
+    lineHeight: 16,
+  },
+  
+  // Grid Layout
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: CURIO_THEME.spacing.md,
+  },
+  gridItem: {
+    width: '47%',
+    backgroundColor: CURIO_THEME.colors.surface,
+    padding: CURIO_THEME.spacing.md,
+    borderRadius: CURIO_THEME.radius.md,
+    alignItems: 'center',
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: CURIO_THEME.spacing.sm,
+  },
+  gridIcon: {
+    fontSize: 24,
+  },
+  gridTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: CURIO_THEME.colors.textPrimary,
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  gridSubtitle: {
+    fontSize: 12,
+    color: CURIO_THEME.colors.textSecondary,
+    textAlign: 'center',
+  },
+  
+  // Streak badge
+  streakBadge: {
+    backgroundColor: '#ff6b9d',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  streakText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#fff',
+  },
+
+  // Progress indicators
+  progressBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: CURIO_THEME.colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  progressText: {
+    fontSize: 8,
+  },
+  progressBar: {
+    width: '100%',
+    height: 3,
+    backgroundColor: CURIO_THEME.colors.lightGray,
+    borderRadius: 2,
+    marginTop: 6,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: CURIO_THEME.colors.primary,
+    borderRadius: 2,
+  },
+
+  // New badge
+  newBadge: {
+    position: 'absolute',
+    top: -6,
+    right: -6,
+    backgroundColor: CURIO_THEME.colors.success,
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  newBadgeText: {
+    fontSize: 8,
+    fontWeight: '700',
+    color: '#fff',
+  },
+
+  // Empty states
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: CURIO_THEME.spacing.xl,
+    paddingHorizontal: CURIO_THEME.spacing.md,
+  },
+  emptyStateIcon: {
+    fontSize: 48,
+    marginBottom: CURIO_THEME.spacing.md,
+    opacity: 0.5,
+  },
+  emptyStateTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: CURIO_THEME.colors.textPrimary,
+    marginBottom: CURIO_THEME.spacing.xs,
+    textAlign: 'center',
+  },
+  emptyStateText: {
+    fontSize: 14,
+    color: CURIO_THEME.colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
+    maxWidth: 240,
+  },
+
+  // Enhanced Air Quality Section
+  airQualityCard: {
+    backgroundColor: CURIO_THEME.colors.surface,
+    borderRadius: CURIO_THEME.radius.lg,
+    padding: CURIO_THEME.spacing.lg,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  airQualityHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: CURIO_THEME.spacing.lg,
+  },
+  airQualityStatus: {
+    flex: 1,
+  },
+  airQualityLevel: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: CURIO_THEME.colors.textPrimary,
+    marginBottom: 4,
+  },
+  airQualityDate: {
+    fontSize: 12,
+    color: CURIO_THEME.colors.textSecondary,
+  },
+  statusIndicator: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  statusEmoji: {
+    fontSize: 24,
+  },
+  chartContainer: {
+    backgroundColor: CURIO_THEME.colors.background,
+    borderRadius: CURIO_THEME.radius.md,
+    padding: CURIO_THEME.spacing.md,
+    marginBottom: CURIO_THEME.spacing.md,
+  },
+  chartTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: CURIO_THEME.colors.textPrimary,
+    marginBottom: CURIO_THEME.spacing.sm,
+  },
+  chartBars: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    height: 60,
+    marginBottom: CURIO_THEME.spacing.sm,
+  },
+  chartBarContainer: {
+    flex: 1,
+    height: '100%',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginHorizontal: 2,
+  },
+  chartBar: {
+    width: '70%',
+    borderRadius: 2,
+    minHeight: 4,
+  },
+  chartLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  chartLabel: {
+    fontSize: 11,
+    color: CURIO_THEME.colors.textSecondary,
+    flex: 1,
+    textAlign: 'center',
+  },
+  airQualityFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: CURIO_THEME.spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: CURIO_THEME.colors.lightGray,
+  },
+  tapToViewText: {
+    fontSize: 12,
+    color: CURIO_THEME.colors.textSecondary,
+    flex: 1,
+  },
+  arrowIcon: {
+    fontSize: 16,
+    color: CURIO_THEME.colors.textSecondary,
+  },
+
+  // Navigation hint
+  navigationHint: {
+    marginHorizontal: CURIO_THEME.spacing.screenPadding,
+    marginBottom: CURIO_THEME.spacing.md,
+    padding: CURIO_THEME.spacing.sm,
+    backgroundColor: CURIO_THEME.colors.primary,
+    borderRadius: CURIO_THEME.radius.sm,
+  },
+  navigationHintText: {
+    fontSize: 12,
+    color: '#fff',
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+});
 
 export default HomeScreen;

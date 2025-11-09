@@ -7,7 +7,7 @@ import { CurioHeader, CurioCard, CurioMascot, CURIO_THEME, TEXT_STYLES } from '.
 const { width: screenWidth } = Dimensions.get('window');
 
 // Enhanced hook for content data with category filtering
-const useContentData = (selectedCategory = 'all') => {
+const useContentData = (selectedCategory = 'bedtime') => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -17,7 +17,7 @@ const useContentData = (selectedCategory = 'all') => {
       // Simulate network delay
       await new Promise(resolve => setTimeout(resolve, 400));
       
-      const stories = getStoriesByCategory(selectedCategory === 'all' ? null : selectedCategory);
+      const stories = getStoriesByCategory(selectedCategory);
       const featuredStory = stories[Math.floor(Math.random() * stories.length)];
       
       setData({
@@ -53,8 +53,8 @@ const learningCategories = getCategoriesList();
 const { width } = Dimensions.get('window');
 
 const EngageScreen = ({ navigation }) => {
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedSongCategory, setSelectedSongCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('bedtime');
+  const [selectedSongCategory, setSelectedSongCategory] = useState('bedtime');
   const { data: contentData, loading: contentLoading } = useContentData(selectedCategory);
 
   const handleNavigation = (screen) => {
@@ -121,43 +121,26 @@ const EngageScreen = ({ navigation }) => {
 
 
 
-      {/* Story Categories - Curio Style */}
-      {contentData?.categories && (
-        <View style={{
-          paddingHorizontal: CURIO_THEME.spacing.screenPadding,
-          paddingVertical: CURIO_THEME.spacing.md,
-        }}>
-          <Text style={[TEXT_STYLES.cardTitle, { marginBottom: CURIO_THEME.spacing.md }]}>
-            Story Categories
-          </Text>
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false} 
-            contentContainerStyle={{ paddingRight: CURIO_THEME.spacing.screenPadding }}
-          >
-            <TouchableOpacity
-              onPress={() => setSelectedCategory('all')}
-              style={{
-                paddingVertical: CURIO_THEME.spacing.sm,
-                paddingHorizontal: CURIO_THEME.spacing.md,
-                backgroundColor: selectedCategory === 'all' ? CURIO_THEME.colors.skyBlue : CURIO_THEME.colors.background,
-                borderRadius: CURIO_THEME.radius.button,
-                marginRight: CURIO_THEME.spacing.sm,
-                borderWidth: 1,
-                borderColor: selectedCategory === 'all' ? CURIO_THEME.colors.skyBlue : CURIO_THEME.colors.lightGray,
-              }}
-              accessible={true}
-              accessibilityLabel="Show all stories"
-              accessibilityRole="button"
-            >
-              <Text style={[
-                TEXT_STYLES.buttonSecondary,
-                { color: selectedCategory === 'all' ? CURIO_THEME.colors.textInverse : CURIO_THEME.colors.textPrimary }
-              ]}>
-                All Stories
-              </Text>
-            </TouchableOpacity>
-            {contentData.categories.map((category) => (
+      {/* Stories Section */}
+      <View style={styles.section}>
+        <View style={[styles.sectionHeader, styles.centeredSectionHeader]}>
+          <Text style={styles.sectionIcon}>📚</Text>
+          <Text style={styles.sectionTitle}>Stories</Text>
+        </View>
+
+        {/* Story Categories Filter - Curio Style */}
+        <Text style={[TEXT_STYLES.bodyMedium, { marginBottom: CURIO_THEME.spacing.sm }]}>
+          Browse by Category:
+        </Text>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false} 
+          contentContainerStyle={{ paddingRight: CURIO_THEME.spacing.screenPadding }}
+          style={{ marginBottom: CURIO_THEME.spacing.md }}
+        >
+          {contentData?.categories && contentData.categories.map((category) => {
+            const categoryStoryCount = getStoriesByCategory(category.id).length;
+            return (
               <TouchableOpacity
                 key={category.id}
                 onPress={() => handleCategoryPress(category)}
@@ -178,187 +161,51 @@ const EngageScreen = ({ navigation }) => {
                   TEXT_STYLES.buttonSecondary,
                   { color: selectedCategory === category.id ? CURIO_THEME.colors.textInverse : CURIO_THEME.colors.textPrimary }
                 ]}>
-                  {category.icon} {category.name}
+                  {category.icon} {category.name} ({categoryStoryCount})
                 </Text>
               </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      )}
-
-      {/* Stories Library - Curio Style */}
-      <View style={{
-        paddingHorizontal: CURIO_THEME.spacing.screenPadding,
-        paddingVertical: CURIO_THEME.spacing.md,
-      }}>
-        <View style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: CURIO_THEME.spacing.md,
-        }}>
-          <Text style={TEXT_STYLES.cardTitle}>
-            {selectedCategory === 'all' ? 'All Stories' : 
-             contentData?.categories.find(c => c.id === selectedCategory)?.name || 'Stories'}
-          </Text>
-          <View style={{
-            backgroundColor: CURIO_THEME.colors.accentOrange,
-            paddingHorizontal: CURIO_THEME.spacing.md,
-            paddingVertical: CURIO_THEME.spacing.xs,
-            borderRadius: CURIO_THEME.radius.badge,
-          }}>
-            <Text style={[TEXT_STYLES.caption, { color: CURIO_THEME.colors.textInverse }]}>
-              {contentData?.stories?.length || 0} stories
-            </Text>
-          </View>
-        </View>
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false} 
-          contentContainerStyle={{ paddingRight: CURIO_THEME.spacing.screenPadding }}
-        >
-          {contentData?.stories?.map((story) => {
-            const categoryColor = STORY_CATEGORIES[story.category.toUpperCase()]?.color || CURIO_THEME.colors.softMint;
-            return (
-              <View key={story.id} style={{ marginRight: CURIO_THEME.spacing.md, alignItems: 'center' }}>
-                {/* Opened Book Shape */}
-                <TouchableOpacity
-                  onPress={() => handleStoryPress(story)}
-                  style={{
-                    width: 100,
-                    height: 75,
-                    backgroundColor: `${categoryColor}25`, // 25% opacity for transparency
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    padding: CURIO_THEME.spacing.xs,
-                    ...CURIO_THEME.shadows.card,
-                    // Book shape with spine in the middle
-                    borderRadius: 8,
-                    borderWidth: 1.5,
-                    borderColor: `${categoryColor}60`, // 60% opacity border
-                    position: 'relative',
-                    // Slight tilt like an open book
-                    transform: [{ rotate: '-2deg' }],
-                  }}
-                  accessible={true}
-                  accessibilityLabel={`${story.title} story, ${story.duration}, rating ${story.rating} stars`}
-                  accessibilityRole="button"
-                >
-                  {/* Book Spine (Center Line) */}
-                  <View style={{
-                    position: 'absolute',
-                    top: 0,
-                    bottom: 0,
-                    left: '50%',
-                    width: 2,
-                    backgroundColor: `${categoryColor}80`, // Darker line for spine
-                    marginLeft: -1, // Center the line
-                  }} />
-                  
-                  {/* Left Page Content */}
-                  <View style={{
-                    position: 'absolute',
-                    left: 4,
-                    top: 8,
-                    width: 40,
-                    alignItems: 'center',
-                  }}>
-                    <Text style={{ fontSize: 20, marginBottom: 1 }}>
-                      {STORY_CATEGORIES[story.category.toUpperCase()]?.icon || '📚'}
-                    </Text>
-                  </View>
-                  
-                  {/* Right Page Content */}
-                  <View style={{
-                    position: 'absolute',
-                    right: 4,
-                    top: 6,
-                    width: 40,
-                    alignItems: 'center',
-                  }}>
-                    <Text style={[TEXT_STYLES.bodySmall, { 
-                      textAlign: 'center', 
-                      fontSize: 8, 
-                      fontWeight: 'bold',
-                      color: CURIO_THEME.colors.textPrimary,
-                      lineHeight: 10,
-                    }]} numberOfLines={3}>
-                      {story.title}
-                    </Text>
-                    <Text style={[TEXT_STYLES.caption, { 
-                      textAlign: 'center', 
-                      fontSize: 6, 
-                      color: CURIO_THEME.colors.textSecondary,
-                      marginTop: 2
-                    }]}>
-                      {story.duration}
-                    </Text>
-                  </View>
-                  
-                  {/* Book Pages Lines (Decoration) */}
-                  <View style={{
-                    position: 'absolute',
-                    left: 8,
-                    bottom: 15,
-                    width: 35,
-                    height: 1,
-                    backgroundColor: `${categoryColor}40`,
-                  }} />
-                  <View style={{
-                    position: 'absolute',
-                    left: 8,
-                    bottom: 12,
-                    width: 30,
-                    height: 1,
-                    backgroundColor: `${categoryColor}30`,
-                  }} />
-                  <View style={{
-                    position: 'absolute',
-                    right: 8,
-                    bottom: 15,
-                    width: 35,
-                    height: 1,
-                    backgroundColor: `${categoryColor}40`,
-                  }} />
-                  <View style={{
-                    position: 'absolute',
-                    right: 8,
-                    bottom: 12,
-                    width: 30,
-                    height: 1,
-                    backgroundColor: `${categoryColor}30`,
-                  }} />
-                </TouchableOpacity>
-              </View>
             );
           })}
         </ScrollView>
+
+        {/* Stories List */}
+        <View style={styles.listContainer}>
+          {contentData?.stories?.slice(0, 6).map((story) => {
+            const categoryInfo = STORY_CATEGORIES[story.category.toUpperCase()] || {};
+            
+            return (
+              <TouchableOpacity
+                key={story.id}
+                onPress={() => handleStoryPress(story)}
+                style={styles.listItem}
+                accessible={true}
+                accessibilityLabel={`${story.title} story, ${story.duration}, rating ${story.rating} stars`}
+                accessibilityRole="button"
+              >
+                <View style={[styles.listIconContainer, { backgroundColor: categoryInfo.color || CURIO_THEME.colors.skyBlue }]}>
+                  <Text style={styles.listIcon}>
+                    {categoryInfo.icon || '📚'}
+                  </Text>
+                </View>
+                <View style={styles.listContent}>
+                  <Text style={styles.listTitle} numberOfLines={2}>
+                    {story.title}
+                  </Text>
+                  <Text style={styles.listSubtitle}>
+                    {story.duration} • ⭐ {story.rating}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       </View>
 
-      {/* Sing-Along Songs - Curio Style */}
-      <View style={{
-        paddingHorizontal: CURIO_THEME.spacing.screenPadding,
-        paddingVertical: CURIO_THEME.spacing.md,
-      }}>
-        <View style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: CURIO_THEME.spacing.md,
-        }}>
-          <Text style={TEXT_STYLES.cardTitle}>
-            🎵 Sing-Along Songs
-          </Text>
-          <View style={{
-            backgroundColor: CURIO_THEME.colors.goldenYellow,
-            paddingHorizontal: CURIO_THEME.spacing.md,
-            paddingVertical: CURIO_THEME.spacing.xs,
-            borderRadius: CURIO_THEME.radius.badge,
-          }}>
-            <Text style={[TEXT_STYLES.caption, { color: CURIO_THEME.colors.textInverse }]}>
-              {getSongsByCategory(selectedSongCategory === 'all' ? null : selectedSongCategory).length} songs
-            </Text>
-          </View>
+      {/* Songs Section */}
+      <View style={styles.section}>
+        <View style={[styles.sectionHeader, styles.centeredSectionHeader]}>
+          <Text style={styles.sectionIcon}>🎵</Text>
+          <Text style={styles.sectionTitle}>Sing-Along Songs</Text>
         </View>
 
         {/* Song Categories Filter - Curio Style */}
@@ -371,145 +218,78 @@ const EngageScreen = ({ navigation }) => {
           contentContainerStyle={{ paddingRight: CURIO_THEME.spacing.screenPadding }}
           style={{ marginBottom: CURIO_THEME.spacing.md }}
         >
-          <TouchableOpacity
-            onPress={() => setSelectedSongCategory('all')}
-            style={{
-              paddingVertical: CURIO_THEME.spacing.sm,
-              paddingHorizontal: CURIO_THEME.spacing.md,
-              backgroundColor: selectedSongCategory === 'all' ? CURIO_THEME.colors.goldenYellow : CURIO_THEME.colors.background,
-              borderRadius: CURIO_THEME.radius.button,
-              marginRight: CURIO_THEME.spacing.sm,
-              borderWidth: 1,
-              borderColor: selectedSongCategory === 'all' ? CURIO_THEME.colors.goldenYellow : CURIO_THEME.colors.lightGray,
-            }}
-            accessible={true}
-            accessibilityLabel="Show all songs"
-            accessibilityRole="button"
-          >
-            <Text style={[
-              TEXT_STYLES.buttonSecondary,
-              { color: selectedSongCategory === 'all' ? CURIO_THEME.colors.textInverse : CURIO_THEME.colors.textPrimary }
-            ]}>
-              All Songs
-            </Text>
-          </TouchableOpacity>
-          {Object.values(SONG_CATEGORIES).map((category) => (
-            <TouchableOpacity
-              key={category.id}
-              onPress={() => setSelectedSongCategory(category.id)}
-              style={{
-                paddingVertical: CURIO_THEME.spacing.sm,
-                paddingHorizontal: CURIO_THEME.spacing.md,
-                backgroundColor: selectedSongCategory === category.id ? category.color : CURIO_THEME.colors.background,
-                borderRadius: CURIO_THEME.radius.button,
-                marginRight: CURIO_THEME.spacing.sm,
-                borderWidth: 1,
-                borderColor: selectedSongCategory === category.id ? category.color : CURIO_THEME.colors.lightGray,
-              }}
-              accessible={true}
-              accessibilityLabel={`Filter by ${category.name} songs`}
-              accessibilityRole="button"
-            >
-              <Text style={[
-                TEXT_STYLES.buttonSecondary,
-                { color: selectedSongCategory === category.id ? CURIO_THEME.colors.textInverse : CURIO_THEME.colors.textPrimary }
-              ]}>
-                {category.icon} {category.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
+          {Object.values(SONG_CATEGORIES).map((category) => {
+            const categorySongCount = getSongsByCategory(category.id).length;
+            return (
+              <TouchableOpacity
+                key={category.id}
+                onPress={() => setSelectedSongCategory(category.id)}
+                style={{
+                  paddingVertical: CURIO_THEME.spacing.sm,
+                  paddingHorizontal: CURIO_THEME.spacing.md,
+                  backgroundColor: selectedSongCategory === category.id ? category.color : CURIO_THEME.colors.background,
+                  borderRadius: CURIO_THEME.radius.button,
+                  marginRight: CURIO_THEME.spacing.sm,
+                  borderWidth: 1,
+                  borderColor: selectedSongCategory === category.id ? category.color : CURIO_THEME.colors.lightGray,
+                }}
+                accessible={true}
+                accessibilityLabel={`Filter by ${category.name} songs`}
+                accessibilityRole="button"
+              >
+                <Text style={[
+                  TEXT_STYLES.buttonSecondary,
+                  { color: selectedSongCategory === category.id ? CURIO_THEME.colors.textInverse : CURIO_THEME.colors.textPrimary }
+                ]}>
+                  {category.icon} {category.name} ({categorySongCount})
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </ScrollView>
 
-        {/* Songs List - Circular Cards */}
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false} 
-          contentContainerStyle={{ paddingRight: CURIO_THEME.spacing.screenPadding }}
-        >
-          {getSongsByCategory(selectedSongCategory === 'all' ? null : selectedSongCategory).map((song, index) => {
+        {/* Songs List */}
+        <View style={styles.listContainer}>
+          {getSongsByCategory(selectedSongCategory).slice(0, 6).map((song, index) => {
             const difficulty = SONG_DIFFICULTIES[song.difficulty.toUpperCase()];
-            const category = SONG_CATEGORIES[song.category.toUpperCase()];
-            const songColor = song.color || category?.color || CURIO_THEME.colors.goldenYellow;
+            const songColors = [
+              CURIO_THEME.colors.goldenYellow,
+              CURIO_THEME.colors.softMint,
+              CURIO_THEME.colors.accentOrange,
+              CURIO_THEME.colors.skyBlue
+            ];
             
             return (
               <TouchableOpacity
                 key={song.id}
                 onPress={() => handleSongPress(song)}
-                style={{
-                  width: 140,
-                  marginRight: CURIO_THEME.spacing.md,
-                  backgroundColor: `${songColor}25`, // 25% opacity for transparency
-                  paddingHorizontal: CURIO_THEME.spacing.sm,
-                  paddingVertical: CURIO_THEME.spacing.xs,
-                  borderRadius: CURIO_THEME.radius.md,
-                  borderWidth: 1,
-                  borderColor: `${songColor}40`,
-                  ...CURIO_THEME.shadows.card,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                }}
+                style={styles.listItem}
                 accessible={true}
                 accessibilityLabel={`${song.title} song, ${difficulty?.name} difficulty, ${song.duration} long`}
                 accessibilityRole="button"
               >
-                {/* Music Symbol Icon */}
-                <Text style={{ 
-                  fontSize: 20, 
-                  marginRight: CURIO_THEME.spacing.xs,
-                  color: songColor 
-                }}>
-                  🎵
-                </Text>
-                
-                {/* Song Details */}
-                <View style={{ flex: 1 }}>
-                  <Text style={[TEXT_STYLES.bodySmall, { 
-                    fontSize: 12, 
-                    fontWeight: 'bold',
-                    color: CURIO_THEME.colors.textPrimary,
-                  }]} numberOfLines={1}>
+                <View style={[styles.listIconContainer, { backgroundColor: songColors[index % songColors.length] }]}>
+                  <Text style={styles.listIcon}>🎵</Text>
+                </View>
+                <View style={styles.listContent}>
+                  <Text style={styles.listTitle} numberOfLines={2}>
                     {song.title}
                   </Text>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
-                    <Text style={[TEXT_STYLES.caption, { 
-                      fontSize: 9, 
-                      color: CURIO_THEME.colors.textSecondary,
-                      marginRight: CURIO_THEME.spacing.xs,
-                    }]}>
-                      {song.duration}
-                    </Text>
-                    <View style={{
-                      backgroundColor: difficulty?.color || CURIO_THEME.colors.success,
-                      paddingHorizontal: 4,
-                      paddingVertical: 1,
-                      borderRadius: CURIO_THEME.radius.sm,
-                    }}>
-                      <Text style={[TEXT_STYLES.caption, { color: CURIO_THEME.colors.textInverse, fontSize: 7 }]}>
-                        {difficulty?.icon || '⭐'}
-                      </Text>
-                    </View>
-                  </View>
+                  <Text style={styles.listSubtitle}>
+                    {song.duration} • {difficulty?.name}
+                  </Text>
                 </View>
               </TouchableOpacity>
             );
           })}
-        </ScrollView>
+        </View>
       </View>
 
-      {/* Learning Categories - Curio Style */}
-      <View style={{
-        paddingHorizontal: CURIO_THEME.spacing.screenPadding,
-        paddingVertical: CURIO_THEME.spacing.md,
-      }}>
-        <View style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: CURIO_THEME.spacing.md,
-        }}>
-          <Text style={TEXT_STYLES.cardTitle}>
-            Learning Categories
-          </Text>
+      {/* Learning Categories Section */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionIcon}>🎨</Text>
+          <Text style={styles.sectionTitle}>Learning Categories</Text>
           <View style={{
             backgroundColor: CURIO_THEME.colors.primary,
             paddingHorizontal: CURIO_THEME.spacing.md,
@@ -522,155 +302,64 @@ const EngageScreen = ({ navigation }) => {
           </View>
         </View>
         
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false} 
-          contentContainerStyle={{ paddingRight: CURIO_THEME.spacing.screenPadding }}
-        >
-          {learningCategories.map((category) => {
-            return (
-              <View
-                key={category.id}
-                style={{
-                  marginRight: CURIO_THEME.spacing.md,
-                  alignItems: 'center',
-                }}
-              >
-                {/* Paint Palette Shape - Main Oval with Thumb Hole */}
-                <TouchableOpacity
-                  onPress={() => handleLearningCategoryPress(category)}
-                  style={{
-                    width: 90,
-                    height: 65,
-                    backgroundColor: `${category.color}25`, // 25% opacity for transparency
-                    borderRadius: 32, // Large oval shape for palette
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    padding: CURIO_THEME.spacing.xs,
-                    ...CURIO_THEME.shadows.card,
-                    borderWidth: 2,
-                    borderColor: `${category.color}60`, // 60% opacity border
-                    position: 'relative',
-                    // Slight rotation for artistic feel
-                    transform: [{ rotate: '-8deg' }],
-                  }}
-                  accessible={true}
-                  accessibilityLabel={`${category.name} category with ${category.totalActivities} activities`}
-                  accessibilityRole="button"
-                >
-                  {/* Thumb Hole in Palette */}
-                  <View style={{
-                    position: 'absolute',
-                    right: 8,
-                    top: 15,
-                    width: 18,
-                    height: 18,
-                    borderRadius: 9,
-                    backgroundColor: CURIO_THEME.colors.surface,
-                    borderWidth: 1,
-                    borderColor: `${category.color}40`,
-                  }} />
-                  
-                  {/* Paint Dots on Palette */}
-                  <View style={{
-                    position: 'absolute',
-                    top: 8,
-                    left: 12,
-                    width: 8,
-                    height: 8,
-                    borderRadius: 4,
-                    backgroundColor: `${category.color}80`,
-                  }} />
-                  <View style={{
-                    position: 'absolute',
-                    top: 12,
-                    left: 25,
-                    width: 6,
-                    height: 6,
-                    borderRadius: 3,
-                    backgroundColor: `${CURIO_THEME.colors.accentOrange}70`,
-                  }} />
-                  <View style={{
-                    position: 'absolute',
-                    bottom: 12,
-                    left: 15,
-                    width: 7,
-                    height: 7,
-                    borderRadius: 3.5,
-                    backgroundColor: `${CURIO_THEME.colors.skyBlue}70`,
-                  }} />
-                  
-                  {/* Category Content */}
-                  <View style={{ alignItems: 'center', transform: [{ rotate: '8deg' }] }}>
-                    <Text style={{ fontSize: 18, marginBottom: 2 }}>
-                      {category.icon}
-                    </Text>
-                    <Text style={[TEXT_STYLES.bodySmall, { 
-                      textAlign: 'center', 
-                      fontSize: 9, 
-                      fontWeight: 'bold',
-                      color: CURIO_THEME.colors.textPrimary,
-                    }]} numberOfLines={2}>
-                      {category.name}
-                    </Text>
-                    <Text style={[TEXT_STYLES.caption, { 
-                      textAlign: 'center', 
-                      fontSize: 7, 
-                      color: CURIO_THEME.colors.textSecondary,
-                      marginTop: 1
-                    }]}>
-                      {category.totalActivities}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-                
-                {/* Paint Brush Handle */}
-                <View style={{
-                  width: 3,
-                  height: 20,
-                  backgroundColor: '#8B4513', // Brown for brush handle
-                  borderRadius: 1.5,
-                  marginTop: -8,
-                  transform: [{ rotate: '15deg' }],
-                }} />
+        <View style={styles.gridContainer}>
+          {learningCategories.map((category) => (
+            <TouchableOpacity
+              key={category.id}
+              onPress={() => handleLearningCategoryPress(category)}
+              style={styles.gridItem}
+              accessible={true}
+              accessibilityLabel={`${category.name} category with ${category.totalActivities} activities`}
+              accessibilityRole="button"
+            >
+              <View style={[styles.iconContainer, { backgroundColor: category.color || CURIO_THEME.colors.primary }]}>
+                <Text style={styles.gridIcon}>{category.icon}</Text>
               </View>
-            );
-          })}
-        </ScrollView>
+              <Text style={styles.gridTitle} numberOfLines={2}>
+                {category.name}
+              </Text>
+              <Text style={styles.gridSubtitle}>
+                {category.totalActivities} activities
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
 
-      {/* Recommendations Card */}
-      <View style={styles.recommendationsSection}>
-        <View style={styles.recommendationHeader}>
-          <View style={styles.notificationIcon}>
-            <Text style={styles.bellIcon}>🔔</Text>
-          </View>
-          <Text style={styles.recommendationTitle}>Recommendations</Text>
+      {/* Recommendations Section */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionIcon}>🔔</Text>
+          <Text style={styles.sectionTitle}>Recommendations</Text>
         </View>
         
-        <View style={styles.recommendationsContainer}>
+        <View style={styles.sectionContent}>
           <TouchableOpacity 
-            style={styles.recommendationCard}
+            style={styles.contentItem}
             onPress={() => handleActivityPress('lullaby')}
             accessible={true}
             accessibilityRole="button"
             accessibilityLabel="Submit a lullaby activity - Music Sing Together Play"
           >
-            <Text style={styles.activityTitle}>Submit a lullaby</Text>
-            <Text style={styles.activitySubtitle}>Music Sing Together Play</Text>
+            <Text style={styles.contentIcon}>🎵</Text>
+            <View style={styles.contentText}>
+              <Text style={styles.contentTitle}>Submit a lullaby</Text>
+              <Text style={styles.contentSubtitle}>Music Sing Together Play</Text>
+            </View>
           </TouchableOpacity>
           
-          <View style={styles.dividerLine} />
-          
           <TouchableOpacity 
-            style={styles.recommendationCard}
+            style={styles.contentItem}
             onPress={() => handleActivityPress('guiro')}
             accessible={true}
             accessibilityRole="button"
             accessibilityLabel="Guiro activity - History Multilingual Story"
           >
-            <Text style={styles.activityTitle}>Guiro</Text>
-            <Text style={styles.activitySubtitle}>History Multilingual Story</Text>
+            <Text style={styles.contentIcon}>🪘</Text>
+            <View style={styles.contentText}>
+              <Text style={styles.contentTitle}>Guiro</Text>
+              <Text style={styles.contentSubtitle}>History Multilingual Story</Text>
+            </View>
           </TouchableOpacity>
         </View>
       </View>
@@ -761,6 +450,148 @@ const styles = StyleSheet.create({
     flex: 1, 
     backgroundColor: '#f8f9fa', 
     paddingHorizontal: 20 
+  },
+
+  // Section Styles
+  section: {
+    paddingHorizontal: CURIO_THEME.spacing.screenPadding,
+    marginBottom: CURIO_THEME.spacing.lg,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: CURIO_THEME.spacing.md,
+  },
+  centeredSectionHeader: {
+    justifyContent: 'center',
+  },
+  sectionIcon: {
+    fontSize: 28,
+    marginRight: CURIO_THEME.spacing.sm,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: CURIO_THEME.colors.textPrimary,
+    flex: 1,
+  },
+  sectionContent: {
+    gap: CURIO_THEME.spacing.sm,
+  },
+  
+  // Grid Layout (keeping for Learning Categories)
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: CURIO_THEME.spacing.md,
+  },
+  gridItem: {
+    width: '47%',
+    backgroundColor: CURIO_THEME.colors.surface,
+    padding: CURIO_THEME.spacing.md,
+    borderRadius: CURIO_THEME.radius.md,
+    alignItems: 'center',
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: CURIO_THEME.spacing.sm,
+  },
+  gridIcon: {
+    fontSize: 24,
+  },
+  gridTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: CURIO_THEME.colors.textPrimary,
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  gridSubtitle: {
+    fontSize: 12,
+    color: CURIO_THEME.colors.textSecondary,
+    textAlign: 'center',
+  },
+  
+  // List Layout (for Stories and Songs)
+  listContainer: {
+    gap: CURIO_THEME.spacing.sm,
+  },
+  listItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: CURIO_THEME.colors.surface,
+    padding: CURIO_THEME.spacing.md,
+    borderRadius: CURIO_THEME.radius.md,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+  },
+  listIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: CURIO_THEME.spacing.md,
+  },
+  listIcon: {
+    fontSize: 24,
+  },
+  listContent: {
+    flex: 1,
+  },
+  listTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: CURIO_THEME.colors.textPrimary,
+    marginBottom: 4,
+  },
+  listSubtitle: {
+    fontSize: 14,
+    color: CURIO_THEME.colors.textSecondary,
+  },
+  
+  // Content Items (keep for recommendations section)
+  contentItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: CURIO_THEME.colors.surface,
+    padding: CURIO_THEME.spacing.md,
+    borderRadius: CURIO_THEME.radius.md,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+  },
+  contentIcon: {
+    fontSize: 32,
+    marginRight: CURIO_THEME.spacing.md,
+  },
+  contentText: {
+    flex: 1,
+  },
+  contentTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: CURIO_THEME.colors.textPrimary,
+    marginBottom: 2,
+  },
+  contentSubtitle: {
+    fontSize: 14,
+    color: CURIO_THEME.colors.textSecondary,
   },
 
   // Header - Create Together

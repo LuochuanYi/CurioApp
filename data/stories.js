@@ -2,10 +2,10 @@
 // Complete story database with multiple categories and rich content
 
 export const STORY_CATEGORIES = {
+  BEDTIME: { id: 'bedtime', name: 'Bedtime', icon: '🌙', color: '#9b6bcc' },
   CLASSIC: { id: 'classic', name: 'Classic Tales', icon: '👑', color: '#ff6b8a' },
   ADVENTURE: { id: 'adventure', name: 'Adventure', icon: '🗺️', color: '#4ecdc4' },
   EDUCATIONAL: { id: 'educational', name: 'Educational', icon: '🧠', color: '#45b7d1' },
-  BEDTIME: { id: 'bedtime', name: 'Bedtime', icon: '🌙', color: '#9b6bcc' },
   MODERN: { id: 'modern', name: 'Modern Tales', icon: '🚀', color: '#f9ca24' }
 };
 

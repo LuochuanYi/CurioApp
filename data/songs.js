@@ -61,6 +61,12 @@ export const SONG_DIFFICULTIES = {
 
 // Song categories for organization
 export const SONG_CATEGORIES = {
+  BEDTIME: {
+    id: 'bedtime',
+    name: 'Bedtime',
+    icon: '🌙',
+    color: '#6c5ce7'
+  },
   CLASSIC: {
     id: 'classic',
     name: 'Classic Nursery',
@@ -90,12 +96,6 @@ export const SONG_CATEGORIES = {
     name: 'Calming',
     icon: '😌',
     color: '#1abc9c'
-  },
-  BEDTIME: {
-    id: 'bedtime',
-    name: 'Bedtime',
-    icon: '🌙',
-    color: '#6c5ce7'
   }
 };
 

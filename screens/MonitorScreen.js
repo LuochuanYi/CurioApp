@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Image } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { CurioHeader, CurioCard, CurioButton, CurioMascot, CURIO_THEME, TEXT_STYLES } from '../components';
 
 // Custom hook for sensor data (simulated)
@@ -62,6 +63,7 @@ const mockAlerts = [
 const { width } = Dimensions.get('window');
 
 const MonitorScreen = ({ navigation }) => {
+  const { t } = useTranslation();
   const { data: sensorData, loading: sensorLoading } = useSensorData();
 
   const handleNavigation = (screen) => {
@@ -90,6 +92,40 @@ const MonitorScreen = ({ navigation }) => {
     });
   };
 
+  // Helper function to get translated sensor data
+  const getSensorData = () => [
+    { 
+      key: 'airQuality', 
+      icon: '🌬️', 
+      title: t('monitor.sensors.airQuality.title'), 
+      value: sensorData?.airQuality === 'Good' ? t('monitor.sensors.airQuality.good') : t('monitor.sensors.airQuality.low'),
+      status: sensorData?.airQuality === 'Good' ? 'good' : 'warning',
+      color: sensorData?.airQuality === 'Good' ? CURIO_THEME.colors.success : CURIO_THEME.colors.warning,
+      description: sensorData?.airQuality === 'Good' ? t('monitor.sensors.airQuality.goodDescription') : t('monitor.sensors.airQuality.lowDescription'),
+      trend: 'stable'
+    },
+    { 
+      key: 'sound', 
+      icon: '🔊', 
+      title: t('monitor.sensors.sound.title'), 
+      value: sensorData?.sound === 'Loud' ? t('monitor.sensors.sound.loud') : t('monitor.sensors.sound.normal'),
+      status: sensorData?.sound === 'Loud' ? 'warning' : 'good',
+      color: sensorData?.sound === 'Loud' ? CURIO_THEME.colors.warning : CURIO_THEME.colors.success,
+      description: sensorData?.sound === 'Loud' ? t('monitor.sensors.sound.loudDescription') : t('monitor.sensors.sound.normalDescription'),
+      trend: 'stable'
+    },
+    { 
+      key: 'motion', 
+      icon: '🚶', 
+      title: t('monitor.sensors.motion.title'), 
+      value: sensorData?.motion === 'Active' ? t('monitor.sensors.motion.active') : t('monitor.sensors.motion.still'),
+      status: 'good',
+      color: CURIO_THEME.colors.primary,
+      description: sensorData?.motion === 'Active' ? t('monitor.sensors.motion.activeDescription') : t('monitor.sensors.motion.stillDescription'),
+      trend: 'stable'
+    }
+  ];
+
   return (
     <ScrollView style={{ 
       flex: 1, 
@@ -98,9 +134,9 @@ const MonitorScreen = ({ navigation }) => {
       {/* Monitor Header with Branding */}
       <View style={styles.brandingHeader}>
         <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>Safety Monitor</Text>
+          <Text style={styles.headerTitle}>{t('monitor.header.title')}</Text>
           <Text style={styles.headerSubtitle}>
-            Keep your environment safe and comfortable
+            {t('monitor.header.subtitle')}
           </Text>
         </View>
         <View style={styles.statusIndicator}>
@@ -109,7 +145,7 @@ const MonitorScreen = ({ navigation }) => {
             isAnimating={sensorLoading}
           />
           <Text style={styles.statusText}>
-            {sensorLoading ? 'Updating...' : 'Active'}
+            {sensorLoading ? t('monitor.status.updating') : t('monitor.status.active')}
           </Text>
         </View>
       </View>
@@ -131,45 +167,14 @@ const MonitorScreen = ({ navigation }) => {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionIcon}>📡</Text>
-          <Text style={styles.sectionTitle}>Live Sensors</Text>
+          <Text style={styles.sectionTitle}>{t('monitor.sections.liveSensors.title')}</Text>
         </View>
         <Text style={styles.sectionDescription}>
-          Real-time monitoring of your environment. Tap any sensor for detailed information and history.
+          {t('monitor.sections.liveSensors.description')}
         </Text>
         
         <View style={styles.sensorsGrid}>
-          {[
-            { 
-              key: 'airQuality', 
-              icon: '🌬️', 
-              title: 'Air Quality', 
-              value: sensorData?.airQuality || 'Low',
-              status: sensorData?.airQuality === 'Good' ? 'good' : 'warning',
-              color: sensorData?.airQuality === 'Good' ? CURIO_THEME.colors.success : CURIO_THEME.colors.warning,
-              description: sensorData?.airQuality === 'Good' ? 'Clean and fresh' : 'Monitor ventilation',
-              trend: 'stable'
-            },
-            { 
-              key: 'sound', 
-              icon: '🔊', 
-              title: 'Sound Level', 
-              value: sensorData?.sound || 'Normal',
-              status: sensorData?.sound === 'Loud' ? 'warning' : 'good',
-              color: sensorData?.sound === 'Loud' ? CURIO_THEME.colors.warning : CURIO_THEME.colors.success,
-              description: sensorData?.sound === 'Loud' ? 'Consider quieter activities' : 'Perfect for focus',
-              trend: 'stable'
-            },
-            { 
-              key: 'motion', 
-              icon: '🚶', 
-              title: 'Activity Level', 
-              value: sensorData?.motion || 'Active',
-              status: 'good',
-              color: CURIO_THEME.colors.primary,
-              description: sensorData?.motion === 'Active' ? 'Great energy level' : 'Nice and calm',
-              trend: 'stable'
-            }
-          ].map((sensor) => (
+          {getSensorData().map((sensor) => (
             <TouchableOpacity
               key={sensor.key}
               onPress={() => handleSensorPress(sensor.key)}
@@ -204,10 +209,10 @@ const MonitorScreen = ({ navigation }) => {
                   backgroundColor: sensor.trend === 'stable' ? CURIO_THEME.colors.success : CURIO_THEME.colors.warning
                 }]}>
                   <Text style={styles.trendText}>
-                    {sensor.trend === 'stable' ? '✓ Stable' : '⚠ Changing'}
+                    {sensor.trend === 'stable' ? t('monitor.sensors.stable') : t('monitor.sensors.changing')}
                   </Text>
                 </View>
-                <Text style={styles.tapHint}>Tap for details →</Text>
+                <Text style={styles.tapHint}>{t('monitor.sensors.tapForDetails')}</Text>
               </View>
             </TouchableOpacity>
           ))}
@@ -218,7 +223,7 @@ const MonitorScreen = ({ navigation }) => {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionIcon}>🚨</Text>
-          <Text style={styles.sectionTitle}>Recent Alerts</Text>
+          <Text style={styles.sectionTitle}>{t('monitor.alerts.title')}</Text>
           {mockAlerts.length > 0 && (
             <View style={styles.alertsBadge}>
               <Text style={styles.alertsBadgeText}>{mockAlerts.length}</Text>
@@ -227,8 +232,8 @@ const MonitorScreen = ({ navigation }) => {
         </View>
         <Text style={styles.sectionDescription}>
           {mockAlerts.length > 0 ? 
-            'Review recent environment changes and notifications' :
-            'All clear! No alerts in the past 24 hours. Great job maintaining a safe environment!'
+            t('monitor.alerts.description') :
+            t('monitor.alerts.allClear')
           }
         </Text>
         
@@ -253,9 +258,9 @@ const MonitorScreen = ({ navigation }) => {
                   <Text style={styles.alertTitle}>{alert.message}</Text>
                   <Text style={styles.alertTime}>{formatTime(alert.timestamp)}</Text>
                   <Text style={styles.alertDescription}>
-                    {alert.type === 'air_quality' ? 'Check ventilation and consider air purifier' :
-                     alert.type === 'sound' ? 'Noise levels elevated, consider quieter activities' :
-                     'Increased movement detected, great activity level'}
+                    {alert.type === 'air_quality' ? t('monitor.alerts.airQualityAdvice') :
+                     alert.type === 'sound' ? t('monitor.alerts.soundAdvice') :
+                     t('monitor.alerts.activityAdvice')}
                   </Text>
                 </View>
                 <View style={[styles.severityIndicator, {
@@ -279,35 +284,35 @@ const MonitorScreen = ({ navigation }) => {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionIcon}>🏆</Text>
-          <Text style={styles.sectionTitle}>Safety Progress</Text>
+          <Text style={styles.sectionTitle}>{t('monitor.progress.title')}</Text>
         </View>
         <Text style={styles.sectionDescription}>
-          Track your safety monitoring streak and maintain healthy environments
+          {t('monitor.progress.description')}
         </Text>
         
         <View style={styles.progressCard}>
           <View style={styles.progressHeader}>
             <View style={styles.streakInfo}>
               <Text style={styles.streakNumber}>7</Text>
-              <Text style={styles.streakLabel}>Days Safe</Text>
+              <Text style={styles.streakLabel}>{t('monitor.progress.daysSafe')}</Text>
             </View>
             <View style={styles.goalInfo}>
-              <Text style={styles.goalLabel}>Weekly Goal</Text>
+              <Text style={styles.goalLabel}>{t('monitor.progress.weeklyGoal')}</Text>
               <View style={styles.progressBarContainer}>
                 <View style={[styles.progressBar, { width: '100%' }]} />
               </View>
-              <Text style={styles.goalText}>7/7 days ✅</Text>
+              <Text style={styles.goalText}>{t('monitor.progress.goalComplete')}</Text>
             </View>
           </View>
           
           <View style={styles.achievementsList}>
             <View style={styles.achievement}>
               <Text style={styles.achievementIcon}>🌟</Text>
-              <Text style={styles.achievementText}>Perfect Air Quality Week</Text>
+              <Text style={styles.achievementText}>{t('monitor.progress.achievements.airQuality')}</Text>
             </View>
             <View style={styles.achievement}>
               <Text style={styles.achievementIcon}>🔇</Text>
-              <Text style={styles.achievementText}>Quiet Environment Master</Text>
+              <Text style={styles.achievementText}>{t('monitor.progress.achievements.quietMaster')}</Text>
             </View>
           </View>
         </View>
@@ -317,10 +322,10 @@ const MonitorScreen = ({ navigation }) => {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionIcon}>🚨</Text>
-          <Text style={styles.sectionTitle}>Emergency Actions</Text>
+          <Text style={styles.sectionTitle}>{t('monitor.emergency.title')}</Text>
         </View>
         <Text style={styles.sectionDescription}>
-          Need help immediately? Tap the button below to instantly notify your parent or guardian.
+          {t('monitor.emergency.description')}
         </Text>
         
         <TouchableOpacity
@@ -351,10 +356,10 @@ const MonitorScreen = ({ navigation }) => {
         ...CURIO_THEME.shadows.nav,
       }}>
         {[
-          { key: 'Home', icon: '🏠', label: 'Home', active: false, color: CURIO_THEME.colors.skyBlue },
-          { key: 'Monitor', icon: '📊', label: 'Monitor', active: true, color: CURIO_THEME.colors.deepNavy },
-          { key: 'Engage', icon: '💡', label: 'Engage', active: false, color: CURIO_THEME.colors.goldenYellow },
-          { key: 'Personalize', icon: '👤', label: 'Personalize', active: false, color: CURIO_THEME.colors.deepNavy }
+          { key: 'Home', icon: '🏠', label: t('common.home'), active: false, color: CURIO_THEME.colors.skyBlue },
+          { key: 'Monitor', icon: '📊', label: t('common.monitor'), active: true, color: CURIO_THEME.colors.deepNavy },
+          { key: 'Engage', icon: '💡', label: t('common.engage'), active: false, color: CURIO_THEME.colors.goldenYellow },
+          { key: 'Personalize', icon: '👤', label: t('common.personalize'), active: false, color: CURIO_THEME.colors.deepNavy }
         ].map((navItem) => (
           <TouchableOpacity
             key={navItem.key}

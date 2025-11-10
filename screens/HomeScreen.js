@@ -4,6 +4,7 @@ import { STORY_CATEGORIES, STORY_LIBRARY, getStoriesByCategory } from '../data/s
 import { SONGS_LIBRARY, getSongsByCategory, SONG_CATEGORIES } from '../data/songs';
 import { useUserProgress } from '../hooks/useUserProgress';
 import { CurioHeader, CurioCard, CurioButton, CurioMascot, CURIO_THEME, TEXT_STYLES } from '../components';
+import { useTranslation } from 'react-i18next';
 
 // Custom hook for air quality data (simulated)
 const useAirQualityData = () => {
@@ -82,6 +83,7 @@ const getFeaturedContent = (userProgressHook) => {
 const HomeScreen = ({ navigation }) => {
   console.log('HomeScreen: Component rendering...');
   
+  const { t } = useTranslation();
   const { data: airQualityData, loading: airQualityLoading } = useAirQualityData();
   
   console.log('HomeScreen: About to call useUserProgress...');
@@ -170,7 +172,7 @@ const HomeScreen = ({ navigation }) => {
           source={require('../assets/images/curio-branding.png')}
           style={styles.brandingImage}
           accessible={true}
-          accessibilityLabel="Curio branding - Nurture imagination, together!"
+          accessibilityLabel={t('accessibility.curioBranding')}
         />
       </View>
 
@@ -179,9 +181,9 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.welcomeHint}>
           <Text style={styles.welcomeIcon}>👋</Text>
           <View style={styles.welcomeTextContainer}>
-            <Text style={styles.welcomeTitle}>Welcome to Curio!</Text>
+            <Text style={styles.welcomeTitle}>{t('home.welcome.title')}</Text>
             <Text style={styles.welcomeText}>
-              Start by exploring our Quick Actions below, or tap "Explore Content" to browse all stories and songs.
+              {t('home.welcome.description')}
             </Text>
           </View>
         </View>
@@ -191,24 +193,28 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionIcon}>⚡</Text>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <Text style={styles.sectionTitle}>{t('home.sections.quickActions.title')}</Text>
         </View>
         <Text style={styles.sectionDescription}>
-          Jump right into activities tailored for this time of day
+          {t('home.sections.quickActions.description')}
         </Text>
         <View style={styles.sectionContent}>
           <TouchableOpacity
             style={styles.actionItem}
             onPress={() => handleQuickAction(isBedtime() ? 'bedtime_song' : 'surprise_me')}
             accessible={true}
-            accessibilityLabel={`${isBedtime() ? 'Bedtime' : 'Surprise Me'} quick action`}
+            accessibilityLabel={t('accessibility.quickActionButton', { 
+              action: isBedtime() ? t('home.sections.quickActions.bedtimeStories') : t('home.sections.quickActions.surpriseMe')
+            })}
             accessibilityRole="button"
           >
             <Text style={styles.actionIcon}>{isBedtime() ? '😴' : '🎲'}</Text>
             <View style={styles.actionTextContainer}>
-              <Text style={styles.actionText}>{isBedtime() ? 'Bedtime Stories' : 'Surprise Me'}</Text>
+              <Text style={styles.actionText}>
+                {isBedtime() ? t('home.sections.quickActions.bedtimeStories') : t('home.sections.quickActions.surpriseMe')}
+              </Text>
               <Text style={styles.actionSubtitle}>
-                {isBedtime() ? 'Calming content for sleepy time' : 'Random story or song just for you'}
+                {isBedtime() ? t('home.sections.quickActions.bedtimeDescription') : t('home.sections.quickActions.surpriseDescription')}
               </Text>
             </View>
           </TouchableOpacity>
@@ -217,16 +223,18 @@ const HomeScreen = ({ navigation }) => {
             style={styles.actionItem}
             onPress={() => handleQuickAction('continue_story')}
             accessible={true}
-            accessibilityLabel="Continue story quick action"
+            accessibilityLabel={t('accessibility.quickActionButton', { 
+              action: t('home.sections.quickActions.continueReading')
+            })}
             accessibilityRole="button"
           >
             <Text style={styles.actionIcon}>📖</Text>
             <View style={styles.actionTextContainer}>
-              <Text style={styles.actionText}>Continue Reading</Text>
+              <Text style={styles.actionText}>{t('home.sections.quickActions.continueReading')}</Text>
               <Text style={styles.actionSubtitle}>
                 {featuredContent.inProgress.length > 0 ? 
-                  `Pick up where you left off` : 
-                  'Start a new adventure together'
+                  t('home.sections.quickActions.continuePickUp') : 
+                  t('home.sections.quickActions.startNew')
                 }
               </Text>
             </View>
@@ -236,14 +244,16 @@ const HomeScreen = ({ navigation }) => {
             style={styles.actionItem}
             onPress={() => navigation?.navigate('Engage')}
             accessible={true}
-            accessibilityLabel="Explore content quick action"
+            accessibilityLabel={t('accessibility.quickActionButton', { 
+              action: t('home.sections.quickActions.exploreContent')
+            })}
             accessibilityRole="button"
           >
             <Text style={styles.actionIcon}>🚀</Text>
             <View style={styles.actionTextContainer}>
-              <Text style={styles.actionText}>Explore Content</Text>
+              <Text style={styles.actionText}>{t('home.sections.quickActions.exploreContent')}</Text>
               <Text style={styles.actionSubtitle}>
-                Browse all stories, songs & activities
+                {t('home.sections.quickActions.exploreDescription')}
               </Text>
             </View>
           </TouchableOpacity>
@@ -255,7 +265,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionIcon}>📚</Text>
           <Text style={styles.sectionTitle}>
-            {featuredContent.hasRecentActivity ? 'Recent Stories' : 'Featured Stories'}
+            {featuredContent.hasRecentActivity ? t('home.sections.stories.recent') : t('home.sections.stories.featured')}
           </Text>
           {userProgress.stats.currentStreak > 0 && (
             <View style={styles.streakBadge}>
@@ -265,8 +275,8 @@ const HomeScreen = ({ navigation }) => {
         </View>
         <Text style={styles.sectionDescription}>
           {featuredContent.hasRecentActivity ? 
-            'Continue where you left off or discover what\'s new' :
-            'Handpicked stories perfect for you and your child'
+            t('home.sections.stories.recentDescription') :
+            t('home.sections.stories.featuredDescription')
           }
         </Text>
         
@@ -286,7 +296,12 @@ const HomeScreen = ({ navigation }) => {
                   onPress={() => handleStoryPress(story.id)}
                   style={styles.gridItem}
                   accessible={true}
-                  accessibilityLabel={`${story.title} story, ${story.duration}, ${story.category}${isInProgress ? ', in progress' : ''}`}
+                  accessibilityLabel={t('accessibility.storyButton', {
+                    title: story.title,
+                    duration: story.duration,
+                    category: story.category,
+                    progress: isInProgress ? `, ${t('home.sections.stories.inProgress')}` : ''
+                  })}
                   accessibilityRole="button"
                 >
                   <View style={[styles.iconContainer, { backgroundColor: categoryInfo.color || CURIO_THEME.colors.skyBlue }]}>
@@ -303,7 +318,7 @@ const HomeScreen = ({ navigation }) => {
                     {story.title}
                   </Text>
                   <Text style={styles.gridSubtitle}>
-                    {isInProgress ? `Continue • ${progressData?.progress || 50}% complete` : story.duration}
+                    {isInProgress ? t('home.sections.stories.continueProgress', { progress: progressData?.progress || 50 }) : story.duration}
                   </Text>
                   {isInProgress && (
                     <View style={styles.progressBar}>
@@ -317,9 +332,9 @@ const HomeScreen = ({ navigation }) => {
         ) : (
           <View style={styles.emptyState}>
             <Text style={styles.emptyStateIcon}>📚</Text>
-            <Text style={styles.emptyStateTitle}>No stories yet!</Text>
+            <Text style={styles.emptyStateTitle}>{t('home.empty.stories.title')}</Text>
             <Text style={styles.emptyStateText}>
-              Tap "Explore Content" above to discover amazing stories waiting for you
+              {t('home.empty.stories.description')}
             </Text>
           </View>
         )}
@@ -329,10 +344,10 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionIcon}>🎵</Text>
-          <Text style={styles.sectionTitle}>Featured Songs</Text>
+          <Text style={styles.sectionTitle}>{t('home.sections.songs.featured')}</Text>
         </View>
         <Text style={styles.sectionDescription}>
-          Sing-along favorites and musical adventures for every mood
+          {t('home.sections.songs.description')}
         </Text>
         {featuredContent.songs.length > 0 ? (
           <View style={styles.gridContainer}>
@@ -353,7 +368,11 @@ const HomeScreen = ({ navigation }) => {
                   onPress={() => handleSongPress(song.id)}
                   style={styles.gridItem}
                   accessible={true}
-                  accessibilityLabel={`${song.title} song, ${song.duration}, ${song.category}`}
+                  accessibilityLabel={t('accessibility.songButton', {
+                    title: song.title,
+                    duration: song.duration,
+                    category: song.category
+                  })}
                   accessibilityRole="button"
                 >
                   <View style={[styles.iconContainer, { backgroundColor: songColors[index % songColors.length] }]}>
@@ -377,9 +396,9 @@ const HomeScreen = ({ navigation }) => {
         ) : (
           <View style={styles.emptyState}>
             <Text style={styles.emptyStateIcon}>🎵</Text>
-            <Text style={styles.emptyStateTitle}>No songs yet!</Text>
+            <Text style={styles.emptyStateTitle}>{t('home.empty.songs.title')}</Text>
             <Text style={styles.emptyStateText}>
-              Tap "Explore Content" to find songs perfect for singing along
+              {t('home.empty.songs.description')}
             </Text>
           </View>
         )}
@@ -389,10 +408,10 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionIcon}>🌱</Text>
-          <Text style={styles.sectionTitle}>Today's Air Quality</Text>
+          <Text style={styles.sectionTitle}>{t('home.sections.airQuality.title')}</Text>
         </View>
         <Text style={styles.sectionDescription}>
-          Monitor air quality to plan outdoor activities safely
+          {t('home.sections.airQuality.description')}
         </Text>
         
         <TouchableOpacity
@@ -400,12 +419,14 @@ const HomeScreen = ({ navigation }) => {
           onPress={handleAirQualityPress}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel="View detailed air quality information"
+          accessibilityLabel={t('accessibility.airQualityButton')}
         >
           <View style={styles.airQualityHeader}>
             <View style={styles.airQualityStatus}>
               <Text style={styles.airQualityLevel}>
-                {airQualityLoading ? 'Loading...' : (airQualityData?.status || 'moderate').toUpperCase()}
+                            <Text style={styles.airQualityLevel}>
+              {airQualityLoading ? t('home.sections.airQuality.loading') : (airQualityData?.status || 'moderate').toUpperCase()}
+            </Text>
               </Text>
               <Text style={styles.airQualityDate}>
                 {airQualityData?.alertDate || new Date().toLocaleDateString()}
@@ -424,7 +445,7 @@ const HomeScreen = ({ navigation }) => {
           </View>
 
           <View style={styles.chartContainer}>
-            <Text style={styles.chartTitle}>24-Hour Trend</Text>
+            <Text style={styles.chartTitle}>{t('home.sections.airQuality.chartTitle')}</Text>
             <View style={styles.chartBars}>
               {(airQualityData?.chartData || [30, 45, 28, 38, 52, 41, 35]).map((value, index) => (
                 <View key={index} style={styles.chartBarContainer}>
@@ -448,7 +469,7 @@ const HomeScreen = ({ navigation }) => {
           </View>
 
           <View style={styles.airQualityFooter}>
-            <Text style={styles.tapToViewText}>Tap to view detailed recommendations</Text>
+            <Text style={styles.tapToViewText}>{t('home.sections.airQuality.tapToView')}</Text>
             <Text style={styles.arrowIcon}>→</Text>
           </View>
         </TouchableOpacity>
@@ -458,7 +479,7 @@ const HomeScreen = ({ navigation }) => {
       {(!featuredContent.hasRecentActivity && userProgress.stats.storiesCompleted === 0) && (
         <View style={styles.navigationHint}>
           <Text style={styles.navigationHintText}>
-            💡 Try tapping "Engage" below to discover all our stories and songs!
+            {t('home.navigation.hint')}
           </Text>
         </View>
       )}
@@ -474,10 +495,10 @@ const HomeScreen = ({ navigation }) => {
         ...CURIO_THEME.shadows.nav,
       }}>
         {[
-          { key: 'Home', icon: '🏠', label: 'Home', active: true, color: CURIO_THEME.colors.skyBlue },
-          { key: 'Monitor', icon: '📊', label: 'Monitor', active: false, color: CURIO_THEME.colors.deepNavy },
-          { key: 'Engage', icon: '💡', label: 'Engage', active: false, color: CURIO_THEME.colors.goldenYellow },
-          { key: 'Personalize', icon: '👤', label: 'Personalize', active: false, color: CURIO_THEME.colors.deepNavy }
+          { key: 'Home', icon: '🏠', label: t('common.home'), active: true, color: CURIO_THEME.colors.skyBlue },
+          { key: 'Monitor', icon: '📊', label: t('common.monitor'), active: false, color: CURIO_THEME.colors.deepNavy },
+          { key: 'Engage', icon: '💡', label: t('common.engage'), active: false, color: CURIO_THEME.colors.goldenYellow },
+          { key: 'Personalize', icon: '👤', label: t('common.personalize'), active: false, color: CURIO_THEME.colors.deepNavy }
         ].map((navItem) => (
           <TouchableOpacity
             key={navItem.key}
@@ -489,7 +510,10 @@ const HomeScreen = ({ navigation }) => {
             onPress={() => handleNavigation(navItem.key)}
             accessible={true}
             accessibilityRole="button"
-            accessibilityLabel={`${navItem.label} tab${navItem.active ? ', currently selected' : ''}`}
+            accessibilityLabel={t('accessibility.tabNavigation', { 
+              label: navItem.label,
+              active: navItem.active ? t('accessibility.currentlySelected') : ''
+            })}
             accessibilityState={{ selected: navItem.active }}
           >
             <Text style={{ 

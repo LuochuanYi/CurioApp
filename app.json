@@ -39,7 +39,8 @@
     "sdkVersion": "54.0.0",
     "plugins": [
       "expo-asset",
-      "expo-audio"
+      "expo-audio",
+      "expo-localization"
     ]
   }
 }

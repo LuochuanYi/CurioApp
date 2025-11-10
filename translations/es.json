@@ -1,0 +1,312 @@
+{
+  "common": {
+    "home": "Inicio",
+    "monitor": "Monitorear",
+    "engage": "Interactuar",
+    "personalize": "Personalizar",
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "done": "Listo",
+    "edit": "Editar",
+    "settings": "configuraciones"
+  },
+  "personalize": {
+    "title": "Tu Espacio Familiar",
+    "subtitle": "Actualizado {{date}}",
+    "familyPreferences": "Preferencias y configuraciones familiares",
+    "familyRoutines": "Rutinas Familiares",
+    "routinesCount": "{{count}} rutinas",
+    "safetyControls": "Seguridad y Controles",
+    "languagePreferences": "Preferencias de Idioma",
+    "ageGroups": "Grupos de Edad",
+    "ageGroupsDescription": "Filtrado de contenido basado en la edad del niño",
+    "ageGroupsMultipleDescription": "Contenido para {{count}} grupos de edad",
+    "contentFilter": "Filtro de Contenido",
+    "contentFilterDescription": "Solo contenido apropiado para la edad",
+    "environmentalAlerts": "Alertas Ambientales",
+    "environmentalAlertsDescription": "Notificaciones de calidad del aire y seguridad",
+    "aqiThreshold": "Umbral de Alerta AQI",
+    "aqiThresholdDescription": "Recibir notificación cuando la calidad del aire exceda este nivel",
+    "selectAgeGroups": "Seleccionar Grupos de Edad",
+    "selectAgeGroupsSubtitle": "Elija uno o más grupos de edad para filtrado de contenido",
+    "aqiAlertThreshold": "Umbral de Alerta AQI",
+    "alertWhenExceeds": "Alertar cuando AQI exceda:",
+    "goodAirQuality": "Buena calidad del aire - seguro para actividades al aire libre",
+    "moderateAirQuality": "Moderado - las personas sensibles deben limitar el esfuerzo prolongado al aire libre",
+    "unhealthyAirQuality": "No saludable - todos deben limitar las actividades al aire libre",
+    "aqiGood": "Bueno (25)",
+    "aqiUnhealthy": "No saludable (150)"
+  },
+  "routines": {
+    "storyTime": "Hora del cuento",
+    "quietTime": "Tiempo tranquilo"
+  },
+  "ageGroups": {
+    "1-3": "1-3 años",
+    "3-5": "3-5 años",
+    "5-7": "5-7 años",
+    "7-10": "7-10 años",
+    "10+": "10+ años",
+    "toddlerDescription": "Contenido para niños pequeños con conceptos simples",
+    "preschoolDescription": "Historias preescolares y aprendizaje básico",
+    "earlyElementaryDescription": "Primaria temprana, historias más largas",
+    "advancedDescription": "Historias avanzadas con temas complejos",
+    "matureDescription": "Contenido maduro para niños mayores"
+  },
+  "languages": {
+    "english": "English",
+    "french": "Français",
+    "chinese": "中文",
+    "ukrainian": "Українська",
+    "spanish": "Español",
+    "flemish": "Vlaams (Dutch)"
+  },
+  "home": {
+    "welcome": {
+      "title": "¡Bienvenido a Curio!",
+      "description": "Comience explorando nuestras Acciones Rápidas a continuación, o toque \"Explorar Contenido\" para navegar por todas las historias y canciones."
+    },
+    "sections": {
+      "quickActions": {
+        "title": "Acciones Rápidas",
+        "description": "Salte directamente a actividades adaptadas para este momento del día",
+        "bedtimeStories": "Cuentos para Dormir",
+        "bedtimeDescription": "Contenido relajante para la hora de dormir",
+        "surpriseMe": "Sorpréndeme",
+        "surpriseDescription": "Historia o canción aleatoria solo para ti",
+        "continueReading": "Continuar Leyendo",
+        "continuePickUp": "Continúa donde lo dejaste",
+        "startNew": "Iniciar una nueva aventura juntos",
+        "exploreContent": "Explorar Contenido",
+        "exploreDescription": "Navegar por todas las historias, canciones y actividades"
+      },
+      "stories": {
+        "recent": "Historias Recientes",
+        "featured": "Historias Destacadas",
+        "recentDescription": "Continúa donde lo dejaste o descubre lo nuevo",
+        "featuredDescription": "Historias seleccionadas perfectas para ti y tu hijo",
+        "continueProgress": "Continuar • {{progress}}% completado",
+        "inProgress": "en progreso"
+      },
+      "songs": {
+        "featured": "Canciones Destacadas",
+        "description": "Favoritos para cantar y aventuras musicales para cada estado de ánimo"
+      },
+      "airQuality": {
+        "title": "Calidad del Aire Hoy",
+        "description": "Monitorea la calidad del aire para planificar actividades al aire libre de forma segura",
+        "loading": "Cargando...",
+        "chartTitle": "Tendencia de 24 Horas",
+        "tapToView": "Toque para ver recomendaciones detalladas"
+      }
+    },
+    "empty": {
+      "stories": {
+        "title": "¡Aún no hay historias!",
+        "description": "Toque \"Explorar Contenido\" arriba para descubrir historias increíbles esperándote"
+      },
+      "songs": {
+        "title": "¡Aún no hay canciones!",
+        "description": "Toque \"Explorar Contenido\" para encontrar canciones perfectas para cantar"
+      }
+    },
+    "navigation": {
+      "hint": "💡 ¡Intenta tocar \"Interactuar\" abajo para descubrir todas nuestras historias y canciones!"
+    }
+  },
+  "stories": {
+    "categories": {
+      "bedtime": "Cuentos para dormir",
+      "classic": "Cuentos clásicos",
+      "adventure": "Aventura",
+      "educational": "Educativo",
+      "modern": "Cuentos modernos"
+    }
+  },
+  "engage": {
+    "header": {
+      "title": "Descubrir y Aprender",
+      "subtitle": "Historias, canciones y aventuras de aprendizaje seleccionadas solo para ti"
+    },
+    "welcome": {
+      "title": "¿Listo para la aventura?",
+      "description": "Comience a explorar historias y canciones perfectamente adaptadas a sus intereses y grupo de edad. ¡Cada aventura te está esperando!"
+    },
+    "sections": {
+      "stories": {
+        "title": "Historias",
+        "description": "Cuentos inmersivos que despiertan la imaginación y el aprendizaje",
+        "browseCategories": "Navegar por categoría:",
+        "allCategories": "Todas las categorías",
+        "viewAll": "Ver todas las historias"
+      },
+      "songs": {
+        "title": "Canciones para Cantar",
+        "description": "Aventuras musicales y canciones educativas para cada estado de ánimo",
+        "viewAll": "Ver todas las canciones"
+      },
+      "learning": {
+        "title": "Categorías de Aprendizaje",
+        "description": "Contenido educativo organizado por materia y habilidad",
+        "mathematics": "Matemáticas",
+        "science": "Ciencias",
+        "language": "Artes del Lenguaje",
+        "arts": "Artes y Creatividad",
+        "social": "Estudios Sociales",
+        "mathDescription": "Números, conteo y conceptos matemáticos básicos",
+        "scienceDescription": "Explora el mundo natural y el descubrimiento científico",
+        "languageDescription": "Lectura, escritura y desarrollo del lenguaje",
+        "artsDescription": "Expresión creativa a través del arte, música e imaginación",
+        "socialDescription": "Comunidad, culturas y comprensión social"
+      },
+      "recommendations": {
+        "title": "Recomendaciones",
+        "description": "Selecciones personalizadas basadas en sus preferencias y actividad",
+        "forYou": "Para Ti",
+        "trending": "Tendencias Actuales",
+        "newReleases": "Nuevos Lanzamientos"
+      },
+      "activities": {
+        "drawTell": "Dibujar y Contar",
+        "singAlong": "Cantar Juntos"
+      }
+    },
+    "categories": {
+      "adventure": "Aventura",
+      "fantasy": "Fantasía",
+      "educational": "Educativo",
+      "bedtime": "Hora de dormir",
+      "classic": "Cuentos clásicos",
+      "modern": "Historias modernas",
+      "science": "Ciencia ficción",
+      "animals": "Animales",
+      "friendship": "Amistad",
+      "family": "Familia"
+    },
+    "empty": {
+      "title": "Cargando contenido increíble...",
+      "description": "¡Estamos preparando historias y canciones maravillosas solo para ti!"
+    },
+    "accessibility": {
+      "categoryFilter": "Navegar categoría {{category}}",
+      "storyCard": "Historia {{title}} en categoría {{category}}, duración {{duration}}",
+      "songCard": "Canción {{title}}, duración {{duration}}",
+      "learningCard": "Categoría de aprendizaje {{subject}} con {{count}} actividades"
+    }
+  },
+  "monitor": {
+    "header": {
+      "title": "Monitor de Seguridad",
+      "subtitle": "Mantén tu entorno seguro y cómodo"
+    },
+    "status": {
+      "updating": "Actualizando...",
+      "active": "Activo"
+    },
+    "welcome": {
+      "title": "Tu Guardián de Seguridad",
+      "description": "Estamos monitoreando activamente tu entorno. Verde significa que todo está perfecto, amarillo indica cambios menores a considerar."
+    },
+    "sections": {
+      "liveSensors": {
+        "title": "Sensores en Vivo",
+        "description": "Monitoreo en tiempo real de tu entorno. Toque cualquier sensor para información detallada e historial."
+      },
+      "recentAlerts": {
+        "title": "Alertas Recientes",
+        "description": "Revisar cambios ambientales recientes y notificaciones",
+        "noAlertsDescription": "¡Todo despejado! No hay alertas en las últimas 24 horas. ¡Excelente trabajo manteniendo un entorno seguro!"
+      },
+      "safetyProgress": {
+        "title": "Progreso de Seguridad",
+        "description": "Rastrea tu racha de monitoreo de seguridad y mantén entornos saludables"
+      },
+      "emergencyActions": {
+        "title": "Acciones de Emergencia",
+        "description": "¿Necesitas ayuda inmediatamente? Toque el botón a continuación para notificar instantáneamente a tu padre o tutor."
+      }
+    },
+    "sensors": {
+      "airQuality": {
+        "title": "Calidad del Aire",
+        "good": "Buena",
+        "low": "Baja",
+        "goodDescription": "Limpio y fresco",
+        "lowDescription": "Monitorear ventilación"
+      },
+      "sound": {
+        "title": "Nivel de Sonido",
+        "normal": "Normal",
+        "loud": "Fuerte",
+        "normalDescription": "Perfecto para concentrarse",
+        "loudDescription": "Considere actividades más silenciosas"
+      },
+      "motion": {
+        "title": "Nivel de Actividad",
+        "active": "Activo",
+        "still": "Quieto",
+        "activeDescription": "Excelente nivel de energía",
+        "stillDescription": "Agradable y calmado"
+      },
+      "stable": "✓ Estable",
+      "changing": "⚠ Cambiando",
+      "tapForDetails": "Toque para detalles →"
+    },
+    "alerts": {
+      "title": "Alertas Recientes",
+      "description": "Revisar cambios ambientales recientes y notificaciones",
+      "allClear": "¡Todo despejado! No hay alertas en las últimas 24 horas. ¡Excelente trabajo manteniendo un ambiente seguro!",
+      "airQualityAdvice": "Verificar ventilación y considerar purificador de aire",
+      "soundAdvice": "Niveles de ruido elevados, considerar actividades más silenciosas", 
+      "activityAdvice": "Movimiento aumentado detectado, excelente nivel de actividad",
+      "airQualityMessage": "Calidad del aire deteriorada",
+      "soundMessage": "Ruido fuerte detectado",
+      "motionMessage": "Alta actividad detectada",
+      "airQualityDescription": "Verificar ventilación y considerar purificador de aire",
+      "soundDescription": "Niveles de ruido elevados, considerar actividades más silenciosas",
+      "motionDescription": "Movimiento aumentado detectado, excelente nivel de actividad"
+    },
+    "progress": {
+      "title": "Progreso de Seguridad",
+      "description": "Rastrea tu racha de monitoreo de seguridad y mantén ambientes saludables",
+      "daysSafe": "Días Seguros",
+      "weeklyGoal": "Meta Semanal",
+      "goalComplete": "7/7 días ✅",
+      "daysLabel": "Días Seguros",
+      "achievements": {
+        "airQuality": "Semana de Calidad de Aire Perfecta",
+        "quietMaster": "Maestro del Ambiente Silencioso",
+        "perfectAirQuality": "Semana de Calidad de Aire Perfecta",
+        "quietEnvironment": "Maestro del Ambiente Silencioso"
+      }
+    },
+    "emergency": {
+      "title": "Acciones de Emergencia",
+      "description": "¿Necesitas ayuda inmediatamente? Toca el botón de abajo para notificar instantáneamente a tu padre o tutor.",
+      "notifyParent": "Notificar a los Padres",
+      "instantAlert": "Alerta instantánea con su ubicación"
+    },
+    "empty": {
+      "title": "¡Todo despejado!",
+      "description": "Tu entorno ha estado estable y seguro. ¡Continúa el excelente trabajo manteniendo condiciones óptimas!"
+    },
+    "accessibility": {
+      "sensorCard": "{{title}}: {{value}}, {{description}}, toque para detalles",
+      "alertItem": "Alerta: {{message}} a las {{time}}",
+      "emergencyButton": "Botón de emergencia para notificar al padre inmediatamente"
+    }
+  },
+  "accessibility": {
+    "ageGroupsButton": "Grupos de edad: {{groups}}, tocar para cambiar",
+    "languageSelection": "Seleccionar idioma {{language}}",
+    "contentFilterSwitch": "Filtro de contenido {{status}}",
+    "environmentalAlertsSwitch": "Alertas ambientales {{status}}",
+    "aqiThresholdButton": "Umbral de calidad del aire establecido en {{value}} AQI, tocar para ajustar",
+    "tabNavigation": "Pestaña {{label}}{{active}}",
+    "routineButton": "Rutina {{label}} a las {{time}}, tocar para editar",
+    "enabled": "habilitado",
+    "disabled": "deshabilitado",
+    "currentlySelected": ", actualmente seleccionado"
+  }
+}

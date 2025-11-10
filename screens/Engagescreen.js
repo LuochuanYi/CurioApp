@@ -1,46 +1,84 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Image, Platform } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { LanguageContext, useLanguage } from '../contexts/LanguageContext';
 import { STORY_CATEGORIES, STORY_LIBRARY, getStoriesByCategory, searchStories } from '../data/stories';
 import { SONGS_LIBRARY, getSongsByCategory, SONG_CATEGORIES, SONG_DIFFICULTIES } from '../data/songs';
 import { CurioHeader, CurioCard, CurioMascot, CURIO_THEME, TEXT_STYLES } from '../components';
+import { useDynamicTranslation, useTranslatedStories } from '../hooks/useDynamicTranslation';
 
 const { width: screenWidth } = Dimensions.get('window');
 
-// Enhanced hook for content data with category filtering
+// Enhanced hook for content data with category filtering and dynamic translation
 const useContentData = (selectedCategory = 'bedtime') => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
+  const { translateStories, translateCategory, currentLanguage } = useDynamicTranslation();
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 400));
       
-      const stories = getStoriesByCategory(selectedCategory);
-      const featuredStory = stories[Math.floor(Math.random() * stories.length)];
-      
-      setData({
-        stories: stories,
-        featuredStory: {
-          title: featuredStory.title,
-          icon: STORY_CATEGORIES[featuredStory.category.toUpperCase()]?.icon || '�',
-          duration: featuredStory.duration,
-          category: featuredStory.category
-        },
-        recommendedActivity: {
-          title: Math.random() > 0.5 ? 'Draw & Tell' : 'Sing Along',
-          icon: Math.random() > 0.5 ? '🎨' : '🎵',
-          participants: Math.floor(Math.random() * 3 + 1)
-        },
-        categories: Object.values(STORY_CATEGORIES),
-        lastUpdated: new Date().toLocaleTimeString()
-      });
-      setLoading(false);
+      try {
+        // Get stories for the selected category
+        const originalStories = getStoriesByCategory(selectedCategory);
+        
+        // Translate stories if not in English
+        const stories = currentLanguage === 'en' 
+          ? originalStories 
+          : await translateStories(originalStories);
+        
+        // Get and translate categories
+        const originalCategories = Object.values(STORY_CATEGORIES);
+        const categories = currentLanguage === 'en'
+          ? originalCategories
+          : await Promise.all(originalCategories.map(cat => translateCategory(cat, currentLanguage)));
+        
+        const featuredStory = stories.length > 0 
+          ? stories[Math.floor(Math.random() * stories.length)]
+          : null;
+        
+        setData({
+          stories: stories,
+          featuredStory: featuredStory ? {
+            title: featuredStory.title,
+            icon: STORY_CATEGORIES[featuredStory.category?.toUpperCase()]?.icon || '📚',
+            duration: featuredStory.duration,
+            category: featuredStory.category
+          } : null,
+          recommendedActivity: {
+            title: Math.random() > 0.5 ? t('engage.activities.drawTell') : t('engage.activities.singAlong'),
+            icon: Math.random() > 0.5 ? '🎨' : '🎵',
+            participants: Math.floor(Math.random() * 3 + 1)
+          },
+          categories: categories,
+          lastUpdated: new Date().toLocaleTimeString()
+        });
+      } catch (error) {
+        console.warn('Content translation failed:', error);
+        // Fallback to original English content
+        const stories = getStoriesByCategory(selectedCategory);
+        const categories = Object.values(STORY_CATEGORIES);
+        
+        setData({
+          stories: stories,
+          featuredStory: stories.length > 0 ? stories[0] : null,
+          recommendedActivity: {
+            title: Math.random() > 0.5 ? t('engage.activities.drawTell') : t('engage.activities.singAlong'),
+            icon: Math.random() > 0.5 ? '🎨' : '🎵',
+            participants: Math.floor(Math.random() * 3 + 1)
+          },
+          categories: categories,
+          lastUpdated: new Date().toLocaleTimeString()
+        });
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchData();
-  }, [selectedCategory]);
+  }, [selectedCategory, currentLanguage, t]);
 
   return { data, loading };
 };
@@ -50,9 +88,284 @@ import { getCategoriesList } from '../data/learningCategories';
 // Get learning categories from data
 const learningCategories = getCategoriesList();
 
+// Component for dynamically translated song categories
+const TranslatedSongCategories = ({ selectedCategory, onCategorySelect }) => {
+  const [translatedCategories, setTranslatedCategories] = useState([]);
+  const { translateContent, currentLanguage } = useDynamicTranslation();
+
+  useEffect(() => {
+    const translateCategories = async () => {
+      const categories = Object.values(SONG_CATEGORIES);
+      
+      if (currentLanguage === 'en') {
+        setTranslatedCategories(categories);
+        return;
+      }
+
+      const translated = await Promise.all(
+        categories.map(async (category) => {
+          const translatedName = await translateContent(category.name);
+          return {
+            ...category,
+            name: translatedName,
+            originalName: category.name
+          };
+        })
+      );
+      setTranslatedCategories(translated);
+    };
+
+    translateCategories();
+  }, [currentLanguage]);
+
+  return (
+    <ScrollView 
+      horizontal 
+      showsHorizontalScrollIndicator={false} 
+      contentContainerStyle={{ paddingRight: CURIO_THEME.spacing.screenPadding }}
+      style={{ marginBottom: CURIO_THEME.spacing.md }}
+    >
+      {translatedCategories.map((category) => {
+        const categorySongCount = getSongsByCategory(category.id).length;
+        return (
+          <TouchableOpacity
+            key={category.id}
+            onPress={() => onCategorySelect(category.id)}
+            style={{
+              paddingVertical: CURIO_THEME.spacing.sm,
+              paddingHorizontal: CURIO_THEME.spacing.md,
+              backgroundColor: selectedCategory === category.id ? category.color : CURIO_THEME.colors.background,
+              borderRadius: CURIO_THEME.radius.button,
+              marginRight: CURIO_THEME.spacing.sm,
+              borderWidth: 1,
+              borderColor: selectedCategory === category.id ? category.color : CURIO_THEME.colors.lightGray,
+            }}
+            accessible={true}
+            accessibilityLabel={`Filter by ${category.name} songs`}
+            accessibilityRole="button"
+          >
+            <Text style={[
+              TEXT_STYLES.buttonSecondary,
+              { color: selectedCategory === category.id ? CURIO_THEME.colors.textInverse : CURIO_THEME.colors.textPrimary }
+            ]}>
+              {category.icon} {category.name} ({categorySongCount})
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+    </ScrollView>
+  );
+};
+
+// Component for dynamically translated songs list
+const TranslatedSongsList = ({ songs, onSongPress }) => {
+  const [translatedSongs, setTranslatedSongs] = useState(songs);
+  const { translateContent, currentLanguage } = useDynamicTranslation();
+
+  useEffect(() => {
+    const translateSongs = async () => {
+      if (currentLanguage === 'en') {
+        setTranslatedSongs(songs);
+        return;
+      }
+
+      const translated = await Promise.all(
+        songs.map(async (song) => {
+          const translatedTitle = await translateContent(song.title);
+          return {
+            ...song,
+            title: translatedTitle,
+            originalTitle: song.title
+          };
+        })
+      );
+      setTranslatedSongs(translated);
+    };
+
+    translateSongs();
+  }, [songs, currentLanguage]);
+
+  return (
+    <>
+      {translatedSongs.map((song, index) => {
+        const difficulty = SONG_DIFFICULTIES[song.difficulty.toUpperCase()];
+        const songColors = [
+          CURIO_THEME.colors.goldenYellow,
+          CURIO_THEME.colors.softMint,
+          CURIO_THEME.colors.accentOrange,
+          CURIO_THEME.colors.skyBlue
+        ];
+        
+        return (
+          <TouchableOpacity
+            key={song.id}
+            onPress={() => onSongPress(song)}
+            style={styles.listItem}
+            accessible={true}
+            accessibilityLabel={`${song.title} song, ${difficulty?.name} difficulty, ${song.duration} long`}
+            accessibilityRole="button"
+          >
+            <View style={[styles.listIconContainer, { backgroundColor: songColors[index % songColors.length] }]}>
+              <Text style={styles.listIcon}>🎵</Text>
+            </View>
+            <View style={styles.listContent}>
+              <Text style={styles.listTitle} numberOfLines={2}>
+                {song.title}
+              </Text>
+              <Text style={styles.listSubtitle}>
+                {song.duration} • {difficulty?.name}
+              </Text>
+              {song.originalTitle && song.originalTitle !== song.title && (
+                <Text style={styles.originalTitle} numberOfLines={1}>
+                  {song.originalTitle}
+                </Text>
+              )}
+            </View>
+          </TouchableOpacity>
+        );
+      })}
+    </>
+  );
+};
+
+// Component for dynamically translated learning categories
+const TranslatedLearningCategories = ({ categories, onCategoryPress }) => {
+  const [translatedCategories, setTranslatedCategories] = useState(categories);
+  const { translateContent, currentLanguage } = useDynamicTranslation();
+
+  useEffect(() => {
+    const translateCategories = async () => {
+      if (currentLanguage === 'en') {
+        setTranslatedCategories(categories);
+        return;
+      }
+
+      const translated = await Promise.all(
+        categories.map(async (category) => {
+          const translatedName = await translateContent(category.name);
+          return {
+            ...category,
+            name: translatedName,
+            originalName: category.name
+          };
+        })
+      );
+      setTranslatedCategories(translated);
+    };
+
+    translateCategories();
+  }, [categories, currentLanguage]);
+
+  return (
+    <>
+      {translatedCategories.map((category) => (
+        <TouchableOpacity
+          key={category.id}
+          onPress={() => onCategoryPress(category)}
+          style={styles.gridItem}
+          accessible={true}
+          accessibilityLabel={`${category.name} category with ${category.totalActivities} activities`}
+          accessibilityRole="button"
+        >
+          <View style={[styles.iconContainer, { backgroundColor: category.color || CURIO_THEME.colors.primary }]}>
+            <Text style={styles.gridIcon}>{category.icon}</Text>
+          </View>
+          <Text style={styles.gridTitle} numberOfLines={2}>
+            {category.name}
+          </Text>
+          <Text style={styles.gridSubtitle}>
+            {category.totalActivities} activities
+          </Text>
+          {category.originalName && category.originalName !== category.name && (
+            <Text style={styles.gridOriginal} numberOfLines={1}>
+              {category.originalName}
+            </Text>
+          )}
+        </TouchableOpacity>
+      ))}
+    </>
+  );
+};
+
+// Component for dynamically translated recommendations
+const TranslatedRecommendations = ({ onActivityPress }) => {
+  const [translatedRecommendations, setTranslatedRecommendations] = useState([]);
+  const { translateContent, currentLanguage } = useDynamicTranslation();
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    const translateRecommendations = async () => {
+      const recommendations = [
+        { 
+          id: 'lullaby',
+          title: 'Submit a lullaby',
+          subtitle: 'Music Sing Together Play',
+          icon: '🎵'
+        },
+        {
+          id: 'guiro', 
+          title: 'Guiro',
+          subtitle: 'History Multilingual Story',
+          icon: '🪘'
+        }
+      ];
+
+      if (currentLanguage === 'en') {
+        setTranslatedRecommendations(recommendations);
+        return;
+      }
+
+      const translated = await Promise.all(
+        recommendations.map(async (rec) => {
+          const translatedTitle = await translateContent(rec.title);
+          const translatedSubtitle = await translateContent(rec.subtitle);
+          return {
+            ...rec,
+            title: translatedTitle,
+            subtitle: translatedSubtitle,
+            originalTitle: rec.title,
+            originalSubtitle: rec.subtitle
+          };
+        })
+      );
+      setTranslatedRecommendations(translated);
+    };
+
+    translateRecommendations();
+  }, [currentLanguage]);
+
+  return (
+    <>
+      {translatedRecommendations.map((rec) => (
+        <TouchableOpacity 
+          key={rec.id}
+          style={styles.contentItem}
+          onPress={() => onActivityPress(rec.id)}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel={`${rec.title} activity - ${rec.subtitle}`}
+        >
+          <Text style={styles.contentIcon}>{rec.icon}</Text>
+          <View style={styles.contentText}>
+            <Text style={styles.contentTitle}>{rec.title}</Text>
+            <Text style={styles.contentSubtitle}>{rec.subtitle}</Text>
+            {rec.originalTitle && rec.originalTitle !== rec.title && (
+              <Text style={styles.contentOriginal} numberOfLines={1}>
+                {rec.originalTitle} - {rec.originalSubtitle}
+              </Text>
+            )}
+          </View>
+        </TouchableOpacity>
+      ))}
+    </>
+  );
+};
+
 const { width } = Dimensions.get('window');
 
 const EngageScreen = ({ navigation }) => {
+  const { t } = useTranslation();
+  const { currentLanguage } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState('bedtime');
   const [selectedSongCategory, setSelectedSongCategory] = useState('bedtime');
   const { data: contentData, loading: contentLoading } = useContentData(selectedCategory);
@@ -125,12 +438,12 @@ const EngageScreen = ({ navigation }) => {
       <View style={styles.section}>
         <View style={[styles.sectionHeader, styles.centeredSectionHeader]}>
           <Text style={styles.sectionIcon}>📚</Text>
-          <Text style={styles.sectionTitle}>Stories</Text>
+          <Text style={styles.sectionTitle}>{t('engage.sections.stories.title')}</Text>
         </View>
 
         {/* Story Categories Filter - Curio Style */}
         <Text style={[TEXT_STYLES.bodyMedium, { marginBottom: CURIO_THEME.spacing.sm }]}>
-          Browse by Category:
+          {t('engage.sections.stories.browseCategories')}
         </Text>
         <ScrollView 
           horizontal 
@@ -170,34 +483,46 @@ const EngageScreen = ({ navigation }) => {
 
         {/* Stories List */}
         <View style={styles.listContainer}>
-          {contentData?.stories?.slice(0, 6).map((story) => {
-            const categoryInfo = STORY_CATEGORIES[story.category.toUpperCase()] || {};
-            
-            return (
-              <TouchableOpacity
-                key={story.id}
-                onPress={() => handleStoryPress(story)}
-                style={styles.listItem}
-                accessible={true}
-                accessibilityLabel={`${story.title} story, ${story.duration}, rating ${story.rating} stars`}
-                accessibilityRole="button"
-              >
-                <View style={[styles.listIconContainer, { backgroundColor: categoryInfo.color || CURIO_THEME.colors.skyBlue }]}>
-                  <Text style={styles.listIcon}>
-                    {categoryInfo.icon || '📚'}
-                  </Text>
-                </View>
-                <View style={styles.listContent}>
-                  <Text style={styles.listTitle} numberOfLines={2}>
-                    {story.title}
-                  </Text>
-                  <Text style={styles.listSubtitle}>
-                    {story.duration} • ⭐ {story.rating}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
+          {contentLoading ? (
+            // Loading indicator for translation
+            <View style={styles.loadingContainer}>
+              <Text style={styles.loadingText}>{t('common.loading')}</Text>
+            </View>
+          ) : (
+            contentData?.stories?.slice(0, 6).map((story) => {
+              const categoryInfo = STORY_CATEGORIES[story.category?.toUpperCase()] || {};
+              
+              return (
+                <TouchableOpacity
+                  key={story.id}
+                  onPress={() => handleStoryPress(story)}
+                  style={styles.listItem}
+                  accessible={true}
+                  accessibilityLabel={`${story.title} story, ${story.duration}, rating ${story.rating} stars`}
+                  accessibilityRole="button"
+                >
+                  <View style={[styles.listIconContainer, { backgroundColor: categoryInfo.color || CURIO_THEME.colors.skyBlue }]}>
+                    <Text style={styles.listIcon}>
+                      {categoryInfo.icon || '📚'}
+                    </Text>
+                  </View>
+                  <View style={styles.listContent}>
+                    <Text style={styles.listTitle} numberOfLines={2}>
+                      {story.title}
+                    </Text>
+                    <Text style={styles.listSubtitle}>
+                      {story.duration} • ⭐ {story.rating}
+                    </Text>
+                    {story.originalTitle && story.originalTitle !== story.title && (
+                      <Text style={styles.originalTitle} numberOfLines={1}>
+                        {story.originalTitle}
+                      </Text>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              );
+            })
+          )}
         </View>
       </View>
 
@@ -205,83 +530,30 @@ const EngageScreen = ({ navigation }) => {
       <View style={styles.section}>
         <View style={[styles.sectionHeader, styles.centeredSectionHeader]}>
           <Text style={styles.sectionIcon}>🎵</Text>
-          <Text style={styles.sectionTitle}>Sing-Along Songs</Text>
+          <Text style={styles.sectionTitle}>{t('engage.sections.songs.title')}</Text>
         </View>
 
         {/* Song Categories Filter - Curio Style */}
         <Text style={[TEXT_STYLES.bodyMedium, { marginBottom: CURIO_THEME.spacing.sm }]}>
-          Browse by Category:
+          {t('engage.sections.stories.browseCategories')}
         </Text>
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false} 
-          contentContainerStyle={{ paddingRight: CURIO_THEME.spacing.screenPadding }}
-          style={{ marginBottom: CURIO_THEME.spacing.md }}
-        >
-          {Object.values(SONG_CATEGORIES).map((category) => {
-            const categorySongCount = getSongsByCategory(category.id).length;
-            return (
-              <TouchableOpacity
-                key={category.id}
-                onPress={() => setSelectedSongCategory(category.id)}
-                style={{
-                  paddingVertical: CURIO_THEME.spacing.sm,
-                  paddingHorizontal: CURIO_THEME.spacing.md,
-                  backgroundColor: selectedSongCategory === category.id ? category.color : CURIO_THEME.colors.background,
-                  borderRadius: CURIO_THEME.radius.button,
-                  marginRight: CURIO_THEME.spacing.sm,
-                  borderWidth: 1,
-                  borderColor: selectedSongCategory === category.id ? category.color : CURIO_THEME.colors.lightGray,
-                }}
-                accessible={true}
-                accessibilityLabel={`Filter by ${category.name} songs`}
-                accessibilityRole="button"
-              >
-                <Text style={[
-                  TEXT_STYLES.buttonSecondary,
-                  { color: selectedSongCategory === category.id ? CURIO_THEME.colors.textInverse : CURIO_THEME.colors.textPrimary }
-                ]}>
-                  {category.icon} {category.name} ({categorySongCount})
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
+        <TranslatedSongCategories 
+          selectedCategory={selectedSongCategory}
+          onCategorySelect={setSelectedSongCategory}
+        />
 
         {/* Songs List */}
         <View style={styles.listContainer}>
-          {getSongsByCategory(selectedSongCategory).slice(0, 6).map((song, index) => {
-            const difficulty = SONG_DIFFICULTIES[song.difficulty.toUpperCase()];
-            const songColors = [
-              CURIO_THEME.colors.goldenYellow,
-              CURIO_THEME.colors.softMint,
-              CURIO_THEME.colors.accentOrange,
-              CURIO_THEME.colors.skyBlue
-            ];
-            
-            return (
-              <TouchableOpacity
-                key={song.id}
-                onPress={() => handleSongPress(song)}
-                style={styles.listItem}
-                accessible={true}
-                accessibilityLabel={`${song.title} song, ${difficulty?.name} difficulty, ${song.duration} long`}
-                accessibilityRole="button"
-              >
-                <View style={[styles.listIconContainer, { backgroundColor: songColors[index % songColors.length] }]}>
-                  <Text style={styles.listIcon}>🎵</Text>
-                </View>
-                <View style={styles.listContent}>
-                  <Text style={styles.listTitle} numberOfLines={2}>
-                    {song.title}
-                  </Text>
-                  <Text style={styles.listSubtitle}>
-                    {song.duration} • {difficulty?.name}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
+          {contentLoading ? (
+            <View style={styles.loadingContainer}>
+              <Text style={styles.loadingText}>{t('common.loading')}</Text>
+            </View>
+          ) : (
+            <TranslatedSongsList 
+              songs={getSongsByCategory(selectedSongCategory).slice(0, 6)}
+              onSongPress={handleSongPress}
+            />
+          )}
         </View>
       </View>
 
@@ -289,7 +561,7 @@ const EngageScreen = ({ navigation }) => {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionIcon}>🎨</Text>
-          <Text style={styles.sectionTitle}>Learning Categories</Text>
+          <Text style={styles.sectionTitle}>{t('engage.sections.learning.title')}</Text>
           <View style={{
             backgroundColor: CURIO_THEME.colors.primary,
             paddingHorizontal: CURIO_THEME.spacing.md,
@@ -303,26 +575,16 @@ const EngageScreen = ({ navigation }) => {
         </View>
         
         <View style={styles.gridContainer}>
-          {learningCategories.map((category) => (
-            <TouchableOpacity
-              key={category.id}
-              onPress={() => handleLearningCategoryPress(category)}
-              style={styles.gridItem}
-              accessible={true}
-              accessibilityLabel={`${category.name} category with ${category.totalActivities} activities`}
-              accessibilityRole="button"
-            >
-              <View style={[styles.iconContainer, { backgroundColor: category.color || CURIO_THEME.colors.primary }]}>
-                <Text style={styles.gridIcon}>{category.icon}</Text>
-              </View>
-              <Text style={styles.gridTitle} numberOfLines={2}>
-                {category.name}
-              </Text>
-              <Text style={styles.gridSubtitle}>
-                {category.totalActivities} activities
-              </Text>
-            </TouchableOpacity>
-          ))}
+          {contentLoading ? (
+            <View style={styles.loadingContainer}>
+              <Text style={styles.loadingText}>{t('common.loading')}</Text>
+            </View>
+          ) : (
+            <TranslatedLearningCategories 
+              categories={learningCategories}
+              onCategoryPress={handleLearningCategoryPress}
+            />
+          )}
         </View>
       </View>
 
@@ -330,37 +592,17 @@ const EngageScreen = ({ navigation }) => {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionIcon}>🔔</Text>
-          <Text style={styles.sectionTitle}>Recommendations</Text>
+          <Text style={styles.sectionTitle}>{t('engage.sections.recommendations.title')}</Text>
         </View>
         
         <View style={styles.sectionContent}>
-          <TouchableOpacity 
-            style={styles.contentItem}
-            onPress={() => handleActivityPress('lullaby')}
-            accessible={true}
-            accessibilityRole="button"
-            accessibilityLabel="Submit a lullaby activity - Music Sing Together Play"
-          >
-            <Text style={styles.contentIcon}>🎵</Text>
-            <View style={styles.contentText}>
-              <Text style={styles.contentTitle}>Submit a lullaby</Text>
-              <Text style={styles.contentSubtitle}>Music Sing Together Play</Text>
+          {contentLoading ? (
+            <View style={styles.loadingContainer}>
+              <Text style={styles.loadingText}>{t('common.loading')}</Text>
             </View>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.contentItem}
-            onPress={() => handleActivityPress('guiro')}
-            accessible={true}
-            accessibilityRole="button"
-            accessibilityLabel="Guiro activity - History Multilingual Story"
-          >
-            <Text style={styles.contentIcon}>🪘</Text>
-            <View style={styles.contentText}>
-              <Text style={styles.contentTitle}>Guiro</Text>
-              <Text style={styles.contentSubtitle}>History Multilingual Story</Text>
-            </View>
-          </TouchableOpacity>
+          ) : (
+            <TranslatedRecommendations onActivityPress={handleActivityPress} />
+          )}
         </View>
       </View>
 
@@ -395,10 +637,10 @@ const EngageScreen = ({ navigation }) => {
         ...CURIO_THEME.shadows.nav,
       }}>
         {[
-          { key: 'Home', icon: '🏠', label: 'Home', active: false, color: CURIO_THEME.colors.skyBlue },
-          { key: 'Monitor', icon: '📊', label: 'Monitor', active: false, color: CURIO_THEME.colors.deepNavy },
-          { key: 'Engage', icon: '💡', label: 'Engage', active: true, color: CURIO_THEME.colors.goldenYellow },
-          { key: 'Personalize', icon: '👤', label: 'Personalize', active: false, color: CURIO_THEME.colors.deepNavy }
+          { key: 'Home', icon: '🏠', label: t('common.home'), active: false, color: CURIO_THEME.colors.skyBlue },
+          { key: 'Monitor', icon: '📊', label: t('common.monitor'), active: false, color: CURIO_THEME.colors.deepNavy },
+          { key: 'Engage', icon: '💡', label: t('common.engage'), active: true, color: CURIO_THEME.colors.goldenYellow },
+          { key: 'Personalize', icon: '👤', label: t('common.personalize'), active: false, color: CURIO_THEME.colors.deepNavy }
         ].map((navItem) => (
           <TouchableOpacity
             key={navItem.key}
@@ -521,6 +763,13 @@ const styles = StyleSheet.create({
     color: CURIO_THEME.colors.textSecondary,
     textAlign: 'center',
   },
+  gridOriginal: {
+    fontSize: 10,
+    color: CURIO_THEME.colors.textSecondary,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginTop: 2,
+  },
   
   // List Layout (for Stories and Songs)
   listContainer: {
@@ -562,6 +811,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: CURIO_THEME.colors.textSecondary,
   },
+  originalTitle: {
+    fontSize: 12,
+    color: CURIO_THEME.colors.textSecondary,
+    fontStyle: 'italic',
+    marginTop: 2,
+  },
+  loadingContainer: {
+    padding: CURIO_THEME.spacing.md,
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 14,
+    color: CURIO_THEME.colors.textSecondary,
+  },
   
   // Content Items (keep for recommendations section)
   contentItem: {
@@ -592,6 +855,12 @@ const styles = StyleSheet.create({
   contentSubtitle: {
     fontSize: 14,
     color: CURIO_THEME.colors.textSecondary,
+  },
+  contentOriginal: {
+    fontSize: 12,
+    color: CURIO_THEME.colors.textSecondary,
+    fontStyle: 'italic',
+    marginTop: 2,
   },
 
   // Header - Create Together

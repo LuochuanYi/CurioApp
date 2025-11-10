@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Dimensions, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Dimensions, Image, Modal } from 'react-native';
+import Slider from '@react-native-community/slider';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../contexts/LanguageContext';
 import { CurioHeader, CurioCard, CurioButton, CurioMascot, CURIO_THEME, TEXT_STYLES } from '../components';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -22,8 +25,8 @@ const usePersonalizationData = () => {
         envAlerts: true,
         aqiThreshold: 75,
         routines: [
-          { id: 1, label: 'Story time', time: '12:45 pm', type: 'story' },
-          { id: 2, label: 'Quiet time', time: '2:00 pm – 4:00 pm', type: 'quiet' }
+          { id: 1, label: t('routines.storyTime'), time: '12:45 pm', type: 'story' },
+          { id: 2, label: t('routines.quietTime'), time: '2:00 pm – 4:00 pm', type: 'quiet' }
         ],
         lastUpdated: new Date().toLocaleDateString('en-US', { 
           year: 'numeric', 
@@ -40,42 +43,82 @@ const usePersonalizationData = () => {
   return { data, loading };
 };
 
-// Mock data - in real app, this would come from API/state management
-const mockData = {
-  languages: [
-    { id: 'en', name: 'English', label: 'English' },
-    { id: 'es', name: 'Spanish', label: 'Español' },
-    { id: 'zh', name: 'Chinese', label: '中文' },
-    { id: 'uk', name: 'Ukrainian', label: 'Українська' },
-    { id: 'fr', name: 'French', label: 'Français' }
-  ],
-  preferences: {
-    contentFilter: true,
-    environmentalAlerts: true,
-    aqiThreshold: 75,
-    notificationsEnabled: true
-  }
-};
+// Get age groups with translations
+const getAgeGroups = (t) => [
+  { id: '1-3', label: t('ageGroups.1-3'), description: t('ageGroups.toddlerDescription') },
+  { id: '3-5', label: t('ageGroups.3-5'), description: t('ageGroups.preschoolDescription') },
+  { id: '5-7', label: t('ageGroups.5-7'), description: t('ageGroups.earlyElementaryDescription') },
+  { id: '7-10', label: t('ageGroups.7-10'), description: t('ageGroups.advancedDescription') },
+  { id: '10+', label: t('ageGroups.10+'), description: t('ageGroups.matureDescription') }
+];
 
 const PersonalizeScreen = ({ navigation }) => {
+  // Translation and language hooks
+  const { t } = useTranslation();
+  const { currentLanguage, setLanguage, getAvailableLanguages } = useLanguage();
+
+  // Mock data - in real app, this would come from API/state management  
+  const mockData = {
+    userProfile: {
+      name: 'Family',
+      language: 'English',
+    },
+    familyData: {
+      routines: [
+        { id: 1, label: t('routines.storyTime'), time: '12:45 pm', type: 'story' },
+        { id: 2, label: t('routines.quietTime'), time: '2:00 pm – 4:00 pm', type: 'quiet' }
+      ],
+      lastUpdated: new Date().toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      })
+    },
+    preferences: {
+      contentFilter: true,
+      environmentalAlerts: true,
+      aqiThreshold: 75,
+      notificationsEnabled: true,
+      ageGroups: [t('ageGroups.1-3')]
+    }
+  };
+  
   // Use the custom hook for dynamic personalization data
   const { data: personalizationData, loading: personalizationLoading } = usePersonalizationData();
   
   // Local state for immediate UI updates
-  const [selectedLanguage, setSelectedLanguage] = useState('English');
   const [contentFilter, setContentFilter] = useState(true);
   const [envAlerts, setEnvAlerts] = useState(true);
   const [aqiThreshold, setAqiThreshold] = useState(75);
+  const [selectedAgeGroups, setSelectedAgeGroups] = useState([t('ageGroups.1-3')]);
+  
+  // Modal states
+  const [showAgeGroupModal, setShowAgeGroupModal] = useState(false);
+  const [showThresholdModal, setShowThresholdModal] = useState(false);
+  const [tempAqiThreshold, setTempAqiThreshold] = useState(75);
 
   // Update local state when data loads
   useEffect(() => {
     if (personalizationData) {
-      setSelectedLanguage(personalizationData.language);
       setContentFilter(personalizationData.contentFilter);
       setEnvAlerts(personalizationData.envAlerts);
       setAqiThreshold(personalizationData.aqiThreshold);
+      if (personalizationData.ageGroups) {
+        // Convert age groups to translated versions
+        const translatedAgeGroups = personalizationData.ageGroups.map(group => {
+          switch(group) {
+            case '1-3 years': return t('ageGroups.1-3');
+            case '3-5 years': return t('ageGroups.3-5');
+            case '5-7 years': return t('ageGroups.5-7');
+            case '7-10 years': return t('ageGroups.7-10');
+            case '10+ years': return t('ageGroups.10+');
+            default: return group;
+          }
+        });
+        setSelectedAgeGroups(translatedAgeGroups);
+      }
     }
-  }, [personalizationData]);
+  }, [personalizationData, t]);
 
   const handleNavigation = (screen) => {
     if (navigation && screen !== 'Personalize') {
@@ -83,10 +126,23 @@ const PersonalizeScreen = ({ navigation }) => {
     }
   };
 
-  const handleLanguageSelect = (language) => {
-    setSelectedLanguage(language);
-    console.log(`Language changed to: ${language}`);
-    // In real app: API call to save preference
+  const handleLanguageSelect = async (language) => {
+    console.log(`Language changing to: ${language}`);
+    const success = await setLanguage(language);
+    if (success) {
+      console.log('Language changed successfully to:', language);
+      // Update age groups to new language
+      const currentAgeGroups = selectedAgeGroups.map(group => {
+        // Convert back to English keys first, then to new language
+        const ageGroupKey = Object.keys(getAgeGroups(t)).find(key => 
+          getAgeGroups(t)[key] === group
+        );
+        return ageGroupKey ? t(`ageGroups.${ageGroupKey}`) : group;
+      });
+      setSelectedAgeGroups(currentAgeGroups);
+    } else {
+      console.error('Failed to change language');
+    }
   };
 
   const handleRoutineEdit = (routine) => {
@@ -106,24 +162,54 @@ const PersonalizeScreen = ({ navigation }) => {
     // In real app: API call to save preference
   };
 
+
+
+  const handleAgeGroupPress = () => {
+    setShowAgeGroupModal(true);
+  };
+
+  const handleAgeGroupToggle = (ageGroup) => {
+    setSelectedAgeGroups(prev => {
+      if (prev.includes(ageGroup)) {
+        // Don't allow removing if it's the last one
+        if (prev.length === 1) return prev;
+        return prev.filter(group => group !== ageGroup);
+      } else {
+        return [...prev, ageGroup];
+      }
+    });
+  };
+
   const handleThresholdPress = () => {
-    console.log('Open AQI threshold settings');
-    // In real app: navigation?.navigate('ThresholdSettings', { currentValue: aqiThreshold })
+    setTempAqiThreshold(aqiThreshold);
+    setShowThresholdModal(true);
+  };
+
+  const handleThresholdSave = () => {
+    setAqiThreshold(tempAqiThreshold);
+    setShowThresholdModal(false);
+    console.log(`AQI threshold updated to: ${tempAqiThreshold}`);
   };
 
   return (
-    <ScrollView style={{ 
-      flex: 1, 
-      backgroundColor: CURIO_THEME.colors.surface 
-    }}>
+    <ScrollView 
+      style={{ 
+        flex: 1, 
+        backgroundColor: CURIO_THEME.colors.surface 
+      }}
+      showsVerticalScrollIndicator={true}
+      indicatorStyle="default"
+      scrollIndicatorInsets={{ right: 1 }}
+      contentContainerStyle={{ paddingBottom: 100 }}
+    >
       {/* Welcome Card - Compact */}
       <View style={{
         paddingHorizontal: CURIO_THEME.spacing.screenPadding,
         paddingTop: CURIO_THEME.spacing.md,
       }}>
         <CurioCard
-          title="Your Family Space"
-          subtitle={personalizationLoading ? 'Loading...' : `Updated ${personalizationData?.lastUpdated || 'recently'}`}
+          title={t('personalize.title')}
+          subtitle={personalizationLoading ? t('common.loading') : t('personalize.subtitle', { date: personalizationData?.lastUpdated || 'recently' })}
           variant="default"
           style={{ 
             backgroundColor: CURIO_THEME.colors.background,
@@ -135,7 +221,7 @@ const PersonalizeScreen = ({ navigation }) => {
               👨‍👩‍👧‍👦
             </Text>
             <Text style={[TEXT_STYLES.bodySmall, { textAlign: 'center', flex: 1, fontSize: 12 }]}>
-              Family preferences & settings
+              {t('personalize.familyPreferences')}
             </Text>
           </View>
         </CurioCard>
@@ -153,7 +239,7 @@ const PersonalizeScreen = ({ navigation }) => {
           marginBottom: CURIO_THEME.spacing.md,
         }}>
           <Text style={TEXT_STYLES.cardTitle}>
-            Family Routines
+            {t('personalize.familyRoutines')}
           </Text>
           <View style={{
             backgroundColor: CURIO_THEME.colors.primary,
@@ -162,7 +248,7 @@ const PersonalizeScreen = ({ navigation }) => {
             borderRadius: CURIO_THEME.radius.badge,
           }}>
             <Text style={[TEXT_STYLES.caption, { color: CURIO_THEME.colors.textInverse }]}>
-              {personalizationData?.routines?.length || 2} routines
+              {t('personalize.routinesCount', { count: personalizationData?.routines?.length || 2 })}
             </Text>
           </View>
         </View>
@@ -173,8 +259,8 @@ const PersonalizeScreen = ({ navigation }) => {
           justifyContent: 'space-between',
         }}>
           {(personalizationData?.routines || [
-            { id: 1, label: 'Story time', time: '12:45 pm', type: 'story' },
-            { id: 2, label: 'Quiet time', time: '2:00 pm – 4:00 pm', type: 'quiet' }
+            { id: 1, label: t('routines.storyTime'), time: '12:45 pm', type: 'story' },
+            { id: 2, label: t('routines.quietTime'), time: '2:00 pm – 4:00 pm', type: 'quiet' }
           ]).map((routine) => (
             <TouchableOpacity
               key={routine.id}
@@ -234,55 +320,6 @@ const PersonalizeScreen = ({ navigation }) => {
         </View>
       </View>
 
-      {/* Language Preferences Section */}
-      <View style={styles.languageSection}>
-        <View style={styles.sectionHeader}>
-          <Text 
-            style={styles.sectionTitle}
-            accessibilityRole="header"
-          >
-            Language Preferences
-          </Text>
-          <Text style={styles.sectionCount}>
-            {mockData.languages.length} languages
-          </Text>
-        </View>
-        <View style={styles.languageGrid}>
-          {mockData.languages.map((lang) => (
-            <TouchableOpacity
-              key={lang.id}
-              style={[
-                styles.languageCard,
-                selectedLanguage === lang.name && styles.languageCardActive
-              ]}
-              onPress={() => handleLanguageSelect(lang.name)}
-              accessible={true}
-              accessibilityRole="button"
-              accessibilityLabel={`Select ${lang.name} language`}
-              accessibilityState={{ selected: selectedLanguage === lang.name }}
-            >
-              <View style={styles.languageIconContainer}>
-                <Text style={styles.languageIcon}>🌍</Text>
-              </View>
-              <Text style={[
-                styles.languageText,
-                selectedLanguage === lang.name && styles.languageTextActive
-              ]}>
-                {lang.label}
-              </Text>
-              {selectedLanguage === lang.name && (
-                <View style={styles.selectedIndicator}>
-                  <Text style={styles.checkIcon}>✓</Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          ))}
-        </View>
-        <Text style={styles.selectedLanguage}>
-          Current: {selectedLanguage}
-        </Text>
-      </View>
-
       {/* Safety & Parental Controls Section */}
       <View style={styles.controlsSection}>
         <View style={styles.sectionHeader}>
@@ -290,18 +327,52 @@ const PersonalizeScreen = ({ navigation }) => {
             style={styles.sectionTitle}
             accessibilityRole="header"
           >
-            Safety & Controls
+            {t('personalize.safetyControls')}
           </Text>
-          <Text style={styles.sectionCount}>4 settings</Text>
+          <Text style={styles.sectionCount}>5 {t('common.settings')}</Text>
         </View>
 
         <View style={styles.controlsContainer}>
+          <TouchableOpacity 
+            style={styles.thresholdCard}
+            onPress={handleAgeGroupPress}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={t('accessibility.ageGroupsButton', { groups: selectedAgeGroups.join(', ') })}
+          >
+            <View style={styles.controlInfo}>
+              <View style={styles.controlIconContainer}>
+                <Text style={styles.controlIcon}>👶</Text>
+              </View>
+              <View style={styles.controlTextContainer}>
+                <Text style={styles.controlLabel}>{t('personalize.ageGroups')}</Text>
+                <Text style={styles.controlDescription}>
+                  {selectedAgeGroups.length === 1 
+                    ? t('personalize.ageGroupsDescription') 
+                    : t('personalize.ageGroupsMultipleDescription', { count: selectedAgeGroups.length })}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.ageGroupsContainer}>
+              {selectedAgeGroups.slice(0, 2).map((ageGroup, index) => (
+                <View key={index} style={[styles.ageBadge, { marginLeft: index > 0 ? 4 : 0 }]}>
+                  <Text style={styles.ageText}>{ageGroup}</Text>
+                </View>
+              ))}
+              {selectedAgeGroups.length > 2 && (
+                <View style={[styles.ageBadge, { backgroundColor: '#7f8c8d', marginLeft: 4 }]}>
+                  <Text style={styles.ageText}>+{selectedAgeGroups.length - 2}</Text>
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
+
           <TouchableOpacity 
             style={styles.controlCard}
             onPress={() => handleContentFilterToggle(!contentFilter)}
             accessible={true}
             accessibilityRole="switch"
-            accessibilityLabel={`Content filter ${contentFilter ? 'enabled' : 'disabled'}`}
+            accessibilityLabel={t('accessibility.contentFilterSwitch', { status: contentFilter ? t('accessibility.enabled') : t('accessibility.disabled') })}
             accessibilityState={{ checked: contentFilter }}
           >
             <View style={styles.controlInfo}>
@@ -309,9 +380,9 @@ const PersonalizeScreen = ({ navigation }) => {
                 <Text style={styles.controlIcon}>🛡️</Text>
               </View>
               <View style={styles.controlTextContainer}>
-                <Text style={styles.controlLabel}>Content Filter</Text>
+                <Text style={styles.controlLabel}>{t('personalize.contentFilter')}</Text>
                 <Text style={styles.controlDescription}>
-                  Age-appropriate content only
+                  {t('personalize.contentFilterDescription')}
                 </Text>
               </View>
             </View>
@@ -328,7 +399,7 @@ const PersonalizeScreen = ({ navigation }) => {
             onPress={() => handleEnvironmentalAlertsToggle(!envAlerts)}
             accessible={true}
             accessibilityRole="switch"
-            accessibilityLabel={`Environmental alerts ${envAlerts ? 'enabled' : 'disabled'}`}
+            accessibilityLabel={t('accessibility.environmentalAlertsSwitch', { status: envAlerts ? t('accessibility.enabled') : t('accessibility.disabled') })}
             accessibilityState={{ checked: envAlerts }}
           >
             <View style={styles.controlInfo}>
@@ -336,9 +407,9 @@ const PersonalizeScreen = ({ navigation }) => {
                 <Text style={styles.controlIcon}>🌱</Text>
               </View>
               <View style={styles.controlTextContainer}>
-                <Text style={styles.controlLabel}>Environment Alerts</Text>
+                <Text style={styles.controlLabel}>{t('personalize.environmentalAlerts')}</Text>
                 <Text style={styles.controlDescription}>
-                  Air quality & safety notifications
+                  {t('personalize.environmentalAlertsDescription')}
                 </Text>
               </View>
             </View>
@@ -355,16 +426,16 @@ const PersonalizeScreen = ({ navigation }) => {
             onPress={handleThresholdPress}
             accessible={true}
             accessibilityRole="button"
-            accessibilityLabel={`Air quality threshold set to ${aqiThreshold} AQI, tap to adjust`}
+            accessibilityLabel={t('accessibility.aqiThresholdButton', { value: aqiThreshold })}
           >
             <View style={styles.controlInfo}>
               <View style={styles.controlIconContainer}>
                 <Text style={styles.controlIcon}>📊</Text>
               </View>
               <View style={styles.controlTextContainer}>
-                <Text style={styles.controlLabel}>AQI Alert Threshold</Text>
+                <Text style={styles.controlLabel}>{t('personalize.aqiThreshold')}</Text>
                 <Text style={styles.controlDescription}>
-                  Get notified when air quality exceeds this level
+                  {t('personalize.aqiThresholdDescription')}
                 </Text>
               </View>
             </View>
@@ -376,13 +447,45 @@ const PersonalizeScreen = ({ navigation }) => {
         </View>
       </View>
 
+      {/* Language Preferences Section - Two column grid with checkboxes */}
+      <View style={styles.languageSection}>
+        <Text style={styles.languageSectionTitle}>{t('personalize.languagePreferences')}</Text>
+        <View style={styles.languageGrid}>
+          {getAvailableLanguages().map((lang) => (
+            <TouchableOpacity
+              key={lang.id}
+              style={styles.languageGridItem}
+              onPress={() => handleLanguageSelect(lang.name)}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={t('accessibility.languageSelection', { language: lang.name })}
+              accessibilityState={{ selected: currentLanguage === lang.name }}
+            >
+              <View style={styles.checkboxContainer}>
+                <View style={[
+                  styles.checkbox,
+                  currentLanguage === lang.name && styles.checkboxSelected
+                ]}>
+                  {currentLanguage === lang.name && (
+                    <Text style={styles.checkboxIcon}>✓</Text>
+                  )}
+                </View>
+              </View>
+              <Text style={styles.languageText}>
+                {lang.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
         {[
-          { key: 'Home', icon: '🏠', label: 'Home', active: false },
-          { key: 'Monitor', icon: '📊', label: 'Monitor', active: false },
-          { key: 'Engage', icon: '💡', label: 'Engage', active: false },
-          { key: 'Personalize', icon: '👤', label: 'Personalize', active: true }
+          { key: 'Home', icon: '🏠', label: t('common.home'), active: false },
+          { key: 'Monitor', icon: '📊', label: t('common.monitor'), active: false },
+          { key: 'Engage', icon: '💡', label: t('common.engage'), active: false },
+          { key: 'Personalize', icon: '👤', label: t('common.personalize'), active: true }
         ].map((navItem) => (
           <TouchableOpacity
             key={navItem.key}
@@ -390,7 +493,7 @@ const PersonalizeScreen = ({ navigation }) => {
             onPress={() => handleNavigation(navItem.key)}
             accessible={true}
             accessibilityRole="button"
-            accessibilityLabel={`${navItem.label} tab${navItem.active ? ', currently selected' : ''}`}
+            accessibilityLabel={t('accessibility.tabNavigation', { label: navItem.label, active: navItem.active ? t('accessibility.currentlySelected') : '' })}
             accessibilityState={{ selected: navItem.active }}
           >
             <Text 
@@ -408,6 +511,117 @@ const PersonalizeScreen = ({ navigation }) => {
           </TouchableOpacity>
         ))}
       </View>
+
+      {/* Age Group Selection Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showAgeGroupModal}
+        onRequestClose={() => setShowAgeGroupModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>{t('personalize.selectAgeGroups')}</Text>
+              <TouchableOpacity
+                onPress={() => setShowAgeGroupModal(false)}
+                style={styles.modalCloseButton}
+              >
+                <Text style={styles.modalCloseText}>{t('common.done')}</Text>
+              </TouchableOpacity>
+            </View>
+            
+            <Text style={styles.modalSubtitle}>
+              {t('personalize.selectAgeGroupsSubtitle')}
+            </Text>
+            
+            <View style={styles.ageGroupOptions}>
+              {getAgeGroups(t).map((ageGroup) => (
+                <TouchableOpacity
+                  key={ageGroup.id}
+                  style={styles.ageGroupOption}
+                  onPress={() => handleAgeGroupToggle(ageGroup.label)}
+                >
+                  <View style={styles.ageGroupOptionContent}>
+                    <View style={[
+                      styles.ageGroupCheckbox,
+                      selectedAgeGroups.includes(ageGroup.label) && styles.ageGroupCheckboxSelected
+                    ]}>
+                      {selectedAgeGroups.includes(ageGroup.label) && (
+                        <Text style={styles.ageGroupCheckmark}>✓</Text>
+                      )}
+                    </View>
+                    <View style={styles.ageGroupInfo}>
+                      <Text style={styles.ageGroupLabel}>{ageGroup.label}</Text>
+                      <Text style={styles.ageGroupDescription}>{ageGroup.description}</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* AQI Threshold Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showThresholdModal}
+        onRequestClose={() => setShowThresholdModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <TouchableOpacity
+                onPress={() => setShowThresholdModal(false)}
+                style={styles.modalCancelButton}
+              >
+                <Text style={styles.modalCancelText}>{t('common.cancel')}</Text>
+              </TouchableOpacity>
+              <Text style={styles.modalTitle}>{t('personalize.aqiAlertThreshold')}</Text>
+              <TouchableOpacity
+                onPress={handleThresholdSave}
+                style={styles.modalSaveButton}
+              >
+                <Text style={styles.modalSaveText}>{t('common.save')}</Text>
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.thresholdContainer}>
+              <View style={styles.thresholdDisplay}>
+                <Text style={styles.thresholdDisplayValue}>{tempAqiThreshold}</Text>
+                <Text style={styles.thresholdDisplayLabel}>AQI</Text>
+              </View>
+              
+              <View style={styles.thresholdSliderContainer}>
+                <Text style={styles.thresholdSliderLabel}>Alert when AQI exceeds:</Text>
+                <Slider
+                  style={styles.thresholdSlider}
+                  minimumValue={25}
+                  maximumValue={150}
+                  value={tempAqiThreshold}
+                  onValueChange={setTempAqiThreshold}
+                  step={5}
+                  minimumTrackTintColor="#f39c12"
+                  maximumTrackTintColor="#ecf0f1"
+                  thumbStyle={styles.sliderThumb}
+                />
+                <View style={styles.thresholdLabels}>
+                  <Text style={styles.thresholdLabelText}>{t('personalize.aqiGood')}</Text>
+                  <Text style={styles.thresholdLabelText}>{t('personalize.aqiUnhealthy')}</Text>
+                </View>
+              </View>
+              
+              <Text style={styles.thresholdInfo}>
+                {tempAqiThreshold <= 50 ? t('personalize.goodAirQuality') :
+                 tempAqiThreshold <= 100 ? t('personalize.moderateAirQuality') :
+                 t('personalize.unhealthyAirQuality')}
+              </Text>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -550,9 +764,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Language section
+  // Language section - Two column grid with checkboxes
   languageSection: { 
-    marginBottom: 32 
+    marginBottom: 24,
+    paddingHorizontal: 20,
+  },
+  languageSectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#2c3e50',
+    marginBottom: 16,
   },
   languageGrid: {
     flexDirection: 'row',
@@ -560,69 +781,43 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 8,
   },
-  languageCard: {
-    width: (screenWidth - 80) / 3,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 8,
+  languageGridItem: {
+    width: (screenWidth - 64) / 2, // Explicit width calculation for 2 columns
+    flexDirection: 'row',
     alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    borderWidth: 2,
-    borderColor: '#f1f2f6',
-    position: 'relative',
-    minHeight: 70,
-  },
-  languageCardActive: {
-    borderColor: '#3498db',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
     backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+    marginBottom: 8,
   },
-  languageIconContainer: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#ecf0f1',
+  checkboxContainer: {
+    marginRight: 16,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: '#ddd',
+    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 4,
   },
-  languageIcon: { 
-    fontSize: 12 
-  },
-  languageText: {
-    fontSize: 10,
-    fontWeight: '500',
-    color: '#2c3e50',
-    textAlign: 'center',
-  },
-  languageTextActive: {
-    color: '#3498db',
-    fontWeight: '600',
-  },
-  selectedIndicator: {
-    position: 'absolute',
-    top: 4,
-    right: 4,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+  checkboxSelected: {
+    borderColor: '#3498db',
     backgroundColor: '#3498db',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
-  checkIcon: {
-    fontSize: 8,
+  checkboxIcon: {
+    fontSize: 12,
     color: '#fff',
     fontWeight: 'bold',
   },
-  selectedLanguage: {
-    marginTop: 12,
-    fontSize: 14,
-    color: '#7f8c8d',
+  languageText: {
+    fontSize: 16,
     fontWeight: '500',
+    color: '#2c3e50',
+    flex: 1,
   },
 
   // Controls section
@@ -711,6 +906,24 @@ const styles = StyleSheet.create({
     color: '#fff',
     opacity: 0.8,
   },
+  ageGroupsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  },
+  ageBadge: {
+    backgroundColor: '#9b59b6',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  ageText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#fff',
+  },
 
   // Bottom navigation
   bottomNav: {
@@ -753,6 +966,166 @@ const styles = StyleSheet.create({
     backgroundColor: '#9b59b6',
     borderRadius: 2, 
     marginTop: 5
+  },
+
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f2f6',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#2c3e50',
+  },
+  modalCloseButton: {
+    padding: 8,
+  },
+  modalCloseText: {
+    fontSize: 16,
+    color: '#3498db',
+    fontWeight: '600',
+  },
+  modalCancelButton: {
+    padding: 8,
+  },
+  modalCancelText: {
+    fontSize: 16,
+    color: '#7f8c8d',
+  },
+  modalSaveButton: {
+    padding: 8,
+  },
+  modalSaveText: {
+    fontSize: 16,
+    color: '#3498db',
+    fontWeight: '600',
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: '#7f8c8d',
+    marginTop: 10,
+    marginBottom: 20,
+  },
+
+  // Age Group Modal
+  ageGroupOptions: {
+    gap: 12,
+  },
+  ageGroupOption: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f8f9fa',
+  },
+  ageGroupOptionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  ageGroupCheckbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: '#ddd',
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  ageGroupCheckboxSelected: {
+    borderColor: '#3498db',
+    backgroundColor: '#3498db',
+  },
+  ageGroupCheckmark: {
+    fontSize: 12,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  ageGroupInfo: {
+    flex: 1,
+  },
+  ageGroupLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2c3e50',
+    marginBottom: 2,
+  },
+  ageGroupDescription: {
+    fontSize: 13,
+    color: '#7f8c8d',
+  },
+
+  // Threshold Modal
+  thresholdContainer: {
+    paddingVertical: 20,
+  },
+  thresholdDisplay: {
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  thresholdDisplayValue: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#f39c12',
+  },
+  thresholdDisplayLabel: {
+    fontSize: 16,
+    color: '#7f8c8d',
+    marginTop: 5,
+  },
+  thresholdSliderContainer: {
+    marginBottom: 20,
+  },
+  thresholdSliderLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2c3e50',
+    marginBottom: 15,
+  },
+  thresholdSlider: {
+    width: '100%',
+    height: 40,
+  },
+  sliderThumb: {
+    backgroundColor: '#f39c12',
+    width: 20,
+    height: 20,
+  },
+  thresholdLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  thresholdLabelText: {
+    fontSize: 12,
+    color: '#7f8c8d',
+  },
+  thresholdInfo: {
+    fontSize: 14,
+    color: '#34495e',
+    textAlign: 'center',
+    lineHeight: 20,
+    paddingHorizontal: 20,
+    backgroundColor: '#f8f9fa',
+    padding: 15,
+    borderRadius: 10,
   },
 });
 

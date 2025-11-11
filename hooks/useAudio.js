@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Audio } from 'expo-av';
 import { Alert, Platform } from 'react-native';
+import { logAudio, logError, logWarn } from '../utils/logger';
 
 export const useAudio = (audioUrl) => {
   const [sound, setSound] = useState(null);
@@ -28,7 +29,7 @@ export const useAudio = (audioUrl) => {
           });
         }
       } catch (error) {
-        console.warn('Failed to configure audio:', error);
+        logWarn('Failed to configure audio:', error);
       }
     };
 
@@ -54,7 +55,7 @@ export const useAudio = (audioUrl) => {
             setDuration(status.durationMillis || 0);
           }
         } catch (error) {
-          console.warn('Error getting audio status:', error);
+          logWarn('Error getting audio status:', error);
         }
       }, 100);
     }
@@ -116,7 +117,7 @@ export const useAudio = (audioUrl) => {
       setIsLoading(false);
       return newSound;
     } catch (error) {
-      console.error('Error loading audio:', error);
+      logError('Error loading audio:', error);
       setIsLoading(false);
       
       // More specific error messages for different platforms
@@ -147,11 +148,11 @@ export const useAudio = (audioUrl) => {
         }
       }
     } catch (error) {
-      console.error('Error playing/pausing audio:', error);
+      logError('Error playing/pausing audio:', error);
       
       if (Platform.OS === 'web') {
         // On web, audio often requires user interaction
-        console.log('Web audio playback - this is normal behavior');
+        logAudio('Web audio playback - this is normal behavior');
       } else {
         Alert.alert('Playback Error', 'Unable to control audio playback.');
       }
@@ -167,7 +168,7 @@ export const useAudio = (audioUrl) => {
         setPosition(0);
       }
     } catch (error) {
-      console.error('Error stopping audio:', error);
+      logError('Error stopping audio:', error);
     }
   };
 
@@ -178,7 +179,7 @@ export const useAudio = (audioUrl) => {
         setPosition(newPosition);
       }
     } catch (error) {
-      console.error('Error seeking audio:', error);
+      logError('Error seeking audio:', error);
     }
   };
 
@@ -193,7 +194,7 @@ export const useAudio = (audioUrl) => {
         await sound.setRateAsync(nextSpeed, Platform.OS !== 'web');
       }
     } catch (error) {
-      console.error('Error changing playback speed:', error);
+      logError('Error changing playback speed:', error);
     }
   };
 
@@ -214,7 +215,7 @@ export const useAudio = (audioUrl) => {
         setDuration(0);
       }
     } catch (error) {
-      console.error('Error unloading audio:', error);
+      logError('Error unloading audio:', error);
     }
   };
 

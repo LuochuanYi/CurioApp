@@ -334,19 +334,19 @@ class AlternativeTranslationService {
     
     // If translation is significantly different, it worked
     if (translated !== text && this.hasSignificantTranslation(translated)) {
-      console.log(`🈚 Pattern translation successful: "${text.substring(0, 30)}..." → "${translated.substring(0, 30)}..."`);
+      logTranslation(`🈚 Pattern translation successful: "${text.substring(0, 30)}..." → "${translated.substring(0, 30)}..."`);
       return translated;
     }
     
     // Try intelligent sentence construction for unknown content
     const smartTranslation = this.smartSentenceTranslation(text);
     if (smartTranslation !== text) {
-      console.log(`🤖 Smart translation: "${text.substring(0, 30)}..." → "${smartTranslation.substring(0, 30)}..."`);
+      logTranslation(`🤖 Smart translation: "${text.substring(0, 30)}..." → "${smartTranslation.substring(0, 30)}..."`);
       return smartTranslation;
     }
     
     // If no translation possible, return with minimal language indicator
-    console.log(`🏷️ No pattern match, returning original with context`);
+    logTranslation(`🏷️ No pattern match, returning original with context`);
     return text;  // Keep original text for readability
   }
 

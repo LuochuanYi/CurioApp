@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import * as Speech from 'expo-speech';
 import { Platform } from 'react-native';
+import { logSpeech, logError, logWarn } from '../utils/logger';
 
 // Web Speech API fallback for better browser compatibility
 const speakWithWebAPI = (text, options = {}) => {
@@ -10,7 +11,7 @@ const speakWithWebAPI = (text, options = {}) => {
       return;
     }
 
-    console.log('Creating utterance for text:', text);
+    logSpeech('Creating utterance for text:', text);
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = options.rate || 1.0;
@@ -21,7 +22,7 @@ const speakWithWebAPI = (text, options = {}) => {
     let hasCompleted = false;
 
     utterance.onend = () => {
-      console.log('Web speech completed for:', text.substring(0, 30) + '...');
+      logSpeech('Web speech completed for:', text.substring(0, 30) + '...');
       if (!hasCompleted) {
         hasCompleted = true;
         if (options.onDone) options.onDone();
@@ -30,7 +31,7 @@ const speakWithWebAPI = (text, options = {}) => {
     };
 
     utterance.onerror = (event) => {
-      console.error('Web speech error:', event.error, 'for text:', text.substring(0, 30));
+      logError('Web speech error:', event.error, 'for text:', text.substring(0, 30));
       if (!hasCompleted) {
         hasCompleted = true;
         if (options.onError) options.onError(event.error);
@@ -40,13 +41,13 @@ const speakWithWebAPI = (text, options = {}) => {
     };
 
     utterance.onstart = () => {
-      console.log('Web speech started for:', text.substring(0, 30) + '...');
+      logSpeech('Web speech started for:', text.substring(0, 30) + '...');
     };
 
     // Add a timeout as backup
     const timeout = setTimeout(() => {
       if (!hasCompleted) {
-        console.log('Speech timeout for:', text.substring(0, 30) + '...');
+        logSpeech('Speech timeout for:', text.substring(0, 30) + '...');
         hasCompleted = true;
         window.speechSynthesis.cancel();
         resolve();
@@ -57,14 +58,14 @@ const speakWithWebAPI = (text, options = {}) => {
       clearTimeout(timeout);
       if (!hasCompleted) {
         hasCompleted = true;
-        console.log('Web speech completed for:', text.substring(0, 30) + '...');
+        logSpeech('Web speech completed for:', text.substring(0, 30) + '...');
         if (options.onDone) options.onDone();
         resolve();
       }
     };
 
     // Start speaking
-    console.log('Starting speech synthesis for:', text.substring(0, 50) + '...');
+    logSpeech('Starting speech synthesis for:', text.substring(0, 50) + '...');
     window.speechSynthesis.speak(utterance);
   });
 };
@@ -83,7 +84,7 @@ export const useTextToSpeech = (storyContent) => {
   // Break story content into sentences for better progress tracking
   useEffect(() => {
     if (storyContent) {
-      console.log('Processing story content:', storyContent.substring(0, 100) + '...');
+      logSpeech('Processing story content:', storyContent.substring(0, 100) + '...');
       
       // Split by periods, exclamation marks, and question marks, but keep the punctuation
       const sentenceArray = storyContent
@@ -103,8 +104,8 @@ export const useTextToSpeech = (storyContent) => {
       setProgress(0);
       setCurrentSentence(0);
       
-      console.log('Processed into', sentenceArray.length, 'sentences');
-      console.log('First sentence:', sentenceArray[0]);
+      logSpeech('Processed into', sentenceArray.length, 'sentences');
+      logSpeech('First sentence:', sentenceArray[0]);
     }
   }, [storyContent]);
 
@@ -136,15 +137,15 @@ export const useTextToSpeech = (storyContent) => {
       // Web doesn't support quality option
     }
 
-    console.log('Speech options:', baseOptions); // Debug log
+    logSpeech('Speech options:', baseOptions); // Debug log
     return baseOptions;
   };
 
   const playStory = async () => {
     if (!storyContent || sentences.current.length === 0) {
-      console.warn('No story content available');
-      console.log('Story content:', storyContent);
-      console.log('Sentences:', sentences.current);
+      logWarn('No story content available');
+      logSpeech('Story content:', storyContent);
+      logSpeech('Sentences:', sentences.current);
       return;
     }
 
@@ -156,13 +157,13 @@ export const useTextToSpeech = (storyContent) => {
       
       // iOS-specific logging
       if (Platform.OS === 'ios') {
-        console.log('iOS detected - using simplified speech configuration for better compatibility');
+        logSpeech('iOS detected - using simplified speech configuration for better compatibility');
       }
       
       // For web platforms, check if speech synthesis is available
       if (Platform.OS === 'web') {
         if (!('speechSynthesis' in window)) {
-          console.error('Speech synthesis not supported in this browser');
+          logError('Speech synthesis not supported in this browser');
           alert('Text-to-speech is not supported in this browser. Please try Chrome, Firefox, Safari, or Edge.');
           setIsLoading(false);
           return;
@@ -171,7 +172,7 @@ export const useTextToSpeech = (storyContent) => {
         // Clear any existing speech
         window.speechSynthesis.cancel();
         
-        console.log('Starting story narration with', sentences.current.length, 'sentences');
+        logSpeech('Starting story narration with', sentences.current.length, 'sentences');
       }
       
       setIsPlaying(true);
@@ -180,7 +181,7 @@ export const useTextToSpeech = (storyContent) => {
       await speakSentences(currentSentence);
       
     } catch (error) {
-      console.error('Error starting text-to-speech:', error);
+      logError('Error starting text-to-speech:', error);
       setIsPlaying(false);
     } finally {
       setIsLoading(false);
@@ -191,7 +192,7 @@ export const useTextToSpeech = (storyContent) => {
     for (let i = startIndex; i < sentences.current.length; i++) {
       // Check cancellation flag first
       if (isCancelled.current) {
-        console.log('Speech cancelled, stopping at sentence', i);
+        logSpeech('Speech cancelled, stopping at sentence', i);
         break;
       }
       
@@ -203,26 +204,26 @@ export const useTextToSpeech = (storyContent) => {
       const sentence = sentences.current[i];
       const options = getSpeechOptions();
       
-      console.log('Speaking sentence', i + 1, 'of', sentences.current.length + ':', sentence);
+      logSpeech('Speaking sentence', i + 1, 'of', sentences.current.length + ':', sentence);
       
       try {
         // Use different speech methods based on platform
         if (Platform.OS === 'web') {
           // Use Web Speech API directly for better web compatibility
-          console.log('Using Web Speech API for:', sentence.substring(0, 50) + '...');
+          logSpeech('Using Web Speech API for:', sentence.substring(0, 50) + '...');
           await speakWithWebAPI(sentence, {
             ...options,
             onDone: () => {
-              console.log('Web speech completed for sentence', i + 1);
+              logSpeech('Web speech completed for sentence', i + 1);
             },
             onError: (error) => {
-              console.error('Web speech error for sentence', i + 1, ':', error);
+              logError('Web speech error for sentence', i + 1, ':', error);
             }
           });
         } else {
           // Use Expo Speech for native platforms
-          console.log('Using Expo Speech for', Platform.OS + ':', sentence.substring(0, 50) + '...');
-          console.log('Speech options:', JSON.stringify(options, null, 2));
+          logSpeech('Using Expo Speech for', Platform.OS + ':', sentence.substring(0, 50) + '...');
+          logSpeech('Speech options:', JSON.stringify(options, null, 2));
           
           await new Promise((resolve, reject) => {
             // Longer timeout for iOS speech synthesis
@@ -231,7 +232,7 @@ export const useTextToSpeech = (storyContent) => {
               : Math.max(sentence.length * 100, 2000); // Android: standard timeout
               
             const timeoutId = setTimeout(() => {
-              console.log('Speech timeout for', Platform.OS + ', continuing to next sentence');
+              logSpeech('Speech timeout for', Platform.OS + ', continuing to next sentence');
               resolve();
             }, timeoutDuration);
             
@@ -239,36 +240,36 @@ export const useTextToSpeech = (storyContent) => {
               ...options,
               onDone: () => {
                 clearTimeout(timeoutId);
-                console.log('Speech completed for:', sentence.substring(0, 30) + '...');
+                logSpeech('Speech completed for:', sentence.substring(0, 30) + '...');
                 resolve();
               },
               onError: (error) => {
                 clearTimeout(timeoutId);
-                console.error('Speech error for', Platform.OS + ':', error);
+                logError('Speech error for', Platform.OS + ':', error);
                 if (Platform.OS === 'ios') {
-                  console.log('iOS speech error - this might be due to audio session or permissions');
+                  logSpeech('iOS speech error - this might be due to audio session or permissions');
                 }
                 resolve();
               },
               onStopped: () => {
                 clearTimeout(timeoutId);
-                console.log('Speech stopped');
+                logSpeech('Speech stopped');
                 resolve();
               },
               onStart: () => {
-                console.log('Speech started for', Platform.OS + ':', sentence.substring(0, 30) + '...');
+                logSpeech('Speech started for', Platform.OS + ':', sentence.substring(0, 30) + '...');
               }
             });
           });
         }
       } catch (error) {
-        console.error('Error in speakSentences:', error);
+        logError('Error in speakSentences:', error);
         // Continue to next sentence even if this one fails
       }
 
       // Check if cancelled after sentence completes
       if (isCancelled.current) {
-        console.log('Speech cancelled after sentence completion, stopping...');
+        logSpeech('Speech cancelled after sentence completion, stopping...');
         break;
       }
 
@@ -297,9 +298,9 @@ export const useTextToSpeech = (storyContent) => {
         await Speech.stop();
       }
       setIsPlaying(false);
-      console.log('Speech paused and cancelled');
+      logSpeech('Speech paused and cancelled');
     } catch (error) {
-      console.error('Error pausing speech:', error);
+      logError('Error pausing speech:', error);
     }
   };
 
@@ -316,9 +317,9 @@ export const useTextToSpeech = (storyContent) => {
       setIsPlaying(false);
       setCurrentSentence(0);
       setProgress(0);
-      console.log('Speech stopped and cancelled');
+      logSpeech('Speech stopped and cancelled');
     } catch (error) {
-      console.error('Error stopping speech:', error);
+      logError('Error stopping speech:', error);
     }
   };
 

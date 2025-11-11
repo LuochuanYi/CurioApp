@@ -6,8 +6,8 @@
 
 This document provides a detailed technical architecture overview of CurioApp, focusing on system design, data flow, component architecture, and implementation patterns. It serves as a reference for developers, architects, and technical stakeholders.
 
-**Version**: 1.0.0  
-**Last Updated**: November 2025  
+**Version**: 1.4.0  
+**Last Updated**: November 11, 2025  
 **Audience**: Technical Team, Architects, DevOps Engineers  
 
 ---
@@ -1517,6 +1517,6 @@ eventBus.subscribe('language_changed', async (event) => {
 
 *This architecture documentation serves as a comprehensive guide for understanding CurioApp's technical implementation. For specific implementation details, refer to the source code and additional documentation files.*
 
-**Last Updated**: November 2025  
-**Version**: 1.0.0  
+**Last Updated**: November 11, 2025  
+**Version**: 1.4.0 - Stable Logging  
 **Maintainers**: Technical Architecture Team

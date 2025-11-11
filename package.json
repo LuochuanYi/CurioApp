@@ -1,6 +1,6 @@
 {
-  "name": "CurioApp",
-  "version": "0.0.1",
+  "name": "curio-app",
+  "version": "1.4.0",
   "private": true,
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {

@@ -12,6 +12,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { DIFFICULTY_LEVELS } from '../data/learningCategories';
 import { useDynamicTranslation } from '../hooks/useDynamicTranslation';
+import { logNavigation, logTranslation, logError, logInfo } from '../utils/logger';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -50,26 +51,26 @@ const ActivityDetailScreen = ({ route, navigation }) => {
   }, [completedSteps, displayContent.instructions.length]);
 
   const handleBackPress = () => {
-    console.log('handleBackPress called, isStarted:', isStarted);
-    console.log('Current navigation state:', navigation.getState?.());
+    logNavigation('handleBackPress called, isStarted:', isStarted);
+    logNavigation('Current navigation state:', navigation.getState?.());
     
     const navigateBack = () => {
-      console.log('Attempting to navigate back...');
-      console.log('Available navigation methods:', Object.keys(navigation));
+      logNavigation('Attempting to navigate back...');
+      logNavigation('Available navigation methods:', Object.keys(navigation));
       
       try {
         // Try multiple navigation methods in order of preference
         if (navigation.canGoBack && navigation.canGoBack()) {
-          console.log('Can go back is true, using goBack()');
+          logNavigation('Can go back is true, using goBack()');
           navigation.goBack();
         } else if (navigation.pop) {
-          console.log('Using navigation.pop()');
+          logNavigation('Using navigation.pop()');
           navigation.pop();
         } else if (navigation.navigate && categoryId) {
-          console.log('Using navigation.navigate() to CategoryDetail');
+          logNavigation('Using navigation.navigate() to CategoryDetail');
           navigation.navigate('CategoryDetail', { categoryId });
         } else if (navigation.reset) {
-          console.log('Using navigation.reset() to go to CategoryDetail');
+          logNavigation('Using navigation.reset() to go to CategoryDetail');
           navigation.reset({
             index: 1,
             routes: [
@@ -78,17 +79,17 @@ const ActivityDetailScreen = ({ route, navigation }) => {
             ],
           });
         } else {
-          console.error('No working navigation method found');
+          logError('No working navigation method found');
           // Last resort: try to navigate to Engage screen
           navigation.navigate?.('Engage');
         }
       } catch (error) {
-        console.error('Navigation error:', error);
+        logError('Navigation error:', error);
         // Fallback to Engage screen
         try {
           navigation.navigate('Engage');
         } catch (fallbackError) {
-          console.error('Fallback navigation failed:', fallbackError);
+          logError('Fallback navigation failed:', fallbackError);
           Alert.alert('Navigation Error', 'Unable to navigate back. Please restart the app.');
         }
       }
@@ -104,7 +105,7 @@ const ActivityDetailScreen = ({ route, navigation }) => {
             text: translateText('Leave'), 
             style: 'destructive', 
             onPress: () => {
-              console.log('User confirmed leaving activity');
+              logNavigation('User confirmed leaving activity');
               navigateBack();
             }
           }
@@ -112,7 +113,7 @@ const ActivityDetailScreen = ({ route, navigation }) => {
         { cancelable: true }
       );
     } else {
-      console.log('Activity not started, navigating back immediately');
+      logNavigation('Activity not started, navigating back immediately');
       navigateBack();
     }
   };
@@ -166,7 +167,7 @@ const ActivityDetailScreen = ({ route, navigation }) => {
       // Perform fresh translation
       setIsTranslating(true);
       try {
-        console.log('Starting translation for activity:', activity?.title);
+        logTranslation('Starting translation for activity:', activity?.title);
         
         // Skip translation if target is English
         if (currentLanguage === 'en' || currentLanguage === 'English') {
@@ -228,9 +229,9 @@ const ActivityDetailScreen = ({ route, navigation }) => {
         }));
         
         setIsTranslationEnabled(true);
-        console.log('Translation completed successfully');
+        logTranslation('Translation completed successfully');
       } catch (error) {
-        console.error('Translation error:', error);
+        logError('Translation error:', error);
         alert(`Translation failed: ${error.message}. Please try again.`);
       } finally {
         setIsTranslating(false);
@@ -475,14 +476,14 @@ const ActivityDetailScreen = ({ route, navigation }) => {
         <TouchableOpacity 
           style={styles.backButton} 
           onPress={() => {
-            console.log('Original back button pressed!');
-            console.log('isStarted:', isStarted);
+            logNavigation('Original back button pressed!');
+            logNavigation('isStarted:', isStarted);
             
             if (isStarted) {
-              console.log('Activity started, showing custom confirmation');
+              logNavigation('Activity started, showing custom confirmation');
               setShowExitConfirm(true);
             } else {
-              console.log('Activity not started, navigating back directly');
+              logNavigation('Activity not started, navigating back directly');
               if (navigation?.goBack) {
                 navigation.goBack();
               } else {
@@ -584,7 +585,7 @@ const ActivityDetailScreen = ({ route, navigation }) => {
               <TouchableOpacity
                 style={[styles.confirmButton, styles.cancelButton]}
                 onPress={() => {
-                  console.log('User cancelled exit');
+                  logNavigation('User cancelled exit');
                   setShowExitConfirm(false);
                 }}
               >
@@ -593,7 +594,7 @@ const ActivityDetailScreen = ({ route, navigation }) => {
               <TouchableOpacity
                 style={[styles.confirmButton, styles.leaveButton]}
                 onPress={() => {
-                  console.log('User confirmed exit, navigating back...');
+                  logNavigation('User confirmed exit, navigating back...');
                   setShowExitConfirm(false);
                   if (navigation?.goBack) {
                     navigation.goBack();

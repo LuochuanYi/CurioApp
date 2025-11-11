@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useTextToSpeech } from '../hooks/useTextToSpeech';
 import { getStoryById, STORY_CATEGORIES } from '../data/stories';
 import { useDynamicTranslation, useTranslatedText } from '../hooks/useDynamicTranslation';
+import { logTranslation, logError, logInfo } from '../utils/logger';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -113,13 +114,13 @@ const StoryDetailScreen = ({ navigation, route }) => {
         // Perform fresh translation
         setIsTranslating(true);
         try {
-          console.log('Starting translation for story:', data?.title);
-          console.log('Current language from i18n:', currentLanguage);
-          console.log('Translation service function:', typeof translateService);
+          logTranslation('Starting translation for story:', data?.title);
+          logTranslation('Current language from i18n:', currentLanguage);
+          logTranslation('Translation service function:', typeof translateService);
           
           // Check if we need to translate (don't translate if target is English)
           if (currentLanguage === 'en' || currentLanguage === 'English') {
-            console.log('Target language is English, no translation needed');
+            logTranslation('Target language is English, no translation needed');
             // Just use the original content
             const translations = {
               title: data?.title || '',
@@ -137,7 +138,7 @@ const StoryDetailScreen = ({ navigation, route }) => {
             }));
             
             setIsTranslationEnabled(true);
-            console.log('Translation completed (no-op for English)');
+            logTranslation('Translation completed (no-op for English)');
             return;
           }
           
@@ -145,29 +146,29 @@ const StoryDetailScreen = ({ navigation, route }) => {
           const translations = {};
           
           if (data?.title) {
-            console.log('Translating title:', data.title);
+            logTranslation('Translating title:', data.title.substring(0, 50));
             translations.title = await translateService(data.title);
-            console.log('Title translated to:', translations.title);
+            logTranslation('Title translated successfully');
           }
           if (data?.content) {
-            console.log('Translating content...');
+            logTranslation('Translating content (length:', data.content.length, 'chars)');
             translations.content = await translateService(data.content);
-            console.log('Content translated successfully');
+            logTranslation('Content translated successfully');
           }
           if (data?.moral) {
-            console.log('Translating moral...');
+            logTranslation('Translating moral...');
             translations.moral = await translateService(data.moral);
           }
           if (data?.categoryName) {
-            console.log('Translating category...');
+            logTranslation('Translating category:', data.categoryName);
             translations.categoryName = await translateService(data.categoryName);
           }
           if (data?.previousStory?.title) {
-            console.log('Translating previous story title...');
+            logTranslation('Translating previous story title...');
             translations.prevTitle = await translateService(data.previousStory.title);
           }
           if (data?.nextStory?.title) {
-            console.log('Translating next story title...');
+            logTranslation('Translating next story title...');
             translations.nextTitle = await translateService(data.nextStory.title);
           }
           
@@ -178,12 +179,11 @@ const StoryDetailScreen = ({ navigation, route }) => {
           }));
           
           setIsTranslationEnabled(true);
-          console.log('Translation completed successfully');
+          logTranslation('Translation completed successfully');
         } catch (error) {
-          console.error('Translation error:', error);
-          console.error('Error details:', {
+          logError('Translation error:', error);
+          logError('Error details:', {
             message: error.message,
-            stack: error.stack,
             currentLanguage,
             dataKeys: data ? Object.keys(data) : 'no data',
             storyTitle: data?.title

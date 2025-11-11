@@ -132,6 +132,8 @@ export const logDebug = (...args) => logger.debug(...args);
 export const logTranslation = (...args) => logger.translation(...args);
 export const logAudio = (...args) => logger.audio(...args);
 export const logNavigation = (...args) => logger.navigation(...args);
+export const logSpeech = (...args) => logger.audio(...args); // Speech logs use audio category
+export const logSettings = (...args) => logger.info(...args); // Settings logs use info category
 export const logPerformance = (label, fn) => logger.performance(label, fn);
 
 // Quick configuration helpers

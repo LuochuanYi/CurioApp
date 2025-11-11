@@ -4,6 +4,7 @@ import Slider from '@react-native-community/slider';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../contexts/LanguageContext';
 import { CurioHeader, CurioCard, CurioButton, CurioMascot, CURIO_THEME, TEXT_STYLES } from '../components';
+import { logInfo, logError, logSettings } from '../utils/logger';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -127,10 +128,10 @@ const PersonalizeScreen = ({ navigation }) => {
   };
 
   const handleLanguageSelect = async (language) => {
-    console.log(`Language changing to: ${language}`);
+    logSettings(`Language changing to: ${language}`);
     const success = await setLanguage(language);
     if (success) {
-      console.log('Language changed successfully to:', language);
+      logSettings('Language changed successfully to:', language);
       // Update age groups to new language
       const currentAgeGroups = selectedAgeGroups.map(group => {
         // Convert back to English keys first, then to new language
@@ -141,24 +142,24 @@ const PersonalizeScreen = ({ navigation }) => {
       });
       setSelectedAgeGroups(currentAgeGroups);
     } else {
-      console.error('Failed to change language');
+      logError('Failed to change language');
     }
   };
 
   const handleRoutineEdit = (routine) => {
-    console.log(`Edit routine: ${routine.label}`);
+    logSettings(`Edit routine: ${routine.label}`);
     // In real app: navigation?.navigate('RoutineEditor', { routine })
   };
 
   const handleContentFilterToggle = (value) => {
     setContentFilter(value);
-    console.log(`Content filter: ${value ? 'enabled' : 'disabled'}`);
+    logSettings(`Content filter: ${value ? 'enabled' : 'disabled'}`);
     // In real app: API call to save preference
   };
 
   const handleEnvironmentalAlertsToggle = (value) => {
     setEnvAlerts(value);
-    console.log(`Environmental alerts: ${value ? 'enabled' : 'disabled'}`);
+    logSettings(`Environmental alerts: ${value ? 'enabled' : 'disabled'}`);
     // In real app: API call to save preference
   };
 
@@ -188,7 +189,7 @@ const PersonalizeScreen = ({ navigation }) => {
   const handleThresholdSave = () => {
     setAqiThreshold(tempAqiThreshold);
     setShowThresholdModal(false);
-    console.log(`AQI threshold updated to: ${tempAqiThreshold}`);
+    logSettings(`AQI threshold updated to: ${tempAqiThreshold}`);
   };
 
   return (

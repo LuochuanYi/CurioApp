@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { getSongById, SONG_DIFFICULTIES, SONG_CATEGORIES } from '../data/songs';
 import { useMusicPlayer } from '../hooks/useMusicPlayer';
 import { useDynamicTranslation } from '../hooks/useDynamicTranslation';
+import { logAudio, logTranslation, logError, logInfo } from '../utils/logger';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -100,22 +101,22 @@ const SongPlayerScreen = ({ route, navigation }) => {
   }, [practiceMode]);
 
   const handlePlayPause = () => {
-    console.log('🎵 Play button clicked');
-    console.log('  - Current playing state:', musicPlayer.isPlaying);
-    console.log('  - Current paused state:', musicPlayer.isPaused);
-    console.log('  - Narration enabled:', narrationEnabled);
-    console.log('  - Background music enabled:', musicPlayer.backgroundMusicEnabled);
-    console.log('  - Song has audioFile:', !!song?.audioFile);
+    logAudio('🎵 Play button clicked');
+    logAudio('  - Current playing state:', musicPlayer.isPlaying);
+    logAudio('  - Current paused state:', musicPlayer.isPaused);
+    logAudio('  - Narration enabled:', narrationEnabled);
+    logAudio('  - Background music enabled:', musicPlayer.backgroundMusicEnabled);
+    logAudio('  - Song has audioFile:', !!song?.audioFile);
     
     if (musicPlayer.isPlaying) {
-      console.log('🔇 Pausing playback');
+      logAudio('🔇 Pausing playback');
       musicPlayer.pause();
     } else if (musicPlayer.isPaused) {
-      console.log('▶️ Resuming playback');
+      logAudio('▶️ Resuming playback');
       musicPlayer.resume();
     } else {
       // Start playback - can be music-only or with narration
-      console.log('🎵 Starting new playback with narration:', narrationEnabled);
+      logAudio('🎵 Starting new playback with narration:', narrationEnabled);
       musicPlayer.play(narrationEnabled);
     }
   };
@@ -155,12 +156,12 @@ const SongPlayerScreen = ({ route, navigation }) => {
       // Perform fresh translation
       setIsTranslating(true);
       try {
-        console.log('Starting translation for song:', song?.title);
-        console.log('Current language from i18n:', currentLanguage);
+        logTranslation('Starting translation for song:', song?.title);
+        logTranslation('Current language from i18n:', currentLanguage);
         
         // Skip translation if target is English
         if (currentLanguage === 'en' || currentLanguage === 'English') {
-          console.log('Target language is English, no translation needed');
+          logTranslation('Target language is English, no translation needed');
           const translations = {
             title: song?.title || '',
             description: song?.description || '',
@@ -174,7 +175,7 @@ const SongPlayerScreen = ({ route, navigation }) => {
           }));
           
           setIsTranslationEnabled(true);
-          console.log('Translation completed (no-op for English)');
+          logTranslation('Translation completed (no-op for English)');
           return;
         }
         
@@ -182,25 +183,25 @@ const SongPlayerScreen = ({ route, navigation }) => {
         const translations = {};
         
         if (song?.title) {
-          console.log('Translating title:', song.title);
+          logTranslation('Translating title:', song.title);
           translations.title = await translateService(song.title);
-          console.log('Title translated to:', translations.title);
+          logTranslation('Title translated to:', translations.title);
         }
         
         if (song?.description) {
-          console.log('Translating description...');
+          logTranslation('Translating description...');
           translations.description = await translateService(song.description);
         }
         
         if (song?.learningGoals) {
-          console.log('Translating learning goals...');
+          logTranslation('Translating learning goals...');
           translations.learningGoals = await Promise.all(
             song.learningGoals.map(goal => translateService(goal))
           );
         }
         
         if (song?.lyrics) {
-          console.log('Translating lyrics...');
+          logTranslation('Translating lyrics...');
           translations.lyrics = await Promise.all(
             song.lyrics.map(async (lyricObj) => ({
               ...lyricObj,
@@ -223,10 +224,10 @@ const SongPlayerScreen = ({ route, navigation }) => {
         }));
         
         setIsTranslationEnabled(true);
-        console.log('Translation completed successfully');
+        logTranslation('Translation completed successfully');
       } catch (error) {
-        console.error('Translation error:', error);
-        console.error('Error details:', {
+        logError('Translation error:', error);
+        logError('Error details:', {
           message: error.message,
           stack: error.stack,
           currentLanguage,

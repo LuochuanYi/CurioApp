@@ -23,4 +23,18 @@ config.server = {
   },
 };
 
+// Performance optimization: Remove console logs in production builds
+config.transformer = {
+  ...config.transformer,
+  minifierConfig: {
+    mangle: {
+      reserved: ['translation', 'i18n', 'locale', 'logger']
+    },
+    compress: {
+      drop_console: process.env.NODE_ENV === 'production', // Remove console logs in production
+      pure_funcs: process.env.NODE_ENV === 'production' ? ['console.log', 'console.info', 'console.debug'] : []
+    }
+  }
+};
+
 module.exports = config;

@@ -8,12 +8,13 @@
 2. [Architecture Deep Dive](#architecture-deep-dive)
 3. [Static Translation System](#static-translation-system)
 4. [Dynamic Translation Service](#dynamic-translation-service)
-5. [Implementation Details](#implementation-details)
-6. [Performance Optimization](#performance-optimization)
-7. [API Integration](#api-integration)
-8. [Troubleshooting Guide](#troubleshooting-guide)
-9. [Best Practices](#best-practices)
-10. [Extending the System](#extending-the-system)
+5. [On-Demand Translation Toggle](#on-demand-translation-toggle)
+6. [Implementation Details](#implementation-details)
+7. [Performance Optimization](#performance-optimization)
+8. [API Integration](#api-integration)
+9. [Troubleshooting Guide](#troubleshooting-guide)
+10. [Best Practices](#best-practices)
+11. [Extending the System](#extending-the-system)
 
 ---
 
@@ -31,6 +32,7 @@ CurioApp implements a **dual-layer translation architecture** that combines:
 ✅ **Scalability**: Easy addition of new languages without content duplication  
 ✅ **Reliability**: Graceful fallbacks ensure app functionality in all scenarios  
 ✅ **Cost Efficiency**: Smart caching minimizes translation API usage  
+✅ **On-Demand Control**: User-initiated translation toggle for optimal UX and performance  
 
 ---
 
@@ -44,23 +46,27 @@ graph TB
     B --> C{Content Type Decision}
     
     C -->|UI Elements| D[i18next Static Translations]
-    C -->|Dynamic Content| E[Translation Service]
+    C -->|Dynamic Content| E{Translation Toggle}
     
     D --> F[Static Translation Files]
     F --> G[Rendered UI]
     
-    E --> H[Cache Manager]
-    H --> I{Cache Hit?}
-    I -->|Yes| J[Return Cached Translation]
-    I -->|No| K[Translation API Provider]
+    E -->|User Enabled| H[Translation Service]
+    E -->|User Disabled| P[Original Content]
     
-    K --> L[Mock API / Google / Azure / AWS]
-    L --> M[Update Cache]
-    M --> J
-    J --> N[Rendered Content]
+    H --> I[Cache Manager]
+    I --> J{Cache Hit?}
+    J -->|Yes| K[Return Cached Translation]
+    J -->|No| L[Translation API Provider]
     
-    B --> O[Language Persistence]
-    O --> P[AsyncStorage]
+    L --> M[Mock API / Google / Azure / AWS]
+    M --> N[Update Cache]
+    N --> K
+    K --> O[Rendered Translated Content]
+    P --> Q[Rendered Original Content]
+    
+    B --> R[Language Persistence]
+    R --> S[AsyncStorage]
 ```
 
 ### Data Flow Architecture
@@ -369,7 +375,450 @@ export const useTranslatedText = (text) => {
 
 ---
 
-## 🔧 Implementation Details
+## � On-Demand Translation Toggle
+
+### Overview
+
+The **On-Demand Translation Toggle** system provides users with explicit control over content translation. Instead of automatic translation that may impact performance, users can choose when to translate content through an intuitive toggle interface.
+
+### Key Benefits
+
+🎯 **User Control**: Users decide when translation is needed  
+⚡ **Performance**: No background translation overhead  
+💾 **Efficiency**: Translations cached for repeated use  
+🔄 **Flexibility**: Easy toggle between original and translated content  
+📱 **UX Excellence**: Clear visual states and loading indicators  
+
+### Architecture
+
+```mermaid
+graph TD
+    A[User Clicks Toggle] --> B{Translation Enabled?}
+    
+    B -->|No| C[Check Cache]
+    C --> D{Cache Hit?}
+    D -->|Yes| E[Use Cached Translation]
+    D -->|No| F[Call Translation Service]
+    
+    F --> G[Translate All Content]
+    G --> H[Update Cache]
+    H --> I[Enable Translation State]
+    
+    B -->|Yes| J[Disable Translation]
+    J --> K[Show Original Content]
+    
+    E --> I
+    I --> L[Render Translated Content]
+    K --> M[Render Original Content]
+```
+
+### Implementation
+
+#### Toggle State Management
+
+```javascript
+// StoryDetailScreen.js
+const StoryDetailScreen = ({ navigation, route }) => {
+  const { story } = route.params || {};
+  const { data, loading } = useStoryDetail(story?.id);
+  
+  // Translation toggle state
+  const [isTranslationEnabled, setIsTranslationEnabled] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [translationCache, setTranslationCache] = useState({});
+  
+  // Get current language for caching
+  const { i18n } = useTranslation();
+  const currentLanguage = i18n.language || 'en';
+  
+  // Import translation service for on-demand use
+  const { translateContent: translateService } = useDynamicTranslation();
+}
+```
+
+#### Toggle Handler Implementation
+
+```javascript
+const handleTranslationToggle = async () => {
+  if (!isTranslationEnabled) {
+    // Enabling translation - check cache first
+    const cacheKey = `${data?.id}_${currentLanguage}`;
+    if (translationCache[cacheKey]) {
+      // Use cached translation
+      setIsTranslationEnabled(true);
+      return;
+    }
+    
+    // Perform fresh translation
+    setIsTranslating(true);
+    try {
+      console.log('Starting translation for story:', data?.title);
+      
+      // Skip translation if target is English
+      if (currentLanguage === 'en' || currentLanguage === 'English') {
+        const translations = {
+          title: data?.title || '',
+          content: data?.content || '',
+          moral: data?.moral || '',
+          categoryName: data?.categoryName || '',
+          prevTitle: data?.previousStory?.title || '',
+          nextTitle: data?.nextStory?.title || '',
+        };
+        
+        setTranslationCache(prev => ({
+          ...prev,
+          [cacheKey]: translations
+        }));
+        setIsTranslationEnabled(true);
+        return;
+      }
+      
+      // Translate all content pieces
+      const translations = {};
+      
+      if (data?.title) {
+        translations.title = await translateService(data.title);
+      }
+      if (data?.content) {
+        translations.content = await translateService(data.content);
+      }
+      if (data?.moral) {
+        translations.moral = await translateService(data.moral);
+      }
+      if (data?.categoryName) {
+        translations.categoryName = await translateService(data.categoryName);
+      }
+      if (data?.previousStory?.title) {
+        translations.prevTitle = await translateService(data.previousStory.title);
+      }
+      if (data?.nextStory?.title) {
+        translations.nextTitle = await translateService(data.nextStory.title);
+      }
+      
+      // Cache the translations
+      setTranslationCache(prev => ({
+        ...prev,
+        [cacheKey]: translations
+      }));
+      
+      setIsTranslationEnabled(true);
+      console.log('Translation completed successfully');
+    } catch (error) {
+      console.error('Translation error:', error);
+      alert(`Translation failed: ${error.message}. Please try again.`);
+    } finally {
+      setIsTranslating(false);
+    }
+  } else {
+    // Disabling translation - show original content
+    setIsTranslationEnabled(false);
+  }
+};
+```
+
+#### Content Display Logic
+
+```javascript
+// Get display content based on translation state
+const getDisplayContent = () => {
+  if (!isTranslationEnabled) {
+    return {
+      title: data?.title || '',
+      content: data?.content || '',
+      moral: data?.moral || '',
+      categoryName: data?.categoryName || '',
+      prevTitle: data?.previousStory?.title || '',
+      nextTitle: data?.nextStory?.title || '',
+      currentText: getCurrentText?.() || '',
+    };
+  }
+  
+  // Use cached translations when available
+  const cacheKey = `${data?.id}_${currentLanguage}`;
+  const cached = translationCache[cacheKey] || {};
+  
+  return {
+    title: cached.title || data?.title || '',
+    content: cached.content || data?.content || '',
+    moral: cached.moral || data?.moral || '',
+    categoryName: cached.categoryName || data?.categoryName || '',
+    prevTitle: cached.prevTitle || data?.previousStory?.title || '',
+    nextTitle: cached.nextTitle || data?.nextStory?.title || '',
+    currentText: getCurrentText?.() || '',
+  };
+};
+
+const displayContent = getDisplayContent();
+```
+
+#### UI Implementation
+
+```javascript
+// Translation Toggle Button
+const renderTranslationToggle = () => (
+  <View style={styles.translationToggleContainer}>
+    <TouchableOpacity
+      style={[
+        styles.translationToggle,
+        isTranslationEnabled && styles.translationToggleActive
+      ]}
+      onPress={handleTranslationToggle}
+      disabled={isTranslating}
+    >
+      <Icon 
+        name={isTranslating ? "hourglass-outline" : "language-outline"} 
+        size={16} 
+        color={isTranslationEnabled ? "#FFFFFF" : "#007AFF"} 
+        style={styles.toggleIcon}
+      />
+      <Text style={[
+        styles.translationToggleText,
+        isTranslationEnabled && styles.translationToggleTextActive
+      ]}>
+        {isTranslating 
+          ? "Translating..." 
+          : isTranslationEnabled 
+            ? "Show Original" 
+            : "Translate Story"
+        }
+      </Text>
+    </TouchableOpacity>
+    
+    {/* Language indicator */}
+    {isTranslationEnabled && (
+      <View style={styles.languageIndicator}>
+        <Text style={styles.languageText}>
+          Translated to {currentLanguage.toUpperCase()}
+        </Text>
+      </View>
+    )}
+  </View>
+);
+```
+
+#### Styling
+
+```javascript
+const styles = StyleSheet.create({
+  translationToggleContainer: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  
+  translationToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0F9FF',
+    borderColor: '#007AFF',
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    minWidth: 140,
+    justifyContent: 'center',
+  },
+  
+  translationToggleActive: {
+    backgroundColor: '#007AFF',
+    borderColor: '#007AFF',
+  },
+  
+  toggleIcon: {
+    marginRight: 6,
+  },
+  
+  translationToggleText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#007AFF',
+  },
+  
+  translationToggleTextActive: {
+    color: '#FFFFFF',
+  },
+  
+  languageIndicator: {
+    marginTop: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    backgroundColor: '#E8F5E8',
+    borderRadius: 10,
+  },
+  
+  languageText: {
+    fontSize: 11,
+    color: '#4A90E2',
+    fontWeight: '500',
+  },
+});
+```
+
+### Integration with Text-to-Speech
+
+```javascript
+// Dynamic content for TTS based on toggle state
+const contentForSpeech = isTranslationEnabled && translationCache[`${data?.id}_${currentLanguage}`]?.content
+  ? translationCache[`${data?.id}_${currentLanguage}`].content 
+  : data?.content;
+
+const {
+  isPlaying,
+  playPause,
+  stopStory,
+  // ... other TTS functions
+} = useTextToSpeech(contentForSpeech);
+
+// Stop TTS when toggling translation mode
+const handleTranslationToggle = async () => {
+  // ... existing toggle logic
+  
+  if (isTranslationEnabled && isPlaying) {
+    stopStory(); // Stop current audio when switching modes
+  }
+  
+  // ... rest of toggle logic
+};
+```
+
+### Caching Strategy
+
+```javascript
+// Cache key format: storyId_languageCode
+const generateCacheKey = (storyId, languageCode) => `${storyId}_${languageCode}`;
+
+// Cache structure
+const translationCache = {
+  "story_123_zh": {
+    title: "三只小猪",
+    content: "从前，有三只小猪...",
+    moral: "勤劳和智慧...",
+    categoryName: "经典故事",
+    prevTitle: "金发姑娘",
+    nextTitle: "小红帽",
+    timestamp: 1699636800000
+  },
+  "story_123_fr": {
+    title: "Les Trois Petits Cochons",
+    content: "Il était une fois, trois petits cochons...",
+    // ... other translations
+  }
+};
+
+// Cache cleanup (optional - based on TTL or storage limits)
+const cleanupCache = () => {
+  const now = Date.now();
+  const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+  
+  Object.keys(translationCache).forEach(key => {
+    const cached = translationCache[key];
+    if (cached.timestamp && (now - cached.timestamp) > maxAge) {
+      delete translationCache[key];
+    }
+  });
+};
+```
+
+### Error Handling
+
+```javascript
+const handleTranslationToggle = async () => {
+  // ... existing logic
+  
+  try {
+    // ... translation logic
+  } catch (error) {
+    console.error('Translation error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      currentLanguage,
+      dataKeys: data ? Object.keys(data) : 'no data',
+      storyTitle: data?.title
+    });
+    
+    // User-friendly error message
+    alert(`Translation failed: ${error.message}. Please try again.`);
+    
+    // Reset states on error
+    setIsTranslationEnabled(false);
+  } finally {
+    setIsTranslating(false);
+  }
+};
+```
+
+### Testing the Toggle System
+
+#### Manual Testing Checklist
+
+- [ ] **Initial State**: Button shows "Translate Story" 
+- [ ] **Loading State**: Button shows "Translating..." with disabled state
+- [ ] **Success State**: Button shows "Show Original" and content is translated
+- [ ] **Toggle Back**: Clicking "Show Original" returns to original content
+- [ ] **Cache Test**: Re-toggling translation uses cached results (faster)
+- [ ] **Error Handling**: Invalid translations show error message
+- [ ] **Language Change**: Cache keys work correctly for different languages
+- [ ] **TTS Integration**: Audio stops/updates when toggling translation
+
+#### Unit Tests
+
+```javascript
+describe('Translation Toggle', () => {
+  test('should cache translations correctly', async () => {
+    const { result } = renderHook(() => useTranslationToggle());
+    
+    await act(async () => {
+      await result.current.handleTranslationToggle();
+    });
+    
+    expect(result.current.translationCache).toHaveProperty('story_123_zh');
+  });
+  
+  test('should handle translation errors gracefully', async () => {
+    jest.spyOn(translationService, 'translateContent')
+        .mockRejectedValue(new Error('API Error'));
+    
+    const { result } = renderHook(() => useTranslationToggle());
+    
+    await act(async () => {
+      await result.current.handleTranslationToggle();
+    });
+    
+    expect(result.current.isTranslationEnabled).toBe(false);
+  });
+});
+```
+
+### Performance Considerations
+
+#### Memory Management
+- **Cache Size**: Limit cache to prevent memory bloat
+- **Cleanup**: Implement TTL-based cache cleanup
+- **Lazy Loading**: Only translate content when explicitly requested
+
+#### Network Optimization  
+- **Batch Translation**: Translate all content fields in parallel
+- **Error Recovery**: Implement retry logic with exponential backoff
+- **Offline Handling**: Graceful degradation when network unavailable
+
+#### User Experience
+- **Loading States**: Clear visual feedback during translation
+- **Progressive Loading**: Show partial translations as they complete
+- **Accessibility**: Proper screen reader support for toggle states
+
+### Best Practices
+
+1. **Always Use Caching**: Avoid re-translating the same content
+2. **Provide Clear Feedback**: Show loading states and error messages
+3. **Handle Edge Cases**: Empty content, network errors, API failures
+4. **Optimize for Performance**: Parallel translation, efficient caching
+5. **Test Thoroughly**: All toggle states, error conditions, cache behavior
+6. **Accessibility First**: Screen reader support, keyboard navigation
+7. **Progressive Enhancement**: Graceful fallbacks for all scenarios
+
+---
+
+## �🔧 Implementation Details
 
 ### Language Context Setup
 

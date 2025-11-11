@@ -71,10 +71,20 @@ const getDeviceLanguage = () => {
 i18n
   .use(initReactI18next)
   .init({
-    debug: __DEV__, // Enable debug mode in development
+    debug: false, // Disable debug logs to reduce console noise
     resources,
     lng: getDeviceLanguage(), // Default language
     fallbackLng: 'en', // Fallback language
+    
+    // Minimal logging noise reduction (keep functionality intact)
+    saveMissing: false, // Don't save missing translations
+    missingKeyHandler: (lng, ns, key) => {
+      // Only log missing keys in development and avoid repetitive logs
+      if (__DEV__ && !key.includes('missing en translation')) {
+        console.warn(`Missing translation: ${key}`);
+      }
+      return key; // Return the key as fallback
+    },
     
     // Options
     interpolation: {
@@ -94,6 +104,18 @@ i18n
   .catch((error) => {
     console.error('i18n initialization error:', error);
   });
+
+// Override i18next internal logger to reduce verbose logs while keeping functionality
+i18n.services.logger = {
+  log: () => {}, // Disable verbose logs
+  warn: (message) => {
+    // Only show translation warnings in development, and filter out repetitive missing key warnings
+    if (__DEV__ && !message.includes('missing en translation')) {
+      console.warn('i18n:', message);
+    }
+  },
+  error: (error) => console.error('i18n error:', error), // Always keep errors
+};
 
 export default i18n;
 

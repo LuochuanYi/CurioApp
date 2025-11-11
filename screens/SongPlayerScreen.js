@@ -9,8 +9,10 @@ import {
   SafeAreaView,
   Alert
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { getSongById, SONG_DIFFICULTIES, SONG_CATEGORIES } from '../data/songs';
 import { useMusicPlayer } from '../hooks/useMusicPlayer';
+import { useDynamicTranslation } from '../hooks/useDynamicTranslation';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -20,9 +22,54 @@ const SongPlayerScreen = ({ route, navigation }) => {
   const [showSignInstructions, setShowSignInstructions] = useState(true);
   const [selectedSign, setSelectedSign] = useState(null);
   const [practiceMode, setPracticeMode] = useState(false);
+  const [narrationEnabled, setNarrationEnabled] = useState(false);
+  const { t, i18n } = useTranslation();
+  
+  // Translation toggle state
+  const [isTranslationEnabled, setIsTranslationEnabled] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [translationCache, setTranslationCache] = useState({});
+  
+  // Get current language for caching
+  const currentLanguage = i18n.language || 'en';
 
-  // Use the music player hook for all audio functionality
-  const musicPlayer = useMusicPlayer(song);
+  // Get display content based on translation state
+  const getDisplayContent = () => {
+    if (!isTranslationEnabled) {
+      return {
+        title: song?.title || '',
+        description: song?.description || '',
+        learningGoals: song?.learningGoals || [],
+        lyrics: song?.lyrics || [],
+      };
+    }
+    
+    // Use cached translations when available
+    const cacheKey = `${song?.id}_${currentLanguage}`;
+    const cached = translationCache[cacheKey] || {};
+    
+    return {
+      title: cached.title || song?.title || '',
+      description: cached.description || song?.description || '',
+      learningGoals: cached.learningGoals || song?.learningGoals || [],
+      lyrics: cached.lyrics || song?.lyrics || [],
+    };
+  };
+
+  // Create song object for music player (no translation needed for music)
+  const songForPlayer = song;
+
+  // Use the music player hook with original song
+  const musicPlayer = useMusicPlayer(songForPlayer);
+  
+  // Import translation service directly for on-demand use
+  const { translateContent: translateService } = useDynamicTranslation();
+  
+  // Translation function for UI elements
+  const translateText = (text) => {
+    if (!text) return text;
+    return t(text, { defaultValue: text });
+  };
 
   useEffect(() => {
     if (songData) {
@@ -34,11 +81,11 @@ const SongPlayerScreen = ({ route, navigation }) => {
       if (foundSong) {
         setSong(foundSong);
       } else {
-        Alert.alert('Song not found', 'The requested song could not be loaded.');
+        Alert.alert(translateText('Song not found'), translateText('The requested song could not be loaded.'));
         navigation.goBack();
       }
     } else {
-      Alert.alert('No song data', 'No song information was provided.');
+      Alert.alert(translateText('No song data'), translateText('No song information was provided.'));
       navigation.goBack();
     }
   }, [songData, route.params]);
@@ -53,14 +100,23 @@ const SongPlayerScreen = ({ route, navigation }) => {
   }, [practiceMode]);
 
   const handlePlayPause = () => {
+    console.log('🎵 Play button clicked');
+    console.log('  - Current playing state:', musicPlayer.isPlaying);
+    console.log('  - Current paused state:', musicPlayer.isPaused);
+    console.log('  - Narration enabled:', narrationEnabled);
+    console.log('  - Background music enabled:', musicPlayer.backgroundMusicEnabled);
+    console.log('  - Song has audioFile:', !!song?.audioFile);
+    
     if (musicPlayer.isPlaying) {
+      console.log('🔇 Pausing playback');
       musicPlayer.pause();
     } else if (musicPlayer.isPaused) {
+      console.log('▶️ Resuming playback');
       musicPlayer.resume();
     } else {
-      // Start playback - this app uses text-to-speech narration for sign-along learning
-      musicPlayer.play(true); // true = with text-to-speech narration
-      console.log('Starting song with text-to-speech narration...');
+      // Start playback - can be music-only or with narration
+      console.log('🎵 Starting new playback with narration:', narrationEnabled);
+      musicPlayer.play(narrationEnabled);
     }
   };
 
@@ -83,10 +139,120 @@ const SongPlayerScreen = ({ route, navigation }) => {
     }
   };
 
+
+
+  // Handle translation toggle
+  const handleTranslationToggle = async () => {
+    if (!isTranslationEnabled) {
+      // Enabling translation - check cache first
+      const cacheKey = `${song?.id}_${currentLanguage}`;
+      if (translationCache[cacheKey]) {
+        // Use cached translation
+        setIsTranslationEnabled(true);
+        return;
+      }
+      
+      // Perform fresh translation
+      setIsTranslating(true);
+      try {
+        console.log('Starting translation for song:', song?.title);
+        console.log('Current language from i18n:', currentLanguage);
+        
+        // Skip translation if target is English
+        if (currentLanguage === 'en' || currentLanguage === 'English') {
+          console.log('Target language is English, no translation needed');
+          const translations = {
+            title: song?.title || '',
+            description: song?.description || '',
+            learningGoals: song?.learningGoals || [],
+            lyrics: song?.lyrics || [],
+          };
+          
+          setTranslationCache(prev => ({
+            ...prev,
+            [cacheKey]: translations
+          }));
+          
+          setIsTranslationEnabled(true);
+          console.log('Translation completed (no-op for English)');
+          return;
+        }
+        
+        // Translate all content pieces
+        const translations = {};
+        
+        if (song?.title) {
+          console.log('Translating title:', song.title);
+          translations.title = await translateService(song.title);
+          console.log('Title translated to:', translations.title);
+        }
+        
+        if (song?.description) {
+          console.log('Translating description...');
+          translations.description = await translateService(song.description);
+        }
+        
+        if (song?.learningGoals) {
+          console.log('Translating learning goals...');
+          translations.learningGoals = await Promise.all(
+            song.learningGoals.map(goal => translateService(goal))
+          );
+        }
+        
+        if (song?.lyrics) {
+          console.log('Translating lyrics...');
+          translations.lyrics = await Promise.all(
+            song.lyrics.map(async (lyricObj) => ({
+              ...lyricObj,
+              line: await translateService(lyricObj.line),
+              signs: await Promise.all(
+                lyricObj.signs.map(async (sign) => ({
+                  ...sign,
+                  word: await translateService(sign.word),
+                  description: await translateService(sign.description)
+                }))
+              )
+            }))
+          );
+        }
+        
+        // Cache the translations
+        setTranslationCache(prev => ({
+          ...prev,
+          [cacheKey]: translations
+        }));
+        
+        setIsTranslationEnabled(true);
+        console.log('Translation completed successfully');
+      } catch (error) {
+        console.error('Translation error:', error);
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack,
+          currentLanguage,
+          songKeys: song ? Object.keys(song) : 'no song',
+          songTitle: song?.title
+        });
+        alert(`Translation failed: ${error.message}. Please try again.`);
+      } finally {
+        setIsTranslating(false);
+      }
+    } else {
+      // Disabling translation - show original content
+      setIsTranslationEnabled(false);
+      // Stop song if playing translated content
+      if (musicPlayer.isPlaying) {
+        handleStop();
+      }
+    }
+  };
+
+  const displayContent = getDisplayContent();
+
   if (!song) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading song...</Text>
+        <Text style={styles.loadingText}>{translateText("Loading song...")}</Text>
       </View>
     );
   }
@@ -108,13 +274,13 @@ const SongPlayerScreen = ({ route, navigation }) => {
           <Text style={styles.backIcon}>←</Text>
         </TouchableOpacity>
         <View style={styles.headerInfo}>
-          <Text style={styles.songTitle}>{song.title}</Text>
+          <Text style={styles.songTitle}>{displayContent.title}</Text>
           <View style={styles.songMeta}>
             <View style={[styles.difficultyBadge, { backgroundColor: difficulty?.color }]}>
-              <Text style={styles.badgeText}>{difficulty?.icon} {difficulty?.name}</Text>
+              <Text style={styles.badgeText}>{difficulty?.icon} {translateText(difficulty?.name)}</Text>
             </View>
             <View style={[styles.categoryBadge, { backgroundColor: category?.color }]}>
-              <Text style={styles.badgeText}>{category?.icon} {category?.name}</Text>
+              <Text style={styles.badgeText}>{category?.icon} {translateText(category?.name)}</Text>
             </View>
           </View>
         </View>
@@ -127,6 +293,42 @@ const SongPlayerScreen = ({ route, navigation }) => {
         </TouchableOpacity>
       </View>
 
+      {/* Translation Toggle */}
+      <View style={styles.translationToggleContainer}>
+        <TouchableOpacity
+          style={[
+            styles.translationToggle,
+            isTranslationEnabled && styles.translationToggleActive
+          ]}
+          onPress={handleTranslationToggle}
+          disabled={isTranslating}
+        >
+          <Text style={styles.toggleIcon}>
+            {isTranslating ? "⏳" : "🌍"}
+          </Text>
+          <Text style={[
+            styles.translationToggleText,
+            isTranslationEnabled && styles.translationToggleTextActive
+          ]}>
+            {isTranslating 
+              ? "Translating..." 
+              : isTranslationEnabled 
+                ? "Show Original" 
+                : "Translate Song"
+            }
+          </Text>
+        </TouchableOpacity>
+        
+        {/* Language indicator */}
+        {isTranslationEnabled && (
+          <View style={styles.languageIndicator}>
+            <Text style={styles.languageText}>
+              Translated to {currentLanguage.toUpperCase()}
+            </Text>
+          </View>
+        )}
+      </View>
+
       {/* Song Info Card */}
       <View style={styles.songInfoCard}>
         <View style={styles.songIconContainer}>
@@ -134,8 +336,8 @@ const SongPlayerScreen = ({ route, navigation }) => {
         </View>
         <View style={styles.songDetails}>
           <Text style={styles.duration}>{song.duration}</Text>
-          <Text style={styles.ageGroup}>{song.ageGroup}</Text>
-          <Text style={styles.description}>{song.description}</Text>
+          <Text style={styles.ageGroup}>{translateText(song.ageGroup)}</Text>
+          <Text style={styles.description}>{displayContent.description}</Text>
         </View>
       </View>
 
@@ -213,45 +415,48 @@ const SongPlayerScreen = ({ route, navigation }) => {
         {/* Error Display */}
         {musicPlayer.error && (
           <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>⚠️ {musicPlayer.error}</Text>
+            <Text style={styles.errorText}>⚠️ {translateText(musicPlayer.error)}</Text>
             <TouchableOpacity 
               onPress={() => musicPlayer.stop()}
               style={styles.errorButton}
             >
-              <Text style={styles.errorButtonText}>Retry</Text>
+              <Text style={styles.errorButtonText}>{translateText("Retry")}</Text>
             </TouchableOpacity>
           </View>
         )}
 
         {/* Playback Info */}
         <View style={styles.playbackInfoSection}>
-          <Text style={styles.sectionTitle}>🎵 Playback Settings</Text>
+          <Text style={styles.sectionTitle}>🎵 {translateText("Playback Settings")}</Text>
           <View style={styles.playbackInfoCard}>
             <View style={styles.infoNote}>
-              <Text style={styles.infoNoteIcon}>🎤</Text>
+              <Text style={styles.infoNoteIcon}>�</Text>
               <Text style={styles.infoNoteText}>
-                This app uses text-to-speech narration to help you learn the lyrics and practice sign language gestures. Background music support is configured but requires actual audio files to be loaded.
+                {translateText("Choose your playback mode: Music-Only for real MP3 background music, or Voice Narration for sign-along learning with background music. Real MP3 files are loaded when available, with synthetic melodies as fallback.")}
               </Text>
             </View>
             
             <View style={styles.audioFileInfo}>
-              <Text style={styles.audioFileLabel}>🎵 Background Music:</Text>
+              <Text style={styles.audioFileLabel}>🎵 {translateText("Background Music:")}</Text>
               <Text style={styles.audioFileName}>
-                {song.audioFile ? `${song.title}.mp3` : 'No audio file'}
+                {song.audioFile ? `${song.title}.mp3` : translateText('No audio file')}
               </Text>
               <Text style={styles.audioFileNote}>
                 {song.audioFile 
-                  ? 'Real audio file configured. Toggle background music ON to hear it.'
-                  : '🎶 No background music file available. Using text-to-speech narration only.'}
+                  ? translateText('Real audio file configured. Toggle background music ON to hear it.')
+                  : translateText('🎶 No background music file available. Using text-to-speech narration only.')}
               </Text>
               <Text style={styles.audioFileNote}>
-                💡 Tip: Click the ▶️ Play button first, then toggle Background Music ON.
+                {translateText('💡 Tip: Set Background Music ON, Voice Narration OFF for music-only mode, then click ▶️ Play.')}
               </Text>
+              
+              {/* Audio Test Buttons */}
+
             </View>
             
             {/* Speed Control */}
             <View style={styles.playbackInfoItem}>
-              <Text style={styles.playbackInfoLabel}>Speed:</Text>
+              <Text style={styles.playbackInfoLabel}>{translateText("Speed:")}</Text>
               <TouchableOpacity 
                 onPress={() => musicPlayer.changePlaybackRate(
                   musicPlayer.playbackRate === 1.0 ? 0.7 : 1.0
@@ -259,14 +464,14 @@ const SongPlayerScreen = ({ route, navigation }) => {
                 style={styles.speedButton}
               >
                 <Text style={styles.speedButtonText}>
-                  {musicPlayer.playbackRate}x {musicPlayer.playbackRate < 1.0 ? '(Practice)' : '(Normal)'}
+                  {musicPlayer.playbackRate}x {musicPlayer.playbackRate < 1.0 ? translateText('(Practice)') : translateText('(Normal)')}
                 </Text>
               </TouchableOpacity>
             </View>
             
             {/* Background Music Toggle */}
             <View style={styles.playbackInfoItem}>
-              <Text style={styles.playbackInfoLabel}>Background Music:</Text>
+              <Text style={styles.playbackInfoLabel}>{translateText("Background Music:")}</Text>
               <TouchableOpacity 
                 onPress={musicPlayer.toggleBackgroundMusic}
                 style={[
@@ -275,17 +480,33 @@ const SongPlayerScreen = ({ route, navigation }) => {
                 ]}
               >
                 <Text style={styles.toggleButtonText}>
-                  {musicPlayer.backgroundMusicEnabled ? '🎵 ON' : '🔇 OFF'}
+                  {musicPlayer.backgroundMusicEnabled ? translateText('🎵 ON') : translateText('🔇 OFF')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Narration Toggle */}
+            <View style={styles.playbackInfoItem}>
+              <Text style={styles.playbackInfoLabel}>{translateText("Voice Narration:")}</Text>
+              <TouchableOpacity 
+                onPress={() => setNarrationEnabled(!narrationEnabled)}
+                style={[
+                  styles.toggleButton,
+                  { backgroundColor: narrationEnabled ? '#e74c3c' : '#95a5a6' }
+                ]}
+              >
+                <Text style={styles.toggleButtonText}>
+                  {narrationEnabled ? translateText('🎤 ON') : translateText('🔇 OFF')}
                 </Text>
               </TouchableOpacity>
             </View>
 
             {/* Volume Controls */}
             <View style={styles.volumeSection}>
-              <Text style={styles.volumeSectionTitle}>Volume Controls</Text>
+              <Text style={styles.volumeSectionTitle}>{translateText("Volume Controls")}</Text>
               
               <View style={styles.volumeControl}>
-                <Text style={styles.volumeLabel}>🎤 Voice: {Math.round(musicPlayer.speechVolume * 100)}%</Text>
+                <Text style={styles.volumeLabel}>🎤 {translateText("Voice")}: {Math.round(musicPlayer.speechVolume * 100)}%</Text>
                 <View style={styles.volumeSliderContainer}>
                   {[0.2, 0.4, 0.6, 0.8, 1.0].map((level) => (
                     <TouchableOpacity
@@ -302,7 +523,7 @@ const SongPlayerScreen = ({ route, navigation }) => {
 
               {musicPlayer.backgroundMusicEnabled && (
                 <View style={styles.volumeControl}>
-                  <Text style={styles.volumeLabel}>🎵 Music: {Math.round(musicPlayer.musicVolume * 100)}%</Text>
+                  <Text style={styles.volumeLabel}>🎵 {translateText("Music")}: {Math.round(musicPlayer.musicVolume * 100)}%</Text>
                   <View style={styles.volumeSliderContainer}>
                     {[0.1, 0.2, 0.3, 0.4, 0.5].map((level) => (
                       <TouchableOpacity
@@ -321,9 +542,17 @@ const SongPlayerScreen = ({ route, navigation }) => {
 
             {/* Mode Display */}
             <View style={styles.playbackInfoItem}>
-              <Text style={styles.playbackInfoLabel}>Mode:</Text>
+              <Text style={styles.playbackInfoLabel}>{translateText("Playback Mode:")}</Text>
               <Text style={styles.playbackInfoValue}>
-                {practiceMode ? '📚 Practice Mode' : '🎵 Sign-Along Mode'}
+                {narrationEnabled ? translateText('🎤 Sign-Along with Narration') : translateText('🎵 Music Only')}
+              </Text>
+            </View>
+            
+            {/* Speed Mode Display */}
+            <View style={styles.playbackInfoItem}>
+              <Text style={styles.playbackInfoLabel}>{translateText("Speed Mode:")}</Text>
+              <Text style={styles.playbackInfoValue}>
+                {musicPlayer.playbackRate < 1.0 ? translateText('📚 Practice Mode') : translateText('� Normal Speed')}
               </Text>
             </View>
           </View>
@@ -331,9 +560,9 @@ const SongPlayerScreen = ({ route, navigation }) => {
 
         {/* Learning Goals */}
         <View style={styles.learningGoalsSection}>
-          <Text style={styles.sectionTitle}>🎯 Learning Goals</Text>
+          <Text style={styles.sectionTitle}>🎯 {translateText("Learning Goals")}</Text>
           <View style={styles.goalsContainer}>
-            {song.learningGoals.map((goal, index) => (
+            {displayContent.learningGoals.map((goal, index) => (
               <View key={index} style={styles.goalItem}>
                 <Text style={styles.goalDot}>•</Text>
                 <Text style={styles.goalText}>{goal}</Text>
@@ -345,12 +574,12 @@ const SongPlayerScreen = ({ route, navigation }) => {
         {/* Current Lyric Display */}
         {currentLyric && (
           <View style={styles.currentLyricSection}>
-            <Text style={styles.sectionTitle}>🎤 Current Lyric</Text>
+            <Text style={styles.sectionTitle}>🎤 {translateText("Current Lyric")}</Text>
             <View style={styles.currentLyricCard}>
-              <Text style={styles.currentLyricText}>{currentLyric.line}</Text>
+              <Text style={styles.currentLyricText}>{translateText(currentLyric.line)}</Text>
               {showSignInstructions && currentLyric.signs && (
                 <View style={styles.currentSignsContainer}>
-                  <Text style={styles.signsTitle}>Signs for this line:</Text>
+                  <Text style={styles.signsTitle}>{translateText("Signs for this line:")}</Text>
                   {currentLyric.signs.map((sign, index) => (
                     <TouchableOpacity
                       key={index}
@@ -360,13 +589,13 @@ const SongPlayerScreen = ({ route, navigation }) => {
                       ]}
                       onPress={() => handleSignPress(sign)}
                     >
-                      <Text style={styles.signWord}>{sign.word}</Text>
-                      <Text style={styles.signDescription}>{sign.description}</Text>
+                      <Text style={styles.signWord}>{translateText(sign.word)}</Text>
+                      <Text style={styles.signDescription}>{translateText(sign.description)}</Text>
                       {sign.gestureType && (
                         <Text style={styles.signType}>
                           {sign.gestureType === 'hand' ? '✋' : 
                            sign.gestureType === 'body' ? '🤸' :
-                           sign.gestureType === 'facial' ? '😊' : '👆'} {sign.gestureType}
+                           sign.gestureType === 'facial' ? '😊' : '👆'} {translateText(sign.gestureType)}
                         </Text>
                       )}
                     </TouchableOpacity>
@@ -379,7 +608,7 @@ const SongPlayerScreen = ({ route, navigation }) => {
 
         {/* All Lyrics with Navigation */}
         <View style={styles.lyricsSection}>
-          <Text style={styles.sectionTitle}>📝 Complete Lyrics</Text>
+          <Text style={styles.sectionTitle}>📝 {translateText("Complete Lyrics")}</Text>
           {musicPlayer.getLyricsWithTiming().map((lyric, index) => (
             <TouchableOpacity
               key={index}
@@ -389,14 +618,14 @@ const SongPlayerScreen = ({ route, navigation }) => {
                 lyric.isPast && styles.pastLyricCard
               ]}
               onPress={() => handleLyricPress(index)}
-              accessibilityLabel={`Jump to lyric: ${lyric.line}`}
+              accessibilityLabel={`${translateText("Jump to lyric")}: ${translateText(lyric.line)}`}
             >
               <View style={styles.lyricHeader}>
                 <Text style={[
                   styles.lyricLine,
                   lyric.isActive && styles.activeLyricText
                 ]}>
-                  {lyric.line}
+                  {translateText(lyric.line)}
                 </Text>
                 <Text style={styles.lyricTiming}>
                   {musicPlayer.formatTime(lyric.startTime)} - {musicPlayer.formatTime(lyric.endTime)}
@@ -405,12 +634,12 @@ const SongPlayerScreen = ({ route, navigation }) => {
               
               {showSignInstructions && lyric.signs && (
                 <View style={styles.lyricSignsContainer}>
-                  <Text style={styles.signsSubtitle}>Signs:</Text>
+                  <Text style={styles.signsSubtitle}>{translateText("Signs:")}</Text>
                   <View style={styles.signsList}>
                     {lyric.signs.map((sign, signIndex) => (
                       <View key={signIndex} style={styles.signItem}>
-                        <Text style={styles.signItemWord}>{sign.word}</Text>
-                        <Text style={styles.signItemDesc}>{sign.description}</Text>
+                        <Text style={styles.signItemWord}>{translateText(sign.word)}</Text>
+                        <Text style={styles.signItemDesc}>{translateText(sign.description)}</Text>
                       </View>
                     ))}
                   </View>
@@ -423,11 +652,11 @@ const SongPlayerScreen = ({ route, navigation }) => {
         {/* Tips Section */}
         {song.tips && (
           <View style={styles.tipsSection}>
-            <Text style={styles.sectionTitle}>💡 Teaching Tips</Text>
+            <Text style={styles.sectionTitle}>💡 {translateText("Teaching Tips")}</Text>
             {song.tips.map((tip, index) => (
               <View key={index} style={styles.tipCard}>
                 <Text style={styles.tipIcon}>💡</Text>
-                <Text style={styles.tipText}>{tip}</Text>
+                <Text style={styles.tipText}>{translateText(tip)}</Text>
               </View>
             ))}
           </View>
@@ -436,11 +665,11 @@ const SongPlayerScreen = ({ route, navigation }) => {
         {/* Extensions Section */}
         {song.extensions && (
           <View style={styles.extensionsSection}>
-            <Text style={styles.sectionTitle}>🌟 Extension Activities</Text>
+            <Text style={styles.sectionTitle}>🌟 {translateText("Extension Activities")}</Text>
             {song.extensions.map((extension, index) => (
               <View key={index} style={styles.extensionCard}>
                 <Text style={styles.extensionIcon}>🌟</Text>
-                <Text style={styles.extensionText}>{extension}</Text>
+                <Text style={styles.extensionText}>{translateText(extension)}</Text>
               </View>
             ))}
           </View>
@@ -1023,6 +1252,74 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6c757d',
     fontStyle: 'italic',
+  },
+
+  // Translation Toggle Styles
+  translationToggleContainer: {
+    alignItems: 'center',
+    marginBottom: 16,
+    paddingHorizontal: 20,
+  },
+  
+  translationToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFF',
+    borderColor: '#007AFF',
+    borderWidth: 1.5,
+    borderRadius: 22,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    minWidth: 150,
+    justifyContent: 'center',
+    shadowColor: '#007AFF',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  
+  translationToggleActive: {
+    backgroundColor: '#007AFF',
+    borderColor: '#007AFF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  
+  toggleIcon: {
+    marginRight: 8,
+    fontSize: 16,
+  },
+  
+  translationToggleText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#007AFF',
+    letterSpacing: 0.3,
+  },
+  
+  translationToggleTextActive: {
+    color: '#FFFFFF',
+  },
+  
+  languageIndicator: {
+    marginTop: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    backgroundColor: '#E8F5E8',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#81C784',
+  },
+  
+  languageText: {
+    fontSize: 12,
+    color: '#2E7D32',
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
 });
 

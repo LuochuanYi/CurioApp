@@ -3,7 +3,7 @@
 
 // Audio files configuration
 // Using proper require() statements for Expo asset loading
-console.log('Loading songs.js - configuring real audio files...');
+// console.log('Loading songs.js - configuring real audio files...'); // Disabled to reduce log noise
 
 // Import audio files using require() - Expo will bundle these as assets
 const twinkleTwinkleAudio = require('../assets/audio/songs/twinkle-twinkle.mp3');
@@ -20,19 +20,19 @@ const hushLittleBabyAudio = require('../assets/audio/songs/hush-little-baby.mp3'
 const rockAByeBabyAudio = require('../assets/audio/songs/rock-a-bye-baby.mp3');
 const somewhereOverRainbowAudio = require('../assets/audio/songs/somewhere-over-rainbow-bedtime.mp3');
 
-console.log('✅ Real audio files configured:', {
-  twinkleTwinkle: !!twinkleTwinkleAudio,
-  abcSong: !!abcSongAudio,
-  ifYourHappy: !!ifYourHappyAudio,
-  wheelsOnBus: !!wheelsOnBusAudio,
-  rainRainGoAway: !!rainRainGoAwayAudio,
-  fiveLittleDucks: !!fiveLittleDucksAudio,
-  brahmsLullaby: !!brahmsLullabyAudio,
-  goldenSlumbers: !!goldenSlumbersAudio,
-  hushLittleBaby: !!hushLittleBabyAudio,
-  rockAByeBaby: !!rockAByeBabyAudio,
-  somewhereOverRainbow: !!somewhereOverRainbowAudio
-});
+// console.log('✅ Real audio files configured:', { // Disabled to reduce log noise
+//   twinkleTwinkle: !!twinkleTwinkleAudio,
+//   abcSong: !!abcSongAudio,
+//   ifYourHappy: !!ifYourHappy,
+//   wheelsOnBus: !!wheelsOnBusAudio,
+//   rainRainGoAway: !!rainRainGoAwayAudio,
+//   fiveLittleDucks: !!fiveLittleDucksAudio,
+//   brahmsLullaby: !!brahmsLullabyAudio,
+//   goldenSlumbers: !!goldenSlumbersAudio,
+//   hushLittleBaby: !!hushLittleBabyAudio,
+//   rockAByeBaby: !!rockAByeBabyAudio,
+//   somewhereOverRainbow: !!somewhereOverRainbowAudio
+// }); // Disabled to reduce log noise
 
 // Song difficulty levels
 export const SONG_DIFFICULTIES = {

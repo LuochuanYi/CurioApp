@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Platform } from 'react-native';
 import * as Speech from 'expo-speech';
 import { Audio } from 'expo-av';
+import { logAudio, logError, logWarn } from '../utils/logger';
 
 // Simple melody generation as fallback when real audio files aren't available
 const createSimpleMelody = (songId, duration) => {
@@ -54,7 +55,7 @@ const createSimpleMelody = (songId, duration) => {
       }
       
       isPlaying = true;
-      console.log('Starting simple melody for:', songId);
+      logAudio('Starting simple melody for:', songId);
       
       const masterGain = audioContext.createGain();
       masterGain.connect(audioContext.destination);
@@ -66,7 +67,7 @@ const createSimpleMelody = (songId, duration) => {
       const melodyDuration = melody.length * totalNoteDuration;
       const totalLoops = Math.ceil(Math.max(duration, 30) / melodyDuration); // At least 30 seconds
       
-      console.log(`Playing enhanced melody: ${melody.length} notes, ${totalLoops} loops, ${duration}s total`);
+      logAudio(`Playing enhanced melody: ${melody.length} notes, ${totalLoops} loops, ${duration}s total`);
       
       // Create looping melody with harmony
       for (let loop = 0; loop < totalLoops && isPlaying; loop++) {
@@ -143,48 +144,48 @@ const createSimpleMelody = (songId, duration) => {
     },
     
     pauseAsync: async () => {
-      console.log('Pausing simple melody');
+      logAudio('Pausing simple melody');
       isPlaying = false;
       oscillators.forEach(osc => {
         try { 
           if (osc.stop) osc.stop(); 
         } catch (e) {
-          console.warn('Error stopping oscillator:', e);
+          logWarn('Error stopping oscillator:', e);
         }
       });
       oscillators = [];
     },
     
     stopAsync: async () => {
-      console.log('Stopping simple melody');
+      logAudio('Stopping simple melody');
       isPlaying = false;
       oscillators.forEach(osc => {
         try { 
           if (osc.stop) osc.stop(); 
         } catch (e) {
-          console.warn('Error stopping oscillator:', e);
+          logWarn('Error stopping oscillator:', e);
         }
       });
       oscillators = [];
     },
     
     setVolumeAsync: async (volume) => {
-      console.log('Volume change requested:', volume);
+      logAudio('Volume change requested:', volume);
       // Volume is controlled by the gain node during playback
     },
     
     setRateAsync: async (rate, shouldCorrectPitch) => {
-      console.log('Rate change requested:', rate);
+      logAudio('Rate change requested:', rate);
       // Rate changes would require recreating the melody
     },
     
     setPositionAsync: async (position) => {
-      console.log('Position change requested:', position);
+      logAudio('Position change requested:', position);
       // Position seeking would require recreating from that point
     },
     
     unloadAsync: async () => {
-      console.log('Unloading simple melody');
+      logAudio('Unloading simple melody');
       isPlaying = false;
       oscillators.forEach(osc => {
         try { 
@@ -197,7 +198,7 @@ const createSimpleMelody = (songId, duration) => {
         try {
           await audioContext.close();
         } catch (e) {
-          console.warn('Error closing audio context:', e);
+          logWarn('Error closing audio context:', e);
         }
       }
     }
@@ -230,6 +231,9 @@ export const useMusicPlayer = (song) => {
       setError(null);
       setIsLoading(false);
       
+      // Audio loading process
+      logAudio('🎵 Setting up audio for:', song?.title || 'Unknown song');
+      
       if (song?.lyrics?.length > 0) {
         const lastLyric = song.lyrics[song.lyrics.length - 1];
         setDuration(lastLyric.endTime || 30);
@@ -251,14 +255,11 @@ export const useMusicPlayer = (song) => {
 
           // Check if we have a real audio file to load
           if (song.audioFile) {
-            console.log('Attempting to load audio file for:', song.title);
-            console.log('Audio file type:', typeof song.audioFile);
-            console.log('Audio file value:', song.audioFile);
+            logAudio('Loading audio file for:', song.title);
             
             try {
-              // For Expo, when using require(), the audioFile is already the correct format
-              // We can pass it directly to Audio.Sound.createAsync
-              console.log('Creating Expo Audio.Sound with required asset');
+              // Use Expo Audio API for all platforms (including web)
+              logAudio('Creating audio with Expo Audio API for:', song.title);
               
               const { sound } = await Audio.Sound.createAsync(
                 song.audioFile, // Direct use of require()'d asset
@@ -268,22 +269,33 @@ export const useMusicPlayer = (song) => {
                   volume: musicVolume 
                 }
               );
-              
+
               audioSound.current = sound;
-              console.log('✅ Real MP3 audio loaded successfully for:', song.title);
+              logAudio('Audio loaded successfully for:', song.title);
               
             } catch (audioError) {
-              console.error('❌ Failed to load real audio file:', audioError);
-              console.log('🎵 Falling back to synthetic melody');
+              logError('Failed to load audio file:', audioError.message);
+              logError('Audio error details:', {
+                message: audioError.message,
+                name: audioError.name,
+                stack: audioError.stack
+              });
+              logAudio('🎵 Falling back to synthetic melody');
               
               // Use fallback melody generation
               if (Platform.OS === 'web' && window.AudioContext) {
-                audioSound.current = createSimpleMelody(song.id, duration);
-                console.log('✅ Fallback melody created for:', song.title);
+                try {
+                  audioSound.current = createSimpleMelody(song.id, duration);
+                  logAudio('✅ Fallback melody created for:', song.title);
+                } catch (melodyError) {
+                  logError('❌ Failed to create fallback melody:', melodyError);
+                }
+              } else {
+                logWarn('Web Audio API not available, no fallback possible');
               }
             }
           } else {
-            console.log('No audio file available, using fallback melody for:', song.title);
+            logAudio('No audio file available, using fallback melody for:', song.title);
             
             // Use fallback melody generation
             if (Platform.OS === 'web' && window.AudioContext) {
@@ -292,14 +304,14 @@ export const useMusicPlayer = (song) => {
           }
           
         } catch (error) {
-          console.error('❌ Audio setup failed:', error.message);
-          console.error('Full error:', error);
-          console.log('🎵 Using fallback melody generation');
+          logError('❌ Audio setup failed:', error.message);
+          logError('Full error:', error);
+          logAudio('🎵 Using fallback melody generation');
           
           // Fallback to simple Web Audio melody for immediate testing
           if (Platform.OS === 'web' && window.AudioContext) {
             audioSound.current = createSimpleMelody(song.id, duration);
-            console.log('✅ Fallback melody system active');
+            logAudio('✅ Fallback melody system active');
           }
         }
       }
@@ -364,6 +376,7 @@ export const useMusicPlayer = (song) => {
 
   // Play the song with optional text-to-speech narration
   const handlePlay = async (withNarration = false) => {
+    // Reduced logging for performance
     if (!song) {
       setError('No song loaded');
       return;
@@ -382,7 +395,8 @@ export const useMusicPlayer = (song) => {
         
         // Start background music for music-only mode
         if (backgroundMusicEnabled && audioSound.current) {
-          console.log('Starting music-only playback for:', song.title);
+          logAudio('Starting music playback for:', song.title);
+          
           try {
             if (audioSound.current.setVolumeAsync) {
               await audioSound.current.setVolumeAsync(musicVolume);
@@ -391,25 +405,32 @@ export const useMusicPlayer = (song) => {
               await audioSound.current.setRateAsync(playbackRate, true);
             }
             await audioSound.current.playAsync();
-            console.log('Music-only playback started successfully');
+            logAudio('Music playback started successfully!');
           } catch (error) {
-            console.warn('Error starting music-only playback:', error);
+            logError('Error starting music playback:', error.message);
+            setError(`Audio playback failed: ${error.message}`);
+          }
+        } else {
+          if (!backgroundMusicEnabled) {
+            setError('Background music is disabled. Turn it ON to hear audio.');
+          } else if (!audioSound.current) {
+            setError('No audio file loaded. Check if MP3 files are available.');
           }
         }
         
         // Show helpful message about audio type
         if (!song.audioFile && !audioSound.current) {
-          console.log('🔇 Playing in text-to-speech mode - no background music available');
+          logAudio('🔇 Playing in text-to-speech mode - no background music available');
         } else if (audioSound.current) {
           if (song.audioFile) {
-            console.log('🎵 Playing with REAL MP3 audio:', song.title);
+            logAudio('🎵 Playing with REAL MP3 audio:', song.title);
           } else {
-            console.log('🎼 Playing with synthetic fallback melody:', song.title);
+            logAudio('🎼 Playing with synthetic fallback melody:', song.title);
           }
         }
       }
     } catch (err) {
-      console.error('Error playing song:', err);
+      logError('Error playing song:', err);
       const errorMessage = err.message.includes('require') 
         ? 'Audio files not found - using text-to-speech mode' 
         : err.message;
@@ -429,24 +450,24 @@ export const useMusicPlayer = (song) => {
     try {
       // Start background music if available
       if (backgroundMusicEnabled && audioSound.current) {
-        console.log('Starting background music for:', song.title);
-        console.log('Audio sound object:', audioSound.current);
+        logAudio('Starting background music for:', song.title);
+        logAudio('Audio sound object:', audioSound.current);
         try {
           if (audioSound.current.setVolumeAsync) {
             await audioSound.current.setVolumeAsync(musicVolume);
-            console.log('Volume set to:', musicVolume);
+            logAudio('Volume set to:', musicVolume);
           }
           if (audioSound.current.setRateAsync) {
             await audioSound.current.setRateAsync(playbackRate, true);
-            console.log('Playback rate set to:', playbackRate);
+            logAudio('Playback rate set to:', playbackRate);
           }
           await audioSound.current.playAsync();
-          console.log('Background music started successfully');
+          logAudio('Background music started successfully');
         } catch (error) {
-          console.warn('Error starting background music:', error);
+          logWarn('Error starting background music:', error);
         }
       } else {
-        console.log('Background music not available. Enabled:', backgroundMusicEnabled, 'Audio object:', !!audioSound.current);
+        logAudio('Background music not available. Enabled:', backgroundMusicEnabled, 'Audio object:', !!audioSound.current);
       }
 
       // Calculate total narration time
@@ -454,7 +475,7 @@ export const useMusicPlayer = (song) => {
         return total + (lyric.endTime - lyric.startTime);
       }, 0);
 
-      console.log('Total narration time:', totalNarrationTime, 'seconds');
+      logAudio('Total narration time:', totalNarrationTime, 'seconds');
 
       for (let i = 0; i < song.lyrics.length; i++) {
         if (isCancelled.current) break;
@@ -483,7 +504,7 @@ export const useMusicPlayer = (song) => {
         handleStop();
       }
     } catch (error) {
-      console.error('Error during narrated playback:', error);
+      logError('Error during narrated playback:', error);
       setError('Narration failed');
       handleStop();
     }
@@ -540,7 +561,7 @@ export const useMusicPlayer = (song) => {
         await audioSound.current.pauseAsync();
       }
     } catch (error) {
-      console.error('Error pausing:', error);
+      logError('Error pausing:', error);
     }
   };
 
@@ -556,7 +577,7 @@ export const useMusicPlayer = (song) => {
         try {
           await audioSound.current.playAsync();
         } catch (error) {
-          console.warn('Could not resume background music:', error);
+          logWarn('Could not resume background music:', error);
         }
       }
     }
@@ -590,7 +611,7 @@ export const useMusicPlayer = (song) => {
         timeUpdateInterval.current = null;
       }
     } catch (error) {
-      console.error('Error stopping:', error);
+      logError('Error stopping:', error);
     }
   };
 
@@ -628,7 +649,7 @@ export const useMusicPlayer = (song) => {
       try {
         await audioSound.current.setRateAsync(clampedRate, true);
       } catch (error) {
-        console.warn('Could not change music playback rate:', error);
+        logWarn('Could not change music playback rate:', error);
       }
     }
   };
@@ -649,7 +670,7 @@ export const useMusicPlayer = (song) => {
       try {
         await audioSound.current.setVolumeAsync(clampedVolume);
       } catch (error) {
-        console.warn('Could not change music volume:', error);
+        logWarn('Could not change music volume:', error);
       }
     }
   };
@@ -657,6 +678,10 @@ export const useMusicPlayer = (song) => {
   // Toggle background music
   const toggleBackgroundMusic = async () => {
     const newState = !backgroundMusicEnabled;
+    logAudio('🔄 Toggling background music from', backgroundMusicEnabled, 'to', newState);
+    logAudio('  - Audio object exists:', !!audioSound.current);
+    logAudio('  - Currently playing:', isPlaying);
+    
     setBackgroundMusicEnabled(newState);
 
     if (audioSound.current) {
@@ -665,14 +690,14 @@ export const useMusicPlayer = (song) => {
         try {
           await audioSound.current.playAsync();
         } catch (error) {
-          console.warn('Could not start background music:', error);
+          logWarn('Could not start background music:', error);
         }
       } else {
         // Disable and pause
         try {
           await audioSound.current.pauseAsync();
         } catch (error) {
-          console.warn('Could not stop background music:', error);
+          logWarn('Could not stop background music:', error);
         }
       }
     }
@@ -764,5 +789,8 @@ export const useMusicPlayer = (song) => {
     getProgress,
     formatTime,
     getLyricsWithTiming,
+    
+    // Debug/Internal refs
+    audioSound,
   };
 };

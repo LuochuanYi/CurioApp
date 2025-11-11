@@ -3,9 +3,9 @@
 
 import { Audio } from 'expo-av';
 
-// Test function to verify audio file loading
+// Test function to verify audio file loading (logging disabled for performance)
 export const testAudioLoading = async () => {
-  console.log('🔍 Testing MP3 audio file loading...');
+  // console.log('🔍 Testing MP3 audio file loading...'); // Disabled to reduce log noise
   
   const testFiles = [
     { name: 'Twinkle Twinkle', file: require('../assets/audio/songs/twinkle-twinkle.mp3') },

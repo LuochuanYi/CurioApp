@@ -16,9 +16,9 @@ CurioApp is a cutting-edge multilingual educational platform designed for childr
 
 ### ✨ Key Features
 
-- � **6-Language Support**: English, Chinese (Simplified), French, Spanish, Ukrainian, Dutch
+- 🌍 **6-Language Support**: English, Chinese (Simplified), French, Spanish, Ukrainian, Dutch
 - 📚 **Rich Content Library**: Interactive stories, sign-along songs, learning activities
-- 🔄 **Dynamic Translation**: Real-time content translation with caching
+- 🔄 **On-Demand Translation**: User-controlled translation toggle with smart caching
 - 📱 **Cross-Platform**: React Native with Expo for iOS, Android, and Web
 - 🛡️ **Safety Monitoring**: Real-time environment monitoring with multilingual alerts
 - 🎨 **Modern UI**: Curio Design System with accessibility features
@@ -157,12 +157,17 @@ npx expo start
 | **Performance Optimization** | ✅ Complete | Lazy loading, efficient re-renders |
 | **Error Handling** | ✅ Complete | Graceful degradation |
 
-## �📚 Documentation
+## 📚 Documentation
 
-- **[📋 GitHub Management Guide](./GITHUB_GUIDE.md)** - Complete Git workflow and repository management
+### Core Guides
+- **[🌍 Translation System Guide](./TRANSLATION_GUIDE.md)** - Comprehensive internationalization documentation
+- **[🔄 Translation Toggle Implementation](./Docs/translation-toggle-implementation.md)** - On-demand translation feature guide
 - **[🔊 Audio Integration Guide](./FINAL_AUDIO_SUCCESS.md)** - Audio setup and troubleshooting  
 - **[🎵 Music Implementation Guide](./MUSIC_GUIDE.md)** - Song and audio file management
-- **[🌍 Translation System Guide](./TRANSLATION_GUIDE.md)** - Comprehensive internationalization documentation
+
+### Development Guides
+- **[📋 GitHub Management Guide](./GITHUB_GUIDE.md)** - Complete Git workflow and repository management
+- **[🏗️ Architecture Overview](./ARCHITECTURE.md)** - System design and component structure
 
 ## 📁 Project Structure
 

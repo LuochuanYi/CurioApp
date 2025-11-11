@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { changeLanguage, getCurrentLanguage, getCurrentDisplayLanguage, LANGUAGE_MAPPING, DISPLAY_LANGUAGE_MAPPING } from '../i18n';
+import { logInfo, logError } from '../utils/logger';
 
 const LanguageContext = createContext();
 

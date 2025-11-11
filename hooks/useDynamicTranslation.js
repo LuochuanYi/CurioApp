@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import translationService from '../services/translationService';
+import { logTranslation, logWarn } from '../utils/logger';
 
 // Custom hook for dynamic content translation
 export const useDynamicTranslation = () => {
@@ -106,18 +107,49 @@ export const useTranslatedText = (text, sourceLanguage = 'en') => {
   const [translatedText, setTranslatedText] = useState(text);
   const [isLoading, setIsLoading] = useState(false);
   const { currentLanguage } = useLanguage();
-  const { translateContent } = useDynamicTranslation();
 
   useEffect(() => {
     const translate = async () => {
-      if (!text) return;
+      if (!text || !text.trim()) {
+        setTranslatedText(text);
+        return;
+      }
+
+      // Get target language code
+      const langMap = {
+        'English': 'en',
+        'Chinese': 'zh', 
+        'French': 'fr',
+        'Spanish': 'es',
+        'Ukrainian': 'uk',
+        'Flemish': 'nl'
+      };
+      
+      // currentLanguage is already the display name (e.g., "Chinese"), not an object
+      const targetLang = langMap[currentLanguage] || 'en';
+      
+      logTranslation(`🎯 Current language: "${currentLanguage}" → Target code: "${targetLang}"`);
+      
+      // If target is English or same as source, no translation needed
+      if (targetLang === 'en' || targetLang === sourceLanguage) {
+        setTranslatedText(text);
+        return;
+      }
       
       setIsLoading(true);
       try {
-        const result = await translateContent(text, sourceLanguage);
+        logTranslation(`🔄 Starting translation for: "${text.substring(0, 50)}..."`);
+        logTranslation(`📍 Source: ${sourceLanguage} → Target: ${targetLang}`);
+        
+        // Use the translation service directly for real-time translation
+        const result = await translationService.translateText(text, targetLang, sourceLanguage);
+        
+        logTranslation(`✅ Translation result: "${result.substring(0, 50)}..."`);
+        logTranslation(`🔍 Text changed: ${text !== result ? 'YES' : 'NO'}`);
+        
         setTranslatedText(result);
       } catch (error) {
-        console.warn('Translation failed:', error);
+        logWarn('❌ Translation failed:', error);
         setTranslatedText(text); // Fallback to original
       } finally {
         setIsLoading(false);
@@ -146,7 +178,7 @@ export const useTranslatedStories = (stories) => {
         const result = await translateStories(stories);
         setTranslatedStories(result);
       } catch (error) {
-        console.warn('Stories translation failed:', error);
+        logWarn('Stories translation failed:', error);
         setTranslatedStories(stories); // Fallback to original
       } finally {
         setIsLoading(false);

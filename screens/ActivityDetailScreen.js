@@ -9,7 +9,9 @@ import {
   Dimensions,
   Alert
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { DIFFICULTY_LEVELS } from '../data/learningCategories';
+import { useDynamicTranslation } from '../hooks/useDynamicTranslation';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -20,14 +22,32 @@ const ActivityDetailScreen = ({ route, navigation }) => {
   const [completedSteps, setCompletedSteps] = useState([]);
   const [activityProgress, setActivityProgress] = useState(0);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const { t, i18n } = useTranslation();
+  
+  // Translation toggle state
+  const [isTranslationEnabled, setIsTranslationEnabled] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [translationCache, setTranslationCache] = useState({});
+  
+  // Get current language for caching
+  const currentLanguage = i18n.language || 'en';
+
+  // Import translation service directly for on-demand use
+  const { translateContent: translateService } = useDynamicTranslation();
+  
+  // Translation function for UI elements
+  const translateText = (text) => {
+    if (!text) return text;
+    return t(text, { defaultValue: text });
+  };
 
 
 
   useEffect(() => {
     // Calculate progress percentage
-    const progress = (completedSteps.length / activity.instructions.length) * 100;
+    const progress = (completedSteps.length / displayContent.instructions.length) * 100;
     setActivityProgress(progress);
-  }, [completedSteps, activity.instructions.length]);
+  }, [completedSteps, displayContent.instructions.length]);
 
   const handleBackPress = () => {
     console.log('handleBackPress called, isStarted:', isStarted);
@@ -76,12 +96,12 @@ const ActivityDetailScreen = ({ route, navigation }) => {
     
     if (isStarted) {
       Alert.alert(
-        'Leave Activity?',
-        'Are you sure you want to leave this activity? Your progress will be lost.',
+        translateText('Leave Activity?'),
+        translateText('Are you sure you want to leave this activity? Your progress will be lost.'),
         [
-          { text: 'Stay', style: 'cancel' },
+          { text: translateText('Stay'), style: 'cancel' },
           { 
-            text: 'Leave', 
+            text: translateText('Leave'), 
             style: 'destructive', 
             onPress: () => {
               console.log('User confirmed leaving activity');
@@ -103,7 +123,7 @@ const ActivityDetailScreen = ({ route, navigation }) => {
   };
 
   const handleNextStep = () => {
-    if (currentStep < activity.instructions.length - 1) {
+    if (currentStep < displayContent.instructions.length - 1) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -123,14 +143,130 @@ const ActivityDetailScreen = ({ route, navigation }) => {
 
   const handleCompleteActivity = () => {
     Alert.alert(
-      'Great Job! 🎉',
-      'You\'ve completed this activity! Would you like to try another one?',
+      translateText('Great Job! 🎉'),
+      translateText('You\'ve completed this activity! Would you like to try another one?'),
       [
-        { text: 'Stay Here', style: 'cancel' },
-        { text: 'Browse More', onPress: () => navigation.goBack() }
+        { text: translateText('Stay Here'), style: 'cancel' },
+        { text: translateText('Browse More'), onPress: () => navigation.goBack() }
       ]
     );
   };
+
+  // Handle translation toggle
+  const handleTranslationToggle = async () => {
+    if (!isTranslationEnabled) {
+      // Enabling translation - check cache first
+      const cacheKey = `${activity?.id}_${currentLanguage}`;
+      if (translationCache[cacheKey]) {
+        // Use cached translation
+        setIsTranslationEnabled(true);
+        return;
+      }
+      
+      // Perform fresh translation
+      setIsTranslating(true);
+      try {
+        console.log('Starting translation for activity:', activity?.title);
+        
+        // Skip translation if target is English
+        if (currentLanguage === 'en' || currentLanguage === 'English') {
+          const translations = {
+            title: activity?.title || '',
+            description: activity?.description || '',
+            learningObjectives: activity?.learningObjectives || [],
+            instructions: activity?.instructions || [],
+            materials: activity?.materials || [],
+          };
+          
+          setTranslationCache(prev => ({
+            ...prev,
+            [cacheKey]: translations
+          }));
+          
+          setIsTranslationEnabled(true);
+          return;
+        }
+        
+        // Translate all content pieces
+        const translations = {};
+        
+        if (activity?.title) {
+          translations.title = await translateService(activity.title);
+        }
+        
+        if (activity?.description) {
+          translations.description = await translateService(activity.description);
+        }
+        
+        if (activity?.learningObjectives) {
+          translations.learningObjectives = await Promise.all(
+            activity.learningObjectives.map(obj => translateService(obj))
+          );
+        }
+        
+        if (activity?.instructions) {
+          translations.instructions = await Promise.all(
+            activity.instructions.map(async (instruction) => ({
+              ...instruction,
+              title: await translateService(instruction.title),
+              description: await translateService(instruction.description),
+              tip: instruction.tip ? await translateService(instruction.tip) : '',
+            }))
+          );
+        }
+        
+        if (activity?.materials) {
+          translations.materials = await Promise.all(
+            activity.materials.map(material => translateService(material))
+          );
+        }
+        
+        // Cache the translations
+        setTranslationCache(prev => ({
+          ...prev,
+          [cacheKey]: translations
+        }));
+        
+        setIsTranslationEnabled(true);
+        console.log('Translation completed successfully');
+      } catch (error) {
+        console.error('Translation error:', error);
+        alert(`Translation failed: ${error.message}. Please try again.`);
+      } finally {
+        setIsTranslating(false);
+      }
+    } else {
+      // Disabling translation - show original content
+      setIsTranslationEnabled(false);
+    }
+  };
+
+  // Get display content based on translation state
+  const getDisplayContent = () => {
+    if (!isTranslationEnabled) {
+      return {
+        title: activity?.title || '',
+        description: activity?.description || '',
+        learningObjectives: activity?.learningObjectives || [],
+        instructions: activity?.instructions || [],
+        materials: activity?.materials || [],
+      };
+    }
+    
+    // Use cached translations when available
+    const cacheKey = `${activity?.id}_${currentLanguage}`;
+    const cached = translationCache[cacheKey] || {};
+    
+    return {
+      title: cached.title || activity?.title || '',
+      description: cached.description || activity?.description || '',
+      learningObjectives: cached.learningObjectives || activity?.learningObjectives || [],
+      instructions: cached.instructions || activity?.instructions || [],
+      materials: cached.materials || activity?.materials || [],
+    };
+  };
+
+  const displayContent = getDisplayContent();
 
   const getDifficultyColor = () => {
     return DIFFICULTY_LEVELS[activity.difficulty.id.toUpperCase()]?.color || '#6c757d';
@@ -140,21 +276,21 @@ const ActivityDetailScreen = ({ route, navigation }) => {
     <ScrollView style={styles.previewContainer} showsVerticalScrollIndicator={false}>
       {/* Activity Overview */}
       <View style={styles.overviewSection}>
-        <Text style={styles.activityTitle}>{activity.title}</Text>
-        <Text style={styles.activityDescription}>{activity.description}</Text>
+        <Text style={styles.activityTitle}>{translateText(activity.title)}</Text>
+        <Text style={styles.activityDescription}>{displayContent.description}</Text>
         
         {/* Activity Meta Information */}
         <View style={styles.metaContainer}>
           <View style={styles.metaRow}>
             <View style={styles.metaItem}>
               <Text style={styles.metaIcon}>⏱️</Text>
-              <Text style={styles.metaLabel}>Duration</Text>
+              <Text style={styles.metaLabel}>{translateText("Duration")}</Text>
               <Text style={styles.metaValue}>{activity.duration}</Text>
             </View>
             <View style={styles.metaItem}>
               <Text style={styles.metaIcon}>👶</Text>
-              <Text style={styles.metaLabel}>Age Group</Text>
-              <Text style={styles.metaValue}>{activity.ageGroup}</Text>
+              <Text style={styles.metaLabel}>{translateText("Age Group")}</Text>
+              <Text style={styles.metaValue}>{translateText(activity.ageGroup)}</Text>
             </View>
           </View>
           
@@ -163,13 +299,13 @@ const ActivityDetailScreen = ({ route, navigation }) => {
               <Text style={[styles.difficultyBadge, { backgroundColor: getDifficultyColor() }]}>
                 {activity.difficulty.icon}
               </Text>
-              <Text style={styles.metaLabel}>Difficulty</Text>
-              <Text style={styles.metaValue}>{activity.difficulty.name}</Text>
+              <Text style={styles.metaLabel}>{translateText("Difficulty")}</Text>
+              <Text style={styles.metaValue}>{translateText(activity.difficulty.name)}</Text>
             </View>
             <View style={styles.metaItem}>
               <Text style={styles.metaIcon}>🎯</Text>
-              <Text style={styles.metaLabel}>Type</Text>
-              <Text style={styles.metaValue}>{activity.type.replace('_', ' ')}</Text>
+              <Text style={styles.metaLabel}>{translateText("Type")}</Text>
+              <Text style={styles.metaValue}>{translateText(activity.type.replace('_', ' '))}</Text>
             </View>
           </View>
         </View>
@@ -177,9 +313,9 @@ const ActivityDetailScreen = ({ route, navigation }) => {
 
       {/* Learning Goals */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>🎯 Learning Goals</Text>
+        <Text style={styles.sectionTitle}>🎯 {translateText("Learning Goals")}</Text>
         <View style={styles.goalsList}>
-          {activity.learningGoals.map((goal, index) => (
+          {displayContent.learningObjectives.map((goal, index) => (
             <View key={index} style={styles.goalItem}>
               <Text style={styles.goalBullet}>•</Text>
               <Text style={styles.goalText}>{goal}</Text>
@@ -191,9 +327,9 @@ const ActivityDetailScreen = ({ route, navigation }) => {
       {/* Materials Needed */}
       {activity.materials && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📦 Materials Needed</Text>
+          <Text style={styles.sectionTitle}>📦 {translateText("Materials Needed")}</Text>
           <View style={styles.materialsList}>
-            {activity.materials.map((material, index) => (
+            {displayContent.materials.map((material, index) => (
               <View key={index} style={styles.materialItem}>
                 <Text style={styles.materialBullet}>✓</Text>
                 <Text style={styles.materialText}>{material}</Text>
@@ -206,11 +342,11 @@ const ActivityDetailScreen = ({ route, navigation }) => {
       {/* Safety Tips */}
       {activity.safetyTips && (
         <View style={[styles.section, styles.safetySection]}>
-          <Text style={styles.sectionTitle}>⚠️ Safety Tips</Text>
+          <Text style={styles.sectionTitle}>⚠️ {translateText("Safety Tips")}</Text>
           {activity.safetyTips.map((tip, index) => (
             <View key={index} style={styles.safetyItem}>
               <Text style={styles.safetyBullet}>!</Text>
-              <Text style={styles.safetyText}>{tip}</Text>
+              <Text style={styles.safetyText}>{translateText(tip)}</Text>
             </View>
           ))}
         </View>
@@ -218,8 +354,8 @@ const ActivityDetailScreen = ({ route, navigation }) => {
 
       {/* Instructions Preview */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>📋 Instructions ({activity.instructions.length} steps)</Text>
-        {activity.instructions.map((instruction, index) => (
+        <Text style={styles.sectionTitle}>📋 {translateText("Instructions")} ({displayContent.instructions.length} {translateText("steps")})</Text>
+        {displayContent.instructions.map((instruction, index) => (
           <View key={index} style={styles.instructionPreview}>
             <View style={styles.stepNumber}>
               <Text style={styles.stepNumberText}>{index + 1}</Text>
@@ -230,11 +366,11 @@ const ActivityDetailScreen = ({ route, navigation }) => {
       </View>
 
       {/* Tips */}
-      {activity.tips && (
+      {displayContent.tips && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>💡 Tips for Success</Text>
+          <Text style={styles.sectionTitle}>💡 {translateText("Tips for Success")}</Text>
           <View style={styles.tipsContainer}>
-            <Text style={styles.tipsText}>{activity.tips}</Text>
+            <Text style={styles.tipsText}>{displayContent.tips}</Text>
           </View>
         </View>
       )}
@@ -242,11 +378,11 @@ const ActivityDetailScreen = ({ route, navigation }) => {
       {/* Fun Facts */}
       {activity.funFacts && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🤓 Fun Facts</Text>
+          <Text style={styles.sectionTitle}>🤓 {translateText("Fun Facts")}</Text>
           {activity.funFacts.map((fact, index) => (
             <View key={index} style={styles.factItem}>
               <Text style={styles.factIcon}>✨</Text>
-              <Text style={styles.factText}>{fact}</Text>
+              <Text style={styles.factText}>{translateText(fact)}</Text>
             </View>
           ))}
         </View>
@@ -261,16 +397,16 @@ const ActivityDetailScreen = ({ route, navigation }) => {
       {/* Progress Bar */}
       <View style={styles.progressSection}>
         <View style={styles.progressHeader}>
-          <Text style={styles.progressTitle}>Progress</Text>
+          <Text style={styles.progressTitle}>{translateText("Progress")}</Text>
           <Text style={styles.progressText}>
-            {currentStep + 1} of {activity.instructions.length}
+            {currentStep + 1} {translateText("of")} {displayContent.instructions.length}
           </Text>
         </View>
         <View style={styles.progressBarContainer}>
           <View 
             style={[
               styles.progressBar, 
-              { width: `${((currentStep + 1) / activity.instructions.length) * 100}%` }
+              { width: `${((currentStep + 1) / displayContent.instructions.length) * 100}%` }
             ]} 
           />
         </View>
@@ -282,23 +418,23 @@ const ActivityDetailScreen = ({ route, navigation }) => {
           <View style={[styles.stepNumberLarge, { backgroundColor: getDifficultyColor() }]}>
             <Text style={styles.stepNumberLargeText}>{currentStep + 1}</Text>
           </View>
-          <Text style={styles.stepTitle}>Step {currentStep + 1}</Text>
+          <Text style={styles.stepTitle}>{translateText("Step")} {currentStep + 1}</Text>
         </View>
         
         <View style={styles.instructionContainer}>
           <Text style={styles.currentInstruction}>
-            {activity.instructions[currentStep]}
+            {displayContent.instructions[currentStep]}
           </Text>
         </View>
 
         {/* Materials for this step (if applicable) */}
         {activity.materials && currentStep === 0 && (
           <View style={styles.stepMaterials}>
-            <Text style={styles.stepMaterialsTitle}>Materials for this activity:</Text>
+            <Text style={styles.stepMaterialsTitle}>{translateText("Materials for this activity:")}</Text>
             {activity.materials.map((material, index) => (
               <View key={index} style={styles.stepMaterialItem}>
                 <Text style={styles.stepMaterialBullet}>•</Text>
-                <Text style={styles.stepMaterialText}>{material}</Text>
+                <Text style={styles.stepMaterialText}>{translateText(material)}</Text>
               </View>
             ))}
           </View>
@@ -315,17 +451,17 @@ const ActivityDetailScreen = ({ route, navigation }) => {
           disabled={currentStep === 0}
         >
           <Text style={[styles.navButtonText, currentStep === 0 && styles.navButtonTextDisabled]}>
-            ← Previous
+            ← {translateText("Previous")}
           </Text>
         </TouchableOpacity>
 
-        {currentStep === activity.instructions.length - 1 ? (
+        {currentStep === displayContent.instructions.length - 1 ? (
           <TouchableOpacity style={[styles.navButton, styles.completeButton]} onPress={handleCompleteActivity}>
-            <Text style={[styles.navButtonText, styles.completeButtonText]}>Complete! 🎉</Text>
+            <Text style={[styles.navButtonText, styles.completeButtonText]}>{translateText("Complete! 🎉")}</Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity style={[styles.navButton, styles.nextButton]} onPress={handleCompleteStep}>
-            <Text style={[styles.navButtonText, styles.nextButtonText]}>Step Done ✓</Text>
+            <Text style={[styles.navButtonText, styles.nextButtonText]}>{translateText("Step Done ✓")}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -364,9 +500,9 @@ const ActivityDetailScreen = ({ route, navigation }) => {
         </TouchableOpacity>
         
         <View style={styles.headerContent}>
-          <Text style={styles.headerCategory}>{categoryName}</Text>
+          <Text style={styles.headerCategory}>{translateText(categoryName)}</Text>
           <Text style={styles.headerTitle} numberOfLines={2}>
-            {activity.title}
+            {displayContent.title}
           </Text>
         </View>
 
@@ -376,6 +512,42 @@ const ActivityDetailScreen = ({ route, navigation }) => {
           <View style={styles.headerProgress}>
             <Text style={styles.headerProgressText}>
               {Math.round(activityProgress)}%
+            </Text>
+          </View>
+        )}
+      </View>
+
+      {/* Translation Toggle */}
+      <View style={styles.translationToggleContainer}>
+        <TouchableOpacity
+          style={[
+            styles.translationToggle,
+            isTranslationEnabled && styles.translationToggleActive
+          ]}
+          onPress={handleTranslationToggle}
+          disabled={isTranslating}
+        >
+          <Text style={styles.toggleIcon}>
+            {isTranslating ? "⏳" : "🌍"}
+          </Text>
+          <Text style={[
+            styles.translationToggleText,
+            isTranslationEnabled && styles.translationToggleTextActive
+          ]}>
+            {isTranslating 
+              ? "Translating..." 
+              : isTranslationEnabled 
+                ? "Show Original" 
+                : "Translate Activity"
+            }
+          </Text>
+        </TouchableOpacity>
+        
+        {/* Language indicator */}
+        {isTranslationEnabled && (
+          <View style={styles.languageIndicator}>
+            <Text style={styles.languageText}>
+              Translated to {currentLanguage.toUpperCase()}
             </Text>
           </View>
         )}
@@ -395,7 +567,7 @@ const ActivityDetailScreen = ({ route, navigation }) => {
             accessibilityLabel="Start activity"
           >
             <Text style={styles.startButtonIcon}>▶️</Text>
-            <Text style={styles.startButtonText}>Start Activity</Text>
+            <Text style={styles.startButtonText}>{translateText("Start Activity")}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -404,9 +576,9 @@ const ActivityDetailScreen = ({ route, navigation }) => {
       {showExitConfirm && (
         <View style={styles.confirmationOverlay}>
           <View style={styles.confirmationModal}>
-            <Text style={styles.confirmationTitle}>Leave Activity?</Text>
+            <Text style={styles.confirmationTitle}>{translateText("Leave Activity?")}</Text>
             <Text style={styles.confirmationMessage}>
-              Your progress will be lost if you leave now.
+              {translateText("Your progress will be lost if you leave now.")}
             </Text>
             <View style={styles.confirmationButtons}>
               <TouchableOpacity
@@ -416,7 +588,7 @@ const ActivityDetailScreen = ({ route, navigation }) => {
                   setShowExitConfirm(false);
                 }}
               >
-                <Text style={styles.cancelButtonText}>Stay</Text>
+                <Text style={styles.cancelButtonText}>{translateText("Stay")}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.confirmButton, styles.leaveButton]}
@@ -430,7 +602,7 @@ const ActivityDetailScreen = ({ route, navigation }) => {
                   }
                 }}
               >
-                <Text style={styles.leaveButtonText}>Leave</Text>
+                <Text style={styles.leaveButtonText}>{translateText("Leave")}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -970,6 +1142,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#fff',
+  },
+  // Translation Toggle Styles
+  translationToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#f8f9fa',
+    padding: 12,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  translationText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#495057',
+  },
+  translationSwitch: {
+    transform: [{ scale: 1.1 }],
   },
 });
 

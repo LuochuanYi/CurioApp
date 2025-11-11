@@ -3,7 +3,7 @@
 
 export const TRANSLATION_CONFIG = {
   // Current provider: 'mock' | 'google' | 'azure' | 'aws'
-  provider: 'mock',
+  provider: 'google',
   
   // API keys (keep these secure in real apps)
   apiKeys: {
@@ -88,6 +88,36 @@ export const MOCK_TRANSLATIONS = {
     'The Amazing Water Cycle Adventure': '神奇的水循环冒险',
     'The Robot Who Learned to Feel': '学会感受的机器人',
     'Cinderella\'s Kindness': '灰姑娘的善良',
+    
+    // Story Content (sample translations)
+    'Once upon a time, there were three little pigs who decided to build their own houses.': '从前，有三只小猪决定建造自己的房子。',
+    'The first little pig built his house out of straw because it was easy and quick.': '第一只小猪用稻草建造房子，因为这样简单快捷。',
+    'The second little pig built his house out of sticks because it was a bit stronger than straw.': '第二只小猪用木棍建房子，因为这比稻草更坚固一些。',
+    'But the third little pig was very wise.': '但是第三只小猪非常聪明。',
+    'He decided to build his house out of bricks, even though it took much longer and was harder work.': '他决定用砖头建房子，尽管这需要更长时间和更辛苦的工作。',
+    'One day, a big bad wolf came along and saw the first little pig in his house of straw.': '有一天，一只大灰狼路过，看见第一只小猪在他的稻草房子里。',
+    '"Little pig, little pig, let me come in!" said the wolf.': '"小猪，小猪，让我进来！"大灰狼说。',
+    '"Not by the hair on my chinny-chin-chin!" replied the first little pig.': '"绝对不行！"第一只小猪回答。',
+    '"Then I\'ll huff, and I\'ll puff, and I\'ll blow your house in!" And the wolf blew down the house of straw.': '"那我就吹气，用力吹，把你的房子吹倒！"大灰狼把稻草房子吹倒了。',
+    'The first little pig ran to his brother\'s house made of sticks.': '第一只小猪跑到他兄弟的木棍房子里。',
+    'But the wolf followed and blew that house down too!': '但是大灰狼跟着来，也把那座房子吹倒了！',
+    'Both pigs ran to their brother\'s brick house.': '两只小猪都跑到他们兄弟的砖房子里。',
+    'The wolf huffed and puffed, but he couldn\'t blow down the strong brick house.': '大灰狼用力吹气，但是他吹不倒坚固的砖房子。',
+    'The three little pigs learned that taking time to do things right keeps you safe and sound.': '三只小猪学会了，花时间把事情做对能让你安全无忧。',
+    'Hard work and planning ahead help us stay safe and secure.': '努力工作和提前计划帮助我们保持安全。',
+    
+    // UI Text
+    'Loading story...': '正在加载故事...',
+    'Loading...': '加载中...',
+    'Pause Narration': '暂停朗读',
+    'Read Story Aloud': '大声朗读故事',
+    'Currently reading:': '当前朗读：',
+    'What We Learn:': '我们学到了什么：',
+    'More Stories': '更多故事',
+    'Previous': '上一个',
+    'Next': '下一个',
+    'Previous story': '上一个故事',
+    'Next story': '下一个故事',
     
     // Categories
     'Bedtime': '睡前故事',

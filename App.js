@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { LanguageProvider } from './contexts/LanguageContext';
 import './i18n'; // Initialize i18n
+import './utils/logger'; // Initialize centralized logging
 import HomeScreen from './screens/HomeScreen';
 import MonitorScreen from './screens/MonitorScreen';
 import EngageScreen from './screens/Engagescreen';
@@ -15,7 +16,7 @@ import ActivityDetailScreen from './screens/ActivityDetailScreen';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  console.log('App component rendering...');
+  // console.log('App component rendering...'); // Disabled to reduce log noise
   
   return (
     <LanguageProvider>

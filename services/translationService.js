@@ -1,6 +1,8 @@
 // Dynamic Translation Service
 // Provides real-time translation for content while caching results for performance
 import { TRANSLATION_CONFIG, MOCK_TRANSLATIONS } from '../config/translationConfig';
+import alternativeTranslationService from './alternativeTranslationService';
+import { logTranslation, logError, logWarn } from '../utils/logger';
 
 class TranslationService {
   constructor() {
@@ -23,21 +25,82 @@ class TranslationService {
 
   // Translation API with configurable providers
   async translateWithAPI(text, fromLang = 'en', toLang = 'zh') {
-    // Simulate API call delay for mock provider
-    if (TRANSLATION_CONFIG.provider === 'mock') {
-      await new Promise(resolve => setTimeout(resolve, 200));
+    logTranslation(`Translating: "${text.substring(0, 50)}..." from ${fromLang} to ${toLang}`);
+    
+    // Use enhanced alternative translation service as primary method (CORS-free)
+    try {
+      logTranslation(`Calling alternative translation service...`);
+      const alternativeResult = await alternativeTranslationService.translateWithBackup(text, toLang);
+      logTranslation(`Alternative service returned: "${alternativeResult.substring(0, 50)}..."`);
       
-      const key = `${fromLang}-${toLang}`;
-      const translations = MOCK_TRANSLATIONS[key] || {};
-      
-      return translations[text] || text; // Return original if no translation found
+      if (alternativeResult && alternativeResult !== text) {
+        logTranslation(`Alternative translation successful: "${alternativeResult.substring(0, 50)}..."`);
+        return alternativeResult;
+      } else {
+        logTranslation(`Alternative translation returned same text or empty result`);
+      }
+    } catch (altError) {
+      logWarn('Alternative translation failed:', altError.message);
     }
     
-    // TODO: Add real API implementations for production
-    // For now, fallback to mock translations
+    // Fallback to mock translations
+    logTranslation('Using mock translations as fallback');
+    return this.getMockTranslation(text, fromLang, toLang);
+  }
+
+  // Fallback method for mock translations
+  getMockTranslation(text, fromLang, toLang) {
     const key = `${fromLang}-${toLang}`;
     const translations = MOCK_TRANSLATIONS[key] || {};
-    return translations[text] || text;
+    
+    // Try exact match first
+    if (translations[text]) {
+      logTranslation(`Using mock translation for: "${text.substring(0, 30)}..."`);
+      return translations[text];
+    }
+    
+    // For longer text, try to find partial matches
+    if (text.length > 50) {
+      for (const [mockText, translation] of Object.entries(translations)) {
+        if (text.includes(mockText) && mockText.length > 10) {
+          logTranslation(`Using partial mock translation for: "${mockText}"`);
+          return translation;
+        }
+      }
+    }
+    
+    logTranslation(`No mock translation found for: "${text.substring(0, 30)}...", using original`);
+    return text; // Return original if no translation found
+  }
+
+  // Split long text into sentences for better translation
+  splitIntoSentences(text) {
+    if (!text) return [];
+    // Split by periods, exclamation marks, question marks while preserving the punctuation
+    return text.split(/([.!?]+\s+)/).filter(chunk => chunk.trim().length > 0);
+  }
+
+  // Add request debouncing to prevent too many API calls
+  async debounceTranslation(text, targetLanguage, sourceLanguage) {
+    const key = `${sourceLanguage}-${targetLanguage}-${text}`;
+    
+    if (this.pendingTranslations && this.pendingTranslations[key]) {
+      return this.pendingTranslations[key];
+    }
+    
+    const translationPromise = this.translateText(text, targetLanguage, sourceLanguage);
+    
+    if (!this.pendingTranslations) this.pendingTranslations = {};
+    this.pendingTranslations[key] = translationPromise;
+    
+    try {
+      const result = await translationPromise;
+      delete this.pendingTranslations[key];
+      return result;
+    } catch (error) {
+      delete this.pendingTranslations[key];
+      throw error;
+    }
   }
 
   // Main translation method with caching
@@ -59,15 +122,34 @@ class TranslationService {
     }
 
     try {
-      // Translate using API
-      const translated = await this.translateWithAPI(text, sourceLanguage, targetLanguage);
-      
-      // Cache the result
-      this.cache.set(cacheKey, translated);
-      
-      return translated;
+      // For long text, break into sentences and translate each
+      if (text.length > 200) {
+        const sentences = this.splitIntoSentences(text);
+        const translatedSentences = [];
+        
+        for (const sentence of sentences) {
+          if (sentence.trim()) {
+            const translatedSentence = await this.translateWithAPI(sentence.trim(), sourceLanguage, targetLanguage);
+            translatedSentences.push(translatedSentence);
+          } else {
+            translatedSentences.push(sentence); // Keep spacing/punctuation
+          }
+        }
+        
+        const result = translatedSentences.join(' ');
+        this.cache.set(cacheKey, result);
+        return result;
+      } else {
+        // Translate short text directly
+        const translated = await this.translateWithAPI(text, sourceLanguage, targetLanguage);
+        
+        // Cache the result
+        this.cache.set(cacheKey, translated);
+        
+        return translated;
+      }
     } catch (error) {
-      console.warn('Translation failed, using original text:', error);
+      logWarn('Translation failed, using original text:', error);
       return text; // Fallback to original text
     }
   }
@@ -96,7 +178,7 @@ class TranslationService {
         originalSummary: story.summary
       };
     } catch (error) {
-      console.warn('Story translation failed:', error);
+      logWarn('Story translation failed:', error);
       return story;
     }
   }
@@ -113,7 +195,7 @@ class TranslationService {
         originalName: category.name
       };
     } catch (error) {
-      console.warn('Category translation failed:', error);
+      logWarn('Category translation failed:', error);
       return category;
     }
   }

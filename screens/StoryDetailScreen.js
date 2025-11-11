@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTextToSpeech } from '../hooks/useTextToSpeech';
 import { getStoryById, STORY_CATEGORIES } from '../data/stories';
+import { useDynamicTranslation, useTranslatedText } from '../hooks/useDynamicTranslation';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -58,8 +60,22 @@ const useStoryDetail = (storyId) => {
 const StoryDetailScreen = ({ navigation, route }) => {
   const { story } = route.params || {};
   const { data, loading } = useStoryDetail(story?.id);
+  const { t, i18n } = useTranslation();
   
-  // Text-to-speech functionality using custom hook
+  // Translation toggle state
+  const [isTranslationEnabled, setIsTranslationEnabled] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [translationCache, setTranslationCache] = useState({});
+  
+  // Get current language for translation
+  const currentLanguage = i18n.language || 'en';
+  
+  // Text-to-speech functionality using custom hook (must be initialized first)
+  // Use original or translated content based on toggle state
+  const contentForSpeech = isTranslationEnabled && translationCache.content 
+    ? translationCache.content 
+    : data?.content;
+    
   const {
     isPlaying,
     isLoading,
@@ -74,7 +90,150 @@ const StoryDetailScreen = ({ navigation, route }) => {
     changeSpeed,
     formatProgress,
     getCurrentText,
-  } = useTextToSpeech(data?.content);
+  } = useTextToSpeech(contentForSpeech);
+  
+  // Import translation service directly for on-demand use
+  const { translateContent: translateService } = useDynamicTranslation();
+  
+  // For UI elements, use the t function directly
+  const translateText = (text) => {
+    if (!text) return text;
+    return t(text, { defaultValue: text });
+  };
+
+  // Handle translation toggle
+  const handleTranslationToggle = async () => {
+    if (!isTranslationEnabled) {
+      // Enabling translation - check if we have cached translations
+      const cacheKey = `${data?.id}_${currentLanguage}`;
+      if (translationCache[cacheKey]) {
+        // Use cached translation
+        setIsTranslationEnabled(true);
+      } else {
+        // Perform fresh translation
+        setIsTranslating(true);
+        try {
+          console.log('Starting translation for story:', data?.title);
+          console.log('Current language from i18n:', currentLanguage);
+          console.log('Translation service function:', typeof translateService);
+          
+          // Check if we need to translate (don't translate if target is English)
+          if (currentLanguage === 'en' || currentLanguage === 'English') {
+            console.log('Target language is English, no translation needed');
+            // Just use the original content
+            const translations = {
+              title: data?.title || '',
+              content: data?.content || '',
+              moral: data?.moral || '',
+              categoryName: data?.categoryName || '',
+              prevTitle: data?.previousStory?.title || '',
+              nextTitle: data?.nextStory?.title || '',
+            };
+            
+            // Cache the "translations" (which are just the originals)
+            setTranslationCache(prev => ({
+              ...prev,
+              [cacheKey]: translations
+            }));
+            
+            setIsTranslationEnabled(true);
+            console.log('Translation completed (no-op for English)');
+            return;
+          }
+          
+          // Translate all content pieces
+          const translations = {};
+          
+          if (data?.title) {
+            console.log('Translating title:', data.title);
+            translations.title = await translateService(data.title);
+            console.log('Title translated to:', translations.title);
+          }
+          if (data?.content) {
+            console.log('Translating content...');
+            translations.content = await translateService(data.content);
+            console.log('Content translated successfully');
+          }
+          if (data?.moral) {
+            console.log('Translating moral...');
+            translations.moral = await translateService(data.moral);
+          }
+          if (data?.categoryName) {
+            console.log('Translating category...');
+            translations.categoryName = await translateService(data.categoryName);
+          }
+          if (data?.previousStory?.title) {
+            console.log('Translating previous story title...');
+            translations.prevTitle = await translateService(data.previousStory.title);
+          }
+          if (data?.nextStory?.title) {
+            console.log('Translating next story title...');
+            translations.nextTitle = await translateService(data.nextStory.title);
+          }
+          
+          // Cache the translations
+          setTranslationCache(prev => ({
+            ...prev,
+            [cacheKey]: translations
+          }));
+          
+          setIsTranslationEnabled(true);
+          console.log('Translation completed successfully');
+        } catch (error) {
+          console.error('Translation error:', error);
+          console.error('Error details:', {
+            message: error.message,
+            stack: error.stack,
+            currentLanguage,
+            dataKeys: data ? Object.keys(data) : 'no data',
+            storyTitle: data?.title
+          });
+          // Keep translation disabled on error but show user feedback
+          alert(`Translation failed: ${error.message}. Please try again.`);
+        } finally {
+          setIsTranslating(false);
+        }
+      }
+    } else {
+      // Disabling translation - show original content
+      setIsTranslationEnabled(false);
+      // Stop speech if playing translated content
+      if (isPlaying) {
+        stopStory();
+      }
+    }
+  };
+
+  // Get display content based on translation state
+  const getDisplayContent = () => {
+    if (!isTranslationEnabled) {
+      return {
+        title: data?.title || '',
+        content: data?.content || '',
+        moral: data?.moral || '',
+        categoryName: data?.categoryName || '',
+        prevTitle: data?.previousStory?.title || '',
+        nextTitle: data?.nextStory?.title || '',
+        currentText: getCurrentText?.() || '',
+      };
+    }
+    
+    // Use cached translations when available
+    const cacheKey = `${data?.id}_${currentLanguage}`;
+    const cached = translationCache[cacheKey] || {};
+    
+    return {
+      title: cached.title || data?.title || '',
+      content: cached.content || data?.content || '',
+      moral: cached.moral || data?.moral || '',
+      categoryName: cached.categoryName || data?.categoryName || '',
+      prevTitle: cached.prevTitle || data?.previousStory?.title || '',
+      nextTitle: cached.nextTitle || data?.nextStory?.title || '',
+      currentText: getCurrentText?.() || '', // TTS text doesn't need translation for now
+    };
+  };
+
+  const displayContent = getDisplayContent();
 
   // Cleanup speech when component unmounts or navigating away
   useEffect(() => {
@@ -115,13 +274,13 @@ const StoryDetailScreen = ({ navigation, route }) => {
           accessibilityLabel="Go back to stories"
         >
           <Text style={styles.backIcon}>←</Text>
-          <Text style={styles.backText}>Stories</Text>
+          <Text style={styles.backText}>{translateText("Stories")}</Text>
         </TouchableOpacity>
       </View>
 
       {loading ? (
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading story...</Text>
+          <Text style={styles.loadingText}>{translateText("Loading story...")}</Text>
         </View>
       ) : (
         <>
@@ -129,7 +288,7 @@ const StoryDetailScreen = ({ navigation, route }) => {
           <View style={styles.storyHeader}>
             <View style={styles.storyMeta}>
               <Text style={styles.category}>
-                {data?.categoryIcon} {data?.categoryName}
+                {data?.categoryIcon} {displayContent.categoryName}
               </Text>
               <View style={styles.metaRow}>
                 <Text style={styles.rating}>⭐ {data?.rating}</Text>
@@ -138,7 +297,54 @@ const StoryDetailScreen = ({ navigation, route }) => {
                 <Text style={styles.language}>🌍 {data?.language}</Text>
               </View>
             </View>
-            <Text style={styles.title}>{data?.title}</Text>
+            <Text style={styles.title}>{displayContent.title}</Text>
+            
+            {/* Translation Toggle */}
+            <View style={styles.translationSection}>
+              <TouchableOpacity
+                style={[
+                  styles.translationToggle,
+                  isTranslationEnabled && styles.translationToggleActive,
+                  isTranslating && styles.translationToggleLoading
+                ]}
+                onPress={handleTranslationToggle}
+                disabled={isTranslating}
+                accessible={true}
+                accessibilityRole="button"
+                accessibilityLabel={
+                  isTranslating 
+                    ? "Translating story..." 
+                    : isTranslationEnabled 
+                      ? "Show original content" 
+                      : "Translate to your language"
+                }
+              >
+                {isTranslating ? (
+                  <>
+                    <Text style={styles.translationIcon}>⏳</Text>
+                    <Text style={styles.translationText}>{translateText("Translating...")}</Text>
+                  </>
+                ) : isTranslationEnabled ? (
+                  <>
+                    <Text style={styles.translationIcon}>🔄</Text>
+                    <Text style={styles.translationText}>{translateText("Show Original")}</Text>
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.translationIcon}>🌐</Text>
+                    <Text style={styles.translationText}>{translateText("Translate Story")}</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+              
+              {/* Language indicator */}
+              <Text style={styles.languageIndicator}>
+                {isTranslationEnabled 
+                  ? `📖 ${translateText("Translated")} (${currentLanguage.toUpperCase()})`
+                  : `📖 ${translateText("Original")} (${data?.language || 'EN'})`
+                }
+              </Text>
+            </View>
           </View>
 
           {/* Audio Controls */}
@@ -155,13 +361,13 @@ const StoryDetailScreen = ({ navigation, route }) => {
               {isLoading ? (
                 <>
                   <Text style={styles.playIcon}>⏳</Text>
-                  <Text style={styles.playText}>Loading...</Text>
+                  <Text style={styles.playText}>{translateText("Loading...")}</Text>
                 </>
               ) : (
                 <>
                   <Text style={styles.playIcon}>{isPlaying ? '⏸️' : '🔊'}</Text>
                   <Text style={styles.playText}>
-                    {isPlaying ? 'Pause Narration' : 'Read Story Aloud'}
+                    {isPlaying ? translateText('Pause Narration') : translateText('Read Story Aloud')}
                   </Text>
                 </>
               )}
@@ -188,8 +394,8 @@ const StoryDetailScreen = ({ navigation, route }) => {
                 {/* Current sentence being read */}
                 {getCurrentText() && (
                   <View style={styles.currentTextContainer}>
-                    <Text style={styles.currentTextLabel}>Currently reading:</Text>
-                    <Text style={styles.currentText}>{getCurrentText()}</Text>
+                    <Text style={styles.currentTextLabel}>{translateText("Currently reading:")}</Text>
+                    <Text style={styles.currentText}>{displayContent.currentText}</Text>
                   </View>
                 )}
               </View>
@@ -248,21 +454,21 @@ const StoryDetailScreen = ({ navigation, route }) => {
               accessible={true}
               accessibilityRole="text"
             >
-              {data?.content}
+              {displayContent.content}
             </Text>
           </View>
 
           {/* Story Moral */}
           {data?.moral && (
             <View style={styles.moralSection}>
-              <Text style={styles.moralTitle}>What We Learn:</Text>
-              <Text style={styles.moralText}>{data.moral}</Text>
+              <Text style={styles.moralTitle}>{translateText("What We Learn:")}</Text>
+              <Text style={styles.moralText}>{displayContent.moral}</Text>
             </View>
           )}
 
           {/* Navigation Controls */}
           <View style={styles.navigationSection}>
-            <Text style={styles.navigationTitle}>More Stories</Text>
+            <Text style={styles.navigationTitle}>{translateText("More Stories")}</Text>
             <View style={styles.navigationButtons}>
               {data?.previousStory && (
                 <TouchableOpacity
@@ -270,11 +476,11 @@ const StoryDetailScreen = ({ navigation, route }) => {
                   onPress={handlePreviousStory}
                   accessible={true}
                   accessibilityRole="button"
-                  accessibilityLabel={`Previous story: ${data.previousStory.title}`}
+                  accessibilityLabel={`${translateText("Previous story")}: ${displayContent.prevTitle}`}
                 >
                   <Text style={styles.navIcon}>⬅️</Text>
-                  <Text style={styles.navTitle}>Previous</Text>
-                  <Text style={styles.navSubtitle}>{data.previousStory.title}</Text>
+                  <Text style={styles.navTitle}>{translateText("Previous")}</Text>
+                  <Text style={styles.navSubtitle}>{displayContent.prevTitle}</Text>
                 </TouchableOpacity>
               )}
               
@@ -284,11 +490,11 @@ const StoryDetailScreen = ({ navigation, route }) => {
                   onPress={handleNextStory}
                   accessible={true}
                   accessibilityRole="button"
-                  accessibilityLabel={`Next story: ${data.nextStory.title}`}
+                  accessibilityLabel={`${translateText("Next story")}: ${displayContent.nextTitle}`}
                 >
                   <Text style={styles.navIcon}>➡️</Text>
-                  <Text style={styles.navTitle}>Next</Text>
-                  <Text style={styles.navSubtitle}>{data.nextStory.title}</Text>
+                  <Text style={styles.navTitle}>{translateText("Next")}</Text>
+                  <Text style={styles.navSubtitle}>{displayContent.nextTitle}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -382,6 +588,48 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#2c3e50',
     lineHeight: 36,
+  },
+
+  // Translation Section
+  translationSection: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#ecf0f1',
+  },
+  translationToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    alignSelf: 'flex-start',
+    marginBottom: 8,
+  },
+  translationToggleActive: {
+    backgroundColor: '#e3f2fd',
+    borderColor: '#2196f3',
+  },
+  translationToggleLoading: {
+    backgroundColor: '#fff3e0',
+    borderColor: '#ff9800',
+  },
+  translationIcon: {
+    fontSize: 16,
+    marginRight: 8,
+  },
+  translationText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2c3e50',
+  },
+  languageIndicator: {
+    fontSize: 12,
+    color: '#7f8c8d',
+    fontStyle: 'italic',
   },
 
   // Audio Section

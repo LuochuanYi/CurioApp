@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   TextInput
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import {
   LEARNING_CATEGORIES,
   getActivitiesByCategory,
@@ -16,6 +17,7 @@ import {
   getActivitiesByDifficulty,
   searchActivities
 } from '../data/learningCategories';
+import { useDynamicTranslation } from '../hooks/useDynamicTranslation';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -23,6 +25,24 @@ const CategoryDetailScreen = ({ route, navigation }) => {
   const { categoryId } = route.params;
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const { t, i18n } = useTranslation();
+  
+  // Translation toggle state
+  const [isTranslationEnabled, setIsTranslationEnabled] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [translationCache, setTranslationCache] = useState({});
+  
+  // Get current language for caching
+  const currentLanguage = i18n.language || 'en';
+  
+  // Import translation service directly for on-demand use
+  const { translateContent: translateService } = useDynamicTranslation();
+  
+  // Translation function for UI elements
+  const translateText = (text) => {
+    if (!text) return text;
+    return t(text, { defaultValue: text });
+  };
   
   const category = Object.values(LEARNING_CATEGORIES).find(cat => cat.id === categoryId);
   
@@ -50,7 +70,7 @@ const CategoryDetailScreen = ({ route, navigation }) => {
   if (!category) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text style={styles.errorText}>Category not found</Text>
+        <Text style={styles.errorText}>{translateText("Category not found")}</Text>
       </SafeAreaView>
     );
   }
@@ -65,6 +85,87 @@ const CategoryDetailScreen = ({ route, navigation }) => {
 
   const handleBackPress = () => {
     navigation.goBack();
+  };
+
+  // Handle translation toggle
+  const handleTranslationToggle = async () => {
+    if (!isTranslationEnabled) {
+      // Enabling translation - check cache first
+      const cacheKey = `category_${categoryId}_${currentLanguage}`;
+      if (translationCache[cacheKey]) {
+        // Use cached translation
+        setIsTranslationEnabled(true);
+        return;
+      }
+      
+      // Perform fresh translation
+      setIsTranslating(true);
+      try {
+        console.log('Starting translation for category:', category?.name);
+        
+        // Skip translation if target is English
+        if (currentLanguage === 'en' || currentLanguage === 'English') {
+          const translations = {
+            categoryName: category?.name || '',
+            categoryDescription: category?.description || '',
+            activities: filteredActivities || [],
+          };
+          
+          setTranslationCache(prev => ({
+            ...prev,
+            [cacheKey]: translations
+          }));
+          
+          setIsTranslationEnabled(true);
+          return;
+        }
+        
+        // Translate category info and activities
+        const translations = {};
+        
+        if (category?.name) {
+          translations.categoryName = await translateService(category.name);
+        }
+        
+        if (category?.description) {
+          translations.categoryDescription = await translateService(category.description);
+        }
+        
+        // Translate all activities
+        if (filteredActivities.length > 0) {
+          translations.activities = await Promise.all(
+            filteredActivities.map(async (activity) => ({
+              ...activity,
+              title: await translateService(activity.title),
+              description: await translateService(activity.description),
+              learningGoals: await Promise.all(
+                activity.learningGoals.map(goal => translateService(goal))
+              ),
+              materials: activity.materials ? await Promise.all(
+                activity.materials.map(material => translateService(material))
+              ) : []
+            }))
+          );
+        }
+        
+        // Cache the translations
+        setTranslationCache(prev => ({
+          ...prev,
+          [cacheKey]: translations
+        }));
+        
+        setIsTranslationEnabled(true);
+        console.log('Category translation completed successfully');
+      } catch (error) {
+        console.error('Category translation error:', error);
+        alert(`Translation failed: ${error.message}. Please try again.`);
+      } finally {
+        setIsTranslating(false);
+      }
+    } else {
+      // Disabling translation - show original content
+      setIsTranslationEnabled(false);
+    }
   };
 
   const getDifficultyColor = (difficulty) => {
@@ -88,13 +189,49 @@ const CategoryDetailScreen = ({ route, navigation }) => {
         <View style={styles.headerContent}>
           <Text style={styles.categoryIcon}>{category.icon}</Text>
           <View style={styles.headerTextContainer}>
-            <Text style={styles.categoryTitle}>{category.name}</Text>
+            <Text style={styles.categoryTitle}>{displayContent.categoryName}</Text>
             <Text style={styles.categorySubtitle}>
-              {category.totalActivities} activities • {category.ageGroup}
+              {category.totalActivities} {translateText("activities")} • {translateText(category.ageGroup)}
             </Text>
-            <Text style={styles.categoryDescription}>{category.description}</Text>
+            <Text style={styles.categoryDescription}>{displayContent.categoryDescription}</Text>
           </View>
         </View>
+      </View>
+
+      {/* Translation Toggle */}
+      <View style={styles.translationToggleContainer}>
+        <TouchableOpacity
+          style={[
+            styles.translationToggle,
+            isTranslationEnabled && styles.translationToggleActive
+          ]}
+          onPress={handleTranslationToggle}
+          disabled={isTranslating}
+        >
+          <Text style={styles.toggleIcon}>
+            {isTranslating ? "⏳" : "🌍"}
+          </Text>
+          <Text style={[
+            styles.translationToggleText,
+            isTranslationEnabled && styles.translationToggleTextActive
+          ]}>
+            {isTranslating 
+              ? "Translating..." 
+              : isTranslationEnabled 
+                ? "Show Original" 
+                : "Translate Category"
+            }
+          </Text>
+        </TouchableOpacity>
+        
+        {/* Language indicator */}
+        {isTranslationEnabled && (
+          <View style={styles.languageIndicator}>
+            <Text style={styles.languageText}>
+              Translated to {currentLanguage.toUpperCase()}
+            </Text>
+          </View>
+        )}
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -104,7 +241,7 @@ const CategoryDetailScreen = ({ route, navigation }) => {
             <Text style={styles.searchIcon}>🔍</Text>
             <TextInput
               style={styles.searchInput}
-              placeholder="Search activities..."
+              placeholder={translateText("Search activities...")}
               value={searchQuery}
               onChangeText={setSearchQuery}
               placeholderTextColor="#999"
@@ -122,7 +259,7 @@ const CategoryDetailScreen = ({ route, navigation }) => {
 
         {/* Difficulty Filter */}
         <View style={styles.filterSection}>
-          <Text style={styles.filterTitle}>Difficulty Level:</Text>
+          <Text style={styles.filterTitle}>{translateText("Difficulty Level:")}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.difficultyScroll}>
             <TouchableOpacity
               style={[
@@ -135,7 +272,7 @@ const CategoryDetailScreen = ({ route, navigation }) => {
                 styles.difficultyText,
                 selectedDifficulty === 'all' && styles.selectedDifficultyText
               ]}>
-                All Levels
+                {translateText("All Levels")}
               </Text>
             </TouchableOpacity>
             
@@ -157,7 +294,7 @@ const CategoryDetailScreen = ({ route, navigation }) => {
                   styles.difficultyText,
                   selectedDifficulty === difficulty.id && styles.selectedDifficultyText
                 ]}>
-                  {difficulty.name}
+                  {translateText(difficulty.name)}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -167,11 +304,11 @@ const CategoryDetailScreen = ({ route, navigation }) => {
         {/* Results Header */}
         <View style={styles.resultsHeader}>
           <Text style={styles.resultsTitle}>
-            {searchQuery ? `Search Results` : 
-             selectedDifficulty === 'all' ? 'All Activities' : 
-             `${DIFFICULTY_LEVELS[selectedDifficulty.toUpperCase()]?.name} Activities`}
+            {searchQuery ? translateText(`Search Results`) : 
+             selectedDifficulty === 'all' ? translateText('All Activities') : 
+             `${translateText(DIFFICULTY_LEVELS[selectedDifficulty.toUpperCase()]?.name)} ${translateText('Activities')}`}
           </Text>
-          <Text style={styles.resultsCount}>{filteredActivities.length} activities</Text>
+          <Text style={styles.resultsCount}>{filteredActivities.length} {translateText("activities")}</Text>
         </View>
 
         {/* Activities List */}
@@ -179,13 +316,13 @@ const CategoryDetailScreen = ({ route, navigation }) => {
           {filteredActivities.length === 0 ? (
             <View style={styles.emptyState}>
               <Text style={styles.emptyIcon}>🔍</Text>
-              <Text style={styles.emptyTitle}>No activities found</Text>
+              <Text style={styles.emptyTitle}>{translateText("No activities found")}</Text>
               <Text style={styles.emptySubtitle}>
-                {searchQuery ? 'Try a different search term' : 'Try changing the difficulty filter'}
+                {searchQuery ? translateText('Try a different search term') : translateText('Try changing the difficulty filter')}
               </Text>
             </View>
           ) : (
-            filteredActivities.map((activity, index) => (
+            displayContent.activities.map((activity, index) => (
               <TouchableOpacity
                 key={activity.id}
                 style={[
@@ -209,7 +346,7 @@ const CategoryDetailScreen = ({ route, navigation }) => {
                   </View>
                   <View style={styles.activityMeta}>
                     <Text style={styles.activityDuration}>⏱️ {activity.duration}</Text>
-                    <Text style={styles.activityAgeGroup}>👶 {activity.ageGroup}</Text>
+                    <Text style={styles.activityAgeGroup}>👶 {translateText(activity.ageGroup)}</Text>
                   </View>
                 </View>
                 
@@ -221,7 +358,7 @@ const CategoryDetailScreen = ({ route, navigation }) => {
                   <View style={styles.learningGoals}>
                     {activity.learningGoals.slice(0, 3).map((goal, goalIndex) => (
                       <View key={goalIndex} style={styles.goalTag}>
-                        <Text style={styles.goalText}>{goal}</Text>
+                        <Text style={styles.goalText}>{translateText(goal)}</Text>
                       </View>
                     ))}
                     {activity.learningGoals.length > 3 && (
@@ -537,6 +674,74 @@ const styles = StyleSheet.create({
   // Bottom spacing
   bottomSpacing: {
     height: 30,
+  },
+
+  // Translation Toggle Styles
+  translationToggleContainer: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    backgroundColor: '#f8f9fa',
+  },
+  
+  translationToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFF',
+    borderColor: '#007AFF',
+    borderWidth: 1.5,
+    borderRadius: 22,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    minWidth: 150,
+    justifyContent: 'center',
+    shadowColor: '#007AFF',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  
+  translationToggleActive: {
+    backgroundColor: '#007AFF',
+    borderColor: '#007AFF',
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  
+  toggleIcon: {
+    fontSize: 16,
+    marginRight: 8,
+  },
+  
+  translationToggleText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#007AFF',
+    letterSpacing: 0.3,
+  },
+  
+  translationToggleTextActive: {
+    color: '#FFFFFF',
+  },
+  
+  languageIndicator: {
+    marginTop: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    backgroundColor: '#E8F5E8',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#81C784',
+  },
+  
+  languageText: {
+    fontSize: 12,
+    color: '#2E7D32',
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
 });
 

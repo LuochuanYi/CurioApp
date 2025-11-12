@@ -64,34 +64,34 @@
   },
   "home": {
     "welcome": {
-      "title": "Welcome to Curio!",
-      "description": "Start by exploring our Quick Actions below, or tap \"Explore Content\" to browse all stories and songs."
+      "title": "🌟 Welcome to Curio! 🌟",
+      "description": "Ready for amazing adventures? Let's start exploring stories and songs together!"
     },
     "sections": {
       "quickActions": {
-        "title": "Quick Actions",
-        "description": "Jump right into activities tailored for this time of day",
-        "bedtimeStories": "Bedtime Stories",
-        "bedtimeDescription": "Calming content for sleepy time",
-        "surpriseMe": "Surprise Me", 
-        "surpriseDescription": "Random story or song just for you",
-        "continueReading": "Continue Reading",
-        "continuePickUp": "Pick up where you left off",
-        "startNew": "Start a new adventure together",
-        "exploreContent": "Explore Content",
-        "exploreDescription": "Browse all stories, songs & activities"
+        "title": "⚡ Let's Play! ⚡",
+        "description": "Pick something fun to do right now!",
+        "bedtimeStories": "🌙 Sleepy Time Stories",
+        "bedtimeDescription": "Cozy stories for bedtime snuggles",
+        "surpriseMe": "🎲 Surprise Me!", 
+        "surpriseDescription": "A magical surprise just for you!",
+        "continueReading": "📖 Keep Reading",
+        "continuePickUp": "Continue your adventure!",
+        "startNew": "Start something new and exciting!",
+        "exploreContent": "🚀 Explore Everything",
+        "exploreDescription": "Discover all our amazing stories & songs!"
       },
       "stories": {
-        "recent": "Recent Stories",
-        "featured": "Featured Stories",
-        "recentDescription": "Continue where you left off or discover what's new",
-        "featuredDescription": "Handpicked stories perfect for you and your child",
-        "continueProgress": "Continue • {{progress}}% complete",
-        "inProgress": "in progress"
+        "recent": "📚 Your Story Adventures",
+        "featured": "✨ Amazing Stories",
+        "recentDescription": "Jump back into your favorite adventures!",
+        "featuredDescription": "Wonderful stories picked just for you!",
+        "continueProgress": "Keep going • {{progress}}% done!",
+        "inProgress": "adventure in progress"
       },
       "songs": {
-        "featured": "Featured Songs",
-        "description": "Sing-along favorites and musical adventures for every mood"
+        "featured": "🎵 Fun Songs to Sing",
+        "description": "Catchy tunes and sing-along favorites that make you smile!"
       },
       "airQuality": {
         "title": "Today's Air Quality",
@@ -103,16 +103,16 @@
     },
     "empty": {
       "stories": {
-        "title": "No stories yet!",
-        "description": "Tap \"Explore Content\" above to discover amazing stories waiting for you"
+        "title": "🌟 Ready for your first story?",
+        "description": "Tap \"🚀 Explore Everything\" above to discover magical stories waiting just for you!"
       },
       "songs": {
-        "title": "No songs yet!",
-        "description": "Tap \"Explore Content\" to find songs perfect for singing along"
+        "title": "🎵 Let's find some music!",
+        "description": "Tap \"🚀 Explore Everything\" to discover fun songs you can sing and dance to!"
       }
     },
     "navigation": {
-      "hint": "💡 Try tapping \"Engage\" below to discover all our stories and songs!"
+      "hint": "🌈 Ready to explore? Tap \"💡 Engage\" below to discover all our amazing stories and songs!"
     }
   },
   "stories": {

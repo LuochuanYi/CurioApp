@@ -356,10 +356,14 @@ const HomeScreen = ({ navigation }) => {
               if (!song) return null;
               
               const songColors = [
-                CURIO_THEME.colors.goldenYellow,
-                CURIO_THEME.colors.softMint,
-                CURIO_THEME.colors.accentOrange,
-                CURIO_THEME.colors.skyBlue
+                '#FF6B6B', // Coral Red
+                '#4ECDC4', // Turquoise
+                '#45B7D1', // Sky Blue
+                '#96CEB4', // Mint Green
+                '#FFEAA7', // Sunny Yellow
+                '#DDA0DD', // Plum Purple
+                '#98D8C8', // Seafoam
+                '#F7DC6F'  // Golden Yellow
               ];
               
               return (
@@ -484,28 +488,40 @@ const HomeScreen = ({ navigation }) => {
         </View>
       )}
 
-      {/* Bottom Navigation - Curio Style */}
+      {/* Bottom Navigation - Kid-Friendly Rainbow Style */}
       <View style={{
-        backgroundColor: CURIO_THEME.colors.background,
+        backgroundColor: '#FFFFFF',
         flexDirection: 'row',
-        paddingVertical: CURIO_THEME.spacing.md,
+        paddingVertical: CURIO_THEME.spacing.lg,
         paddingHorizontal: CURIO_THEME.spacing.screenPadding,
-        borderTopWidth: 1,
-        borderTopColor: CURIO_THEME.colors.lightGray,
-        ...CURIO_THEME.shadows.nav,
+        borderTopWidth: 4,
+        borderTopColor: '#FFE0B2',
+        elevation: 8,
+        shadowColor: '#FF5722',
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
       }}>
         {[
-          { key: 'Home', icon: '🏠', label: t('common.home'), active: true, color: CURIO_THEME.colors.skyBlue },
-          { key: 'Monitor', icon: '📊', label: t('common.monitor'), active: false, color: CURIO_THEME.colors.deepNavy },
-          { key: 'Engage', icon: '💡', label: t('common.engage'), active: false, color: CURIO_THEME.colors.goldenYellow },
-          { key: 'Personalize', icon: '👤', label: t('common.personalize'), active: false, color: CURIO_THEME.colors.deepNavy }
+          { key: 'Home', icon: '🏠', label: t('common.home'), active: true, color: '#FF6B6B', bgColor: '#FFEBEE' },
+          { key: 'Monitor', icon: '📊', label: t('common.monitor'), active: false, color: '#4ECDC4', bgColor: '#E0F2F1' },
+          { key: 'Engage', icon: '💡', label: t('common.engage'), active: false, color: '#FFEAA7', bgColor: '#FFFDE7' },
+          { key: 'Personalize', icon: '👤', label: t('common.personalize'), active: false, color: '#DDA0DD', bgColor: '#F3E5F5' }
         ].map((navItem) => (
           <TouchableOpacity
             key={navItem.key}
             style={{
               flex: 1,
               alignItems: 'center',
-              paddingVertical: CURIO_THEME.spacing.xs,
+              paddingVertical: CURIO_THEME.spacing.sm,
+              paddingHorizontal: CURIO_THEME.spacing.xs,
+              borderRadius: 16,
+              backgroundColor: navItem.active ? navItem.bgColor : 'transparent',
+              elevation: navItem.active ? 3 : 0,
+              shadowColor: navItem.color,
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: navItem.active ? 0.2 : 0,
+              shadowRadius: 4,
             }}
             onPress={() => handleNavigation(navItem.key)}
             accessible={true}
@@ -517,28 +533,32 @@ const HomeScreen = ({ navigation }) => {
             accessibilityState={{ selected: navItem.active }}
           >
             <Text style={{ 
-              fontSize: 24, 
+              fontSize: 28, 
               marginBottom: CURIO_THEME.spacing.xs,
-              opacity: navItem.active ? 1 : 0.6,
+              opacity: navItem.active ? 1 : 0.7,
+              textShadowColor: navItem.active ? 'rgba(0, 0, 0, 0.1)' : 'transparent',
+              textShadowOffset: { width: 1, height: 1 },
+              textShadowRadius: 2,
             }}>
               {navItem.icon}
             </Text>
             <Text style={[
               TEXT_STYLES.caption,
               { 
-                color: navItem.active ? navItem.color : CURIO_THEME.colors.textSecondary,
-                fontWeight: navItem.active ? '600' : '400',
+                color: navItem.active ? navItem.color : '#757575',
+                fontWeight: navItem.active ? '800' : '600',
+                fontSize: 11,
               }
             ]}>
               {navItem.label}
             </Text>
             {navItem.active && (
               <View style={{
-                width: 30,
-                height: 3,
+                width: 40,
+                height: 4,
                 backgroundColor: navItem.color,
                 borderRadius: 2,
-                marginTop: 5,
+                marginTop: 4,
               }} />
             )}
           </TouchableOpacity>
@@ -549,58 +569,66 @@ const HomeScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  // Branding Header
+  // Branding Header - Kid-Friendly Rainbow Design
   brandingHeader: {
     marginTop: 20,
     marginHorizontal: 20,
-    borderRadius: 20,
+    borderRadius: 25,
     overflow: 'hidden',
-    backgroundColor: '#fff',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    backgroundColor: 'linear-gradient(135deg, #FF6B6B, #4ECDC4, #45B7D1, #96CEB4, #FFEAA7, #DDA0DD)',
+    elevation: 6,
+    shadowColor: '#FF6B6B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    borderWidth: 3,
+    borderColor: '#FFF',
   },
   brandingImage: {
     width: '100%',
-    height: 120,
+    height: 130,
     resizeMode: 'contain',
   },
 
-  // Welcome hint
+  // Welcome hint - Playful Kid Design
   welcomeHint: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: CURIO_THEME.colors.surface,
+    backgroundColor: '#FFE5F1',
     marginHorizontal: CURIO_THEME.spacing.screenPadding,
-    padding: CURIO_THEME.spacing.md,
-    borderRadius: CURIO_THEME.radius.md,
-    borderLeftWidth: 4,
-    borderLeftColor: CURIO_THEME.colors.primary,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
+    padding: CURIO_THEME.spacing.lg,
+    borderRadius: 20,
+    borderWidth: 3,
+    borderColor: '#FF6B9D',
+    elevation: 4,
+    shadowColor: '#FF6B9D',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    transform: [{ rotate: '-1deg' }],
   },
   welcomeIcon: {
-    fontSize: 28,
+    fontSize: 36,
     marginRight: CURIO_THEME.spacing.md,
+    transform: [{ rotate: '15deg' }],
   },
   welcomeTextContainer: {
     flex: 1,
   },
   welcomeTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: CURIO_THEME.colors.textPrimary,
-    marginBottom: 4,
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#FF1744',
+    marginBottom: 6,
+    textShadowColor: 'rgba(255, 23, 68, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   welcomeText: {
-    fontSize: 14,
-    color: CURIO_THEME.colors.textSecondary,
-    lineHeight: 18,
+    fontSize: 15,
+    color: '#8E24AA',
+    lineHeight: 20,
+    fontWeight: '600',
   },
 
   // Section Styles
@@ -614,58 +642,76 @@ const styles = StyleSheet.create({
     marginBottom: CURIO_THEME.spacing.md,
   },
   sectionIcon: {
-    fontSize: 28,
+    fontSize: 32,
     marginRight: CURIO_THEME.spacing.sm,
+    textShadowColor: 'rgba(0, 0, 0, 0.1)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: CURIO_THEME.colors.textPrimary,
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#2E7D32',
     flex: 1,
+    textShadowColor: 'rgba(46, 125, 50, 0.2)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
   sectionDescription: {
-    fontSize: 14,
-    color: CURIO_THEME.colors.textSecondary,
+    fontSize: 15,
+    color: '#5E35B1',
     marginBottom: CURIO_THEME.spacing.md,
-    lineHeight: 20,
+    lineHeight: 22,
+    fontWeight: '600',
   },
   sectionContent: {
     gap: CURIO_THEME.spacing.sm,
   },
   
-  // Action Items (keep as horizontal for quick actions)
+  // Action Items - Colorful and Kid-Friendly
   actionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: CURIO_THEME.colors.surface,
-    padding: CURIO_THEME.spacing.md,
-    borderRadius: CURIO_THEME.radius.md,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
+    backgroundColor: '#FFFFFF',
+    padding: CURIO_THEME.spacing.lg,
+    borderRadius: 20,
+    elevation: 6,
+    shadowColor: '#FF5722',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    borderWidth: 2,
+    borderColor: '#FFE0B2',
+    marginVertical: 4,
+    transform: [{ scale: 1 }],
   },
   actionIcon: {
-    fontSize: 32,
+    fontSize: 40,
     marginRight: CURIO_THEME.spacing.md,
+    textShadowColor: 'rgba(0, 0, 0, 0.1)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   actionTextContainer: {
     flex: 1,
   },
   actionText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: CURIO_THEME.colors.textPrimary,
-    marginBottom: 2,
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#D32F2F',
+    marginBottom: 4,
+    textShadowColor: 'rgba(211, 47, 47, 0.2)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
   actionSubtitle: {
-    fontSize: 12,
-    color: CURIO_THEME.colors.textSecondary,
-    lineHeight: 16,
+    fontSize: 13,
+    color: '#7B1FA2',
+    lineHeight: 18,
+    fontWeight: '600',
   },
   
-  // Grid Layout
+  // Grid Layout - Kid-Friendly Cards
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -674,96 +720,142 @@ const styles = StyleSheet.create({
   },
   gridItem: {
     width: '47%',
-    backgroundColor: CURIO_THEME.colors.surface,
-    padding: CURIO_THEME.spacing.md,
-    borderRadius: CURIO_THEME.radius.md,
+    backgroundColor: '#FFFFFF',
+    padding: CURIO_THEME.spacing.lg,
+    borderRadius: 20,
     alignItems: 'center',
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
+    elevation: 8,
+    shadowColor: '#E91E63',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    borderWidth: 3,
+    borderColor: '#FFE0E6',
+    transform: [{ rotate: Math.random() > 0.5 ? '1deg' : '-1deg' }],
   },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: CURIO_THEME.spacing.sm,
+    marginBottom: CURIO_THEME.spacing.md,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
   },
   gridIcon: {
-    fontSize: 24,
+    fontSize: 28,
+    textShadowColor: 'rgba(0, 0, 0, 0.1)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   gridTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: CURIO_THEME.colors.textPrimary,
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#1565C0',
     textAlign: 'center',
-    marginBottom: 4,
+    marginBottom: 6,
+    textShadowColor: 'rgba(21, 101, 192, 0.2)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
   gridSubtitle: {
     fontSize: 12,
-    color: CURIO_THEME.colors.textSecondary,
+    color: '#8E24AA',
     textAlign: 'center',
+    fontWeight: '600',
   },
   
-  // Streak badge
+  // Streak badge - Rainbow celebration
   streakBadge: {
-    backgroundColor: '#ff6b9d',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    background: 'linear-gradient(45deg, #FF6B6B, #4ECDC4, #45B7D1)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    elevation: 4,
+    shadowColor: '#FF6B6B',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    transform: [{ rotate: '-5deg' }, { scale: 1.1 }],
   },
   streakText: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 14,
+    fontWeight: '800',
     color: '#fff',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
 
-  // Progress indicators
+  // Progress indicators - Colorful and animated
   progressBadge: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: CURIO_THEME.colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  progressText: {
-    fontSize: 8,
-  },
-  progressBar: {
-    width: '100%',
-    height: 3,
-    backgroundColor: CURIO_THEME.colors.lightGray,
-    borderRadius: 2,
-    marginTop: 6,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: CURIO_THEME.colors.primary,
-    borderRadius: 2,
-  },
-
-  // New badge
-  newBadge: {
     position: 'absolute',
     top: -6,
     right: -6,
-    backgroundColor: CURIO_THEME.colors.success,
-    paddingHorizontal: 4,
-    paddingVertical: 2,
-    borderRadius: 6,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#FF5722',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#FF5722',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  progressText: {
+    fontSize: 10,
+  },
+  progressBar: {
+    width: '100%',
+    height: 6,
+    backgroundColor: '#FFE0B2',
+    borderRadius: 10,
+    marginTop: 8,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#FFCC02',
+  },
+  progressFill: {
+    height: '100%',
+    background: 'linear-gradient(90deg, #FF6B6B, #4ECDC4, #45B7D1, #96CEB4)',
+    borderRadius: 10,
+  },
+
+  // New badge - Sparkly and exciting
+  newBadge: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: '#FF1744',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    elevation: 6,
+    shadowColor: '#FF1744',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    transform: [{ rotate: '15deg' }],
   },
   newBadgeText: {
-    fontSize: 8,
-    fontWeight: '700',
+    fontSize: 9,
+    fontWeight: '900',
     color: '#fff',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
 
   // Empty states

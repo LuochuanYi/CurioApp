@@ -496,6 +496,319 @@ And so Cinderella and the Prince were married, and they lived happily ever after
     moral: "Kindness and a good heart are the most beautiful qualities of all.",
     nextStory: 2,
     previousStory: 3
+  },
+
+  // CLASSIC BEDTIME STORIES
+  {
+    id: 7,
+    title: "Goodnight Moon",
+    category: STORY_CATEGORIES.BEDTIME.id,
+    rating: 4.9,
+    duration: "3 min",
+    ageGroup: "0-5 years",
+    language: "English",
+    tags: ["bedtime", "peaceful", "routine", "comfort"],
+    summary: "A soothing bedtime ritual of saying goodnight to familiar objects in a child's room.",
+    content: `In the great green room, there was a telephone and a red balloon and a picture of—
+
+The cow jumping over the moon.
+
+And there were three little bears sitting on chairs.
+
+And two little kittens and a pair of mittens.
+
+And a little toy house and a young mouse.
+
+And a comb and a brush and a bowl full of mush.
+
+And a quiet old lady who was whispering "hush."
+
+Goodnight room. Goodnight moon.
+
+Goodnight cow jumping over the moon.
+
+Goodnight light and the red balloon.
+
+Goodnight bears. Goodnight chairs.
+
+Goodnight kittens and goodnight mittens.
+
+Goodnight clocks and goodnight socks.
+
+Goodnight little house and goodnight mouse.
+
+Goodnight comb and goodnight brush.
+
+Goodnight nobody. Goodnight mush.
+
+And goodnight to the old lady whispering "hush."
+
+Goodnight stars. Goodnight air.
+
+Goodnight noises everywhere.`,
+    moral: "Peaceful bedtime routines help us feel safe and ready for sleep.",
+    nextStory: 8,
+    previousStory: 6
+  },
+
+  {
+    id: 8,
+    title: "Goldilocks and the Three Bears",
+    category: STORY_CATEGORIES.CLASSIC.id,
+    rating: 4.7,
+    duration: "6 min",
+    ageGroup: "3-7 years",
+    language: "English", 
+    tags: ["respect", "consequences", "family", "adventure"],
+    summary: "A curious girl learns about respecting others' homes and belongings.",
+    content: `Once upon a time, there was a little girl named Goldilocks who loved to explore.
+
+One day, while walking through the forest, she came upon a cozy little house. The door was open, so she peeked inside.
+
+In the kitchen, she found three bowls of porridge on the table. She was very hungry!
+
+First, she tried the largest bowl. "Ouch!" she cried. "This porridge is too hot!"
+
+Then she tried the medium bowl. "Yuck!" she said. "This porridge is too cold!"
+
+Finally, she tried the smallest bowl. "Mmm, this is just right!" And she ate it all up.
+
+Feeling sleepy, Goldilocks went to the living room and saw three chairs.
+
+First, she sat in the largest chair. "This chair is too hard!" she complained.
+
+Then she sat in the medium chair. "This chair is too soft!" she said.
+
+Finally, she sat in the smallest chair. "This is just right!" But suddenly, CRACK! The chair broke into pieces.
+
+Goldilocks went upstairs and found three beds.
+
+First, she lay on the largest bed. "This bed is too firm!"
+
+Then she tried the medium bed. "This bed is too bouncy!"
+
+Finally, she tried the smallest bed. "This is just right!" And she fell fast asleep.
+
+Soon, the three bears who lived in the house came home.
+
+"Someone's been eating my porridge!" growled Papa Bear in his deep voice.
+
+"Someone's been eating my porridge too!" said Mama Bear.
+
+"Someone's been eating my porridge, and it's all gone!" cried Baby Bear.
+
+They went to the living room.
+
+"Someone's been sitting in my chair!" growled Papa Bear.
+
+"Someone's been sitting in my chair too!" said Mama Bear.
+
+"Someone's been sitting in my chair, and it's broken!" wailed Baby Bear.
+
+They went upstairs.
+
+"Someone's been sleeping in my bed!" growled Papa Bear.
+
+"Someone's been sleeping in my bed too!" said Mama Bear.
+
+"Someone's been sleeping in my bed, and she's still there!" squeaked Baby Bear.
+
+Goldilocks woke up and saw the three bears. "Oh my!" she gasped, and she jumped out of bed, ran down the stairs, and out the door as fast as she could.
+
+And she never went into someone else's house uninvited again.`,
+    moral: "Always ask permission before using someone else's things.",
+    nextStory: 9,
+    previousStory: 7
+  },
+
+  {
+    id: 9,
+    title: "Little Red Riding Hood",
+    category: STORY_CATEGORIES.CLASSIC.id,
+    rating: 4.6,
+    duration: "7 min",
+    ageGroup: "4-8 years",
+    language: "English",
+    tags: ["safety", "family", "cleverness", "forest"],
+    summary: "A clever girl outsmarts a tricky wolf while visiting her grandmother.",
+    content: `Once upon a time, there was a sweet little girl who always wore a bright red cloak with a hood. Everyone called her Little Red Riding Hood.
+
+One morning, her mother said, "Little Red Riding Hood, your grandmother is feeling unwell. Please take this basket of fresh bread, honey, and jam to her cottage."
+
+"Of course, Mother!" said Little Red Riding Hood. "I'll take good care of grandmother."
+
+"Remember," warned her mother, "stay on the path and don't talk to strangers in the forest."
+
+Little Red Riding Hood promised and set off through the woods, carrying the basket carefully.
+
+As she walked along the forest path, a sly wolf appeared. "Hello there, little girl. Where are you going with that delicious-smelling basket?"
+
+Forgetting her mother's warning, Little Red Riding Hood said, "I'm taking food to my grandmother who lives in the cottage by the big oak tree."
+
+"How lovely!" said the wolf with a wicked grin. "I know a shortcut through the meadow filled with beautiful flowers. Why don't you pick some for your grandmother?"
+
+Little Red Riding Hood thought this sounded wonderful and left the safe path.
+
+But the wolf had tricked her! He ran straight to grandmother's cottage and knocked on the door.
+
+"Who is it?" called grandmother.
+
+"It's Little Red Riding Hood," lied the wolf in a high voice.
+
+"Come in, dear," said grandmother.
+
+The wolf burst in and locked poor grandmother safely in the closet. Then he put on her nightgown and cap and climbed into her bed.
+
+Soon, Little Red Riding Hood arrived with her basket and flowers.
+
+"Grandmother, I brought you some food and these beautiful flowers!"
+
+"Come closer, dear," said the wolf, trying to sound like grandmother.
+
+Little Red Riding Hood approached the bed, but something seemed strange.
+
+"Grandmother, what big eyes you have!"
+
+"All the better to see you with, my dear."
+
+"Grandmother, what big ears you have!"
+
+"All the better to hear you with, my dear."
+
+"Grandmother, what big teeth you have!"
+
+"All the better to eat you with!" growled the wolf, jumping out of bed.
+
+Little Red Riding Hood was very clever. She threw her heavy basket at the wolf and ran outside, shouting "Help! Help!"
+
+A kind woodsman heard her cries and came running. He chased away the wolf and freed grandmother from the closet.
+
+"Thank you for being so brave and clever," said the woodsman.
+
+From that day on, Little Red Riding Hood always stayed on safe paths and never talked to strangers.
+
+And grandmother felt much better after eating the delicious food Little Red Riding Hood had brought.`,
+    moral: "Stay safe by listening to your parents and being careful around strangers.",
+    nextStory: 10,
+    previousStory: 8
+  },
+
+  {
+    id: 10,
+    title: "The Tortoise and the Hare",
+    category: STORY_CATEGORIES.CLASSIC.id,
+    rating: 4.8,
+    duration: "5 min",
+    ageGroup: "4-8 years",
+    language: "English",
+    tags: ["perseverance", "humility", "friendship", "competition"],
+    summary: "A slow but steady tortoise teaches a speedy hare an important lesson about persistence.",
+    content: `Once upon a time, in a peaceful meadow, lived a speedy hare and a slow tortoise.
+
+The hare was very proud of how fast he could run. He would zoom around the meadow, showing off to all the other animals.
+
+"Look how fast I am!" boasted the hare. "I'm the fastest animal in the whole forest!"
+
+The gentle tortoise watched quietly. Finally, he spoke up in his calm voice.
+
+"Speed isn't everything, friend hare. Sometimes slow and steady wins the race."
+
+The hare laughed loudly. "You? Beat me in a race? That's impossible! You're the slowest animal I know!"
+
+"Would you like to find out?" asked the tortoise politely.
+
+All the forest animals gathered to watch this unusual race. The wise old owl agreed to be the judge.
+
+"The race will go from here to the big oak tree and back," announced the owl. "Ready, set, GO!"
+
+ZOOM! The hare shot forward like lightning, leaving the tortoise far behind.
+
+The hare ran so fast that soon he couldn't even see the tortoise. "This is too easy!" he thought. "I have plenty of time."
+
+Feeling very confident, the hare decided to take a nap under a shady tree. "I'll just rest for a few minutes. That slow tortoise will never catch up!"
+
+Meanwhile, the tortoise kept moving. Step by step, step by step, he never stopped. He wasn't fast, but he never gave up.
+
+The hare slept longer than he planned. When he woke up, the sun was getting low in the sky.
+
+"Oh no!" cried the hare. "I need to finish the race!"
+
+He ran as fast as he could toward the finish line. But when he got there, he couldn't believe his eyes.
+
+The tortoise was already there, surrounded by cheering animals!
+
+"Congratulations!" said the tortoise kindly. "It was a good race."
+
+The hare felt embarrassed but learned an important lesson. "You were right, friend tortoise. I'm sorry I was so boastful."
+
+From that day on, the hare and tortoise became the best of friends. The hare learned that being humble and persistent are just as important as being fast.`,
+    moral: "Slow and steady progress with persistence wins over speed without focus.",
+    nextStory: 11,
+    previousStory: 9
+  },
+
+  {
+    id: 11,
+    title: "The Ugly Duckling", 
+    category: STORY_CATEGORIES.BEDTIME.id,
+    rating: 4.9,
+    duration: "8 min",
+    ageGroup: "4-9 years",
+    language: "English",
+    tags: ["self-acceptance", "growth", "beauty", "kindness"],
+    summary: "A young swan learns that true beauty comes from within and everyone grows at their own pace.",
+    content: `Once upon a time, on a beautiful farm by a peaceful pond, Mother Duck was waiting for her eggs to hatch.
+
+One by one, the eggs began to crack. "Peep! Peep!" Out popped six fluffy yellow ducklings.
+
+But one egg was much larger than the others. When it finally hatched, out came a duckling that looked very different. He was bigger, grayer, and didn't look like his brothers and sisters at all.
+
+"Oh my," said Mother Duck. "You certainly are... different. But you're still my baby."
+
+The other ducklings weren't very kind. "Look at him!" they laughed. "He's so ugly and big!"
+
+Even the other animals on the farm were mean. "What an ugly duckling!" said the chickens and geese.
+
+The poor little duckling felt very sad. He tried to play with his brothers and sisters, but they always swam away from him.
+
+"Maybe I don't belong here," he thought sadly.
+
+One day, the duckling decided to leave the farm to find where he belonged. He walked and walked until he came to a marsh where wild ducks lived.
+
+"Can I stay here?" he asked hopefully.
+
+"You're too ugly," said the wild ducks. "Go away!"
+
+Winter came, and the poor duckling was cold and lonely. A kind farmer found him and took care of him, but the farmer's children scared him, so he ran away again.
+
+All winter long, the duckling hid in the reeds, feeling sad and alone.
+
+Finally, spring arrived. The duckling had grown much larger during the long winter. One day, he saw beautiful white birds swimming on the lake.
+
+"Those are the most beautiful birds I've ever seen," he sighed. "I wish I could be graceful like them, but I'm too ugly."
+
+The beautiful birds saw him and swam over. The duckling was frightened.
+
+"Please don't hurt me," he said, hanging his head low. "I know I'm ugly."
+
+"Ugly?" said one of the beautiful birds. "Look at your reflection in the water!"
+
+The duckling looked down and gasped. Looking back at him was not an ugly duckling, but a beautiful white swan!
+
+"You're not a duck at all!" said the other swans kindly. "You're one of us—a swan! That's why you looked different."
+
+The young swan couldn't believe it. He spread his magnificent white wings and held his elegant neck high.
+
+Some children playing by the lake pointed and called out, "Look at that beautiful new swan! He's the most beautiful one of all!"
+
+The swan thought of all the sadness he had felt, but now he understood. He had never been ugly—he was just different because he was growing into something beautiful.
+
+He swam happily with his new swan family, grateful for all he had learned about kindness and acceptance.
+
+And he lived happily ever after, always remembering to be kind to others who might look or feel different.`,
+    moral: "Everyone is beautiful in their own way, and we all grow and change at our own pace.",
+    nextStory: 1,
+    previousStory: 10
   }
 ];
 

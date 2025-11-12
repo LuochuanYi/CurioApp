@@ -18,6 +18,7 @@ import {
   searchActivities
 } from '../data/learningCategories';
 import { useDynamicTranslation } from '../hooks/useDynamicTranslation';
+import { logTranslation, logError } from '../utils/logger';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -101,7 +102,7 @@ const CategoryDetailScreen = ({ route, navigation }) => {
       // Perform fresh translation
       setIsTranslating(true);
       try {
-        console.log('Starting translation for category:', category?.name);
+        logTranslation('Starting translation for category:', category?.name);
         
         // Skip translation if target is English
         if (currentLanguage === 'en' || currentLanguage === 'English') {
@@ -155,9 +156,9 @@ const CategoryDetailScreen = ({ route, navigation }) => {
         }));
         
         setIsTranslationEnabled(true);
-        console.log('Category translation completed successfully');
+        logTranslation('Category translation completed successfully');
       } catch (error) {
-        console.error('Category translation error:', error);
+        logError('Category translation error:', error);
         alert(`Translation failed: ${error.message}. Please try again.`);
       } finally {
         setIsTranslating(false);
@@ -171,6 +172,33 @@ const CategoryDetailScreen = ({ route, navigation }) => {
   const getDifficultyColor = (difficulty) => {
     return DIFFICULTY_LEVELS[difficulty.id.toUpperCase()]?.color || '#6c757d';
   };
+
+  // Get display content based on translation state
+  const getDisplayContent = () => {
+    if (!isTranslationEnabled) {
+      return {
+        categoryName: category?.name || '',
+        categoryDescription: category?.description || '',
+        activities: filteredActivities || [],
+      };
+    }
+    
+    const cacheKey = `category_${categoryId}_${currentLanguage}`;
+    const cachedTranslations = translationCache[cacheKey];
+    
+    if (cachedTranslations) {
+      return cachedTranslations;
+    }
+    
+    // Fallback to original content if translation not available
+    return {
+      categoryName: category?.name || '',
+      categoryDescription: category?.description || '',
+      activities: filteredActivities || [],
+    };
+  };
+
+  const displayContent = getDisplayContent();
 
   return (
     <SafeAreaView style={styles.container}>

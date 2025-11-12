@@ -367,7 +367,7 @@ const EngageScreen = ({ navigation }) => {
   const { t } = useTranslation();
   const { currentLanguage } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState('bedtime');
-  const [selectedSongCategory, setSelectedSongCategory] = useState('bedtime');
+  const [selectedSongCategory, setSelectedSongCategory] = useState('classic');
   const { data: contentData, loading: contentLoading } = useContentData(selectedCategory);
 
   const handleNavigation = (screen) => {

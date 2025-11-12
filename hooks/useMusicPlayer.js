@@ -234,10 +234,23 @@ export const useMusicPlayer = (song) => {
       // Audio loading process
       logAudio('🎵 Setting up audio for:', song?.title || 'Unknown song');
       
+      // Set initial duration - use a more realistic estimate for songs
+      let initialDuration = 120; // Default 2 minutes for songs
+      
       if (song?.lyrics?.length > 0) {
         const lastLyric = song.lyrics[song.lyrics.length - 1];
-        setDuration(lastLyric.endTime || 30);
+        const lyricsDuration = lastLyric.endTime || 30;
+        
+        // If lyrics duration seems too short (less than 60s), estimate longer duration
+        if (lyricsDuration < 60) {
+          initialDuration = Math.max(lyricsDuration * 3, 120); // Triple the lyrics duration or 2 min minimum
+          logAudio('📏 Lyrics duration seems short:', lyricsDuration, 's, estimating:', initialDuration, 's for:', song.title);
+        } else {
+          initialDuration = lyricsDuration;
+        }
       }
+      
+      setDuration(initialDuration);
 
       // Initialize audio if song exists and background music is enabled
       if (song && backgroundMusicEnabled) {
@@ -271,6 +284,41 @@ export const useMusicPlayer = (song) => {
               );
 
               audioSound.current = sound;
+              
+              // Get the actual duration from the loaded audio file with retry mechanism
+              const getDurationWithRetry = async (retries = 3) => {
+                for (let attempt = 0; attempt < retries; attempt++) {
+                  try {
+                    // Wait a bit for audio to be fully loaded
+                    if (attempt > 0) {
+                      await new Promise(resolve => setTimeout(resolve, 500 * attempt));
+                    }
+                    
+                    const status = await sound.getStatusAsync();
+                    logAudio(`Attempt ${attempt + 1}: Audio status for ${song.title}:`, {
+                      isLoaded: status.isLoaded,
+                      durationMillis: status.durationMillis,
+                      error: status.error
+                    });
+                    
+                    if (status.isLoaded && status.durationMillis) {
+                      const actualDuration = status.durationMillis / 1000; // Convert to seconds
+                      setDuration(actualDuration);
+                      logAudio('✅ Audio duration detected:', actualDuration, 'seconds for:', song.title);
+                      return true;
+                    }
+                  } catch (statusError) {
+                    logWarn(`Attempt ${attempt + 1} failed to get audio duration:`, statusError.message);
+                  }
+                }
+                
+                logAudio('⚠️  Could not detect audio duration after', retries, 'attempts, using estimated duration for:', song.title);
+                return false;
+              };
+              
+              // Try to get duration (non-blocking)
+              getDurationWithRetry();
+              
               logAudio('Audio loaded successfully for:', song.title);
               
             } catch (audioError) {
@@ -282,11 +330,13 @@ export const useMusicPlayer = (song) => {
               });
               logAudio('🎵 Falling back to synthetic melody');
               
-              // Use fallback melody generation
+              // Use fallback melody generation with estimated duration
               if (Platform.OS === 'web' && window.AudioContext) {
                 try {
-                  audioSound.current = createSimpleMelody(song.id, duration);
-                  logAudio('✅ Fallback melody created for:', song.title);
+                  const estimatedDuration = initialDuration; // Use our estimated duration
+                  audioSound.current = createSimpleMelody(song.id, estimatedDuration);
+                  setDuration(estimatedDuration);
+                  logAudio('✅ Fallback melody created for:', song.title, 'with duration:', estimatedDuration, 's');
                 } catch (melodyError) {
                   logError('❌ Failed to create fallback melody:', melodyError);
                 }
@@ -297,9 +347,12 @@ export const useMusicPlayer = (song) => {
           } else {
             logAudio('No audio file available, using fallback melody for:', song.title);
             
-            // Use fallback melody generation
+            // Use fallback melody generation with estimated duration
             if (Platform.OS === 'web' && window.AudioContext) {
-              audioSound.current = createSimpleMelody(song.id, duration);
+              const estimatedDuration = initialDuration;
+              audioSound.current = createSimpleMelody(song.id, estimatedDuration);
+              setDuration(estimatedDuration);
+              logAudio('✅ Fallback melody created (no audio file) for:', song.title, 'with duration:', estimatedDuration, 's');
             }
           }
           

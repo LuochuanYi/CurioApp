@@ -20,18 +20,38 @@ const hushLittleBabyAudio = require('../assets/audio/songs/hush-little-baby.mp3'
 const rockAByeBabyAudio = require('../assets/audio/songs/rock-a-bye-baby.mp3');
 const somewhereOverRainbowAudio = require('../assets/audio/songs/somewhere-over-rainbow-bedtime.mp3');
 
-// console.log('✅ Real audio files configured:', { // Disabled to reduce log noise
+// Additional classic lullabies and nursery rhymes
+// Using actual audio files that have been added to assets/audio/songs/
+const frereJacquesAudio = require('../assets/audio/songs/frere-jacques.mp3');
+const maryHadLittleLambAudio = require('../assets/audio/songs/mary-had-a-little-lamb.mp3');
+const baaBlackSheepAudio = require('../assets/audio/songs/baa-baa-black-sheep.mp3');
+const humptyDumptyAudio = require('../assets/audio/songs/humpty-dumpty.mp3');
+const hickoryDickoryDockAudio = require('../assets/audio/songs/Hickory_dickory-dock.mp3');
+const oldMacDonaldAudio = require('../assets/audio/songs/macdonald-had-a-farm.mp3');
+const rowRowRowBoatAudio = require('../assets/audio/songs/Row-row-row-your-boat.mp3');
+
+// console.log('✅ All audio files configured:', { // Disabled to reduce log noise
+//   // Original songs
 //   twinkleTwinkle: !!twinkleTwinkleAudio,
 //   abcSong: !!abcSongAudio,
-//   ifYourHappy: !!ifYourHappy,
+//   ifYourHappy: !!ifYourHappyAudio,
 //   wheelsOnBus: !!wheelsOnBusAudio,
 //   rainRainGoAway: !!rainRainGoAwayAudio,
 //   fiveLittleDucks: !!fiveLittleDucksAudio,
+//   // Bedtime lullabies  
 //   brahmsLullaby: !!brahmsLullabyAudio,
 //   goldenSlumbers: !!goldenSlumbersAudio,
 //   hushLittleBaby: !!hushLittleBabyAudio,
 //   rockAByeBaby: !!rockAByeBabyAudio,
-//   somewhereOverRainbow: !!somewhereOverRainbowAudio
+//   somewhereOverRainbow: !!somewhereOverRainbowAudio,
+//   // New classic songs
+//   frereJacques: !!frereJacquesAudio,
+//   maryHadLittleLamb: !!maryHadLittleLambAudio,
+//   baaBlackSheep: !!baaBlackSheepAudio,
+//   humptyDumpty: !!humptyDumptyAudio,
+//   hickoryDickoryDock: !!hickoryDickoryDockAudio,
+//   oldMacDonald: !!oldMacDonaldAudio,
+//   rowRowRowBoat: !!rowRowRowBoatAudio
 // }); // Disabled to reduce log noise
 
 // Song difficulty levels
@@ -965,6 +985,753 @@ export const SONGS_LIBRARY = [
       "Learn about colors in rainbows",
       "Practice positive thinking",
       "Create a dream journal together"
+    ]
+  },
+
+  // CLASSIC NURSERY RHYMES & LULLABIES
+  {
+    id: 'frere-jacques',
+    title: 'Frère Jacques',
+    category: 'classic',
+    difficulty: 'beginner', 
+    duration: '2:30',
+    ageGroup: '2-8 years',
+    icon: '🔔',
+    audioFile: frereJacquesAudio,
+    color: '#ff7675',
+    description: 'Classic French nursery rhyme about sleeping Brother John',
+    lyrics: [
+      {
+        line: "Frère Jacques, Frère Jacques",
+        signs: [
+          createSignInstruction('Frère', 'Point to sleeping person'),
+          createSignInstruction('Jacques', 'Pat shoulder gently')
+        ],
+        startTime: 0,
+        endTime: 3
+      },
+      {
+        line: "Dormez-vous? Dormez-vous?",
+        signs: [
+          createSignInstruction('Dormez-vous', 'Rest head on hands like sleeping, questioning expression')
+        ],
+        startTime: 3,
+        endTime: 6
+      },
+      {
+        line: "Sonnez les matines, sonnez les matines",
+        signs: [
+          createSignInstruction('Sonnez', 'Ring imaginary bell above head'),
+          createSignInstruction('Matines', 'Morning prayer gesture')
+        ],
+        startTime: 6,
+        endTime: 10
+      },
+      {
+        line: "Din don don, din don don",
+        signs: [
+          createSignInstruction('Din don don', 'Ring bell with both hands, side to side')
+        ],
+        startTime: 10,
+        endTime: 13
+      },
+      {
+        line: "Brother John, Brother John",
+        signs: [
+          createSignInstruction('Brother', 'Point to sleeping person'),
+          createSignInstruction('John', 'Pat shoulder gently')
+        ],
+        startTime: 13,
+        endTime: 16
+      },
+      {
+        line: "Are you sleeping? Are you sleeping?",
+        signs: [
+          createSignInstruction('Sleeping', 'Rest head on hands, questioning expression')
+        ],
+        startTime: 16,
+        endTime: 19
+      },
+      {
+        line: "Morning bells are ringing, morning bells are ringing",
+        signs: [
+          createSignInstruction('Morning', 'Sunrise gesture with arms'),
+          createSignInstruction('Bells', 'Ring imaginary bells'),
+          createSignInstruction('Ringing', 'Continuous bell motion')
+        ],
+        startTime: 19,
+        endTime: 23
+      },
+      {
+        line: "Ding ding dong, ding ding dong",
+        signs: [
+          createSignInstruction('Ding ding dong', 'Ring bell with rhythm, side to side')
+        ],
+        startTime: 23,
+        endTime: 26
+      }
+    ],
+    signInstructions: [
+      {
+        lyric: 'Frère Jacques, Frère Jacques',
+        instruction: 'Point to sleeping person, pat shoulder gently',
+        gestureType: 'body',
+        difficulty: 'easy',
+        duration: 4,
+        visualCues: ['Point gesture', 'Gentle pat', 'Sleeping motion'],
+        startTime: 0,
+        endTime: 4
+      },
+      {
+        lyric: 'Dormez-vous? Dormez-vous?',
+        instruction: 'Rest head on hands like sleeping, questioning expression',
+        gestureType: 'facial',
+        difficulty: 'easy',
+        duration: 4,
+        visualCues: ['Sleeping gesture', 'Question face', 'Head tilt'],
+        startTime: 4,
+        endTime: 8
+      },
+      {
+        lyric: 'Sonnez les matines',
+        instruction: 'Ring imaginary bell above head',
+        gestureType: 'hand',
+        difficulty: 'medium',
+        duration: 4,
+        visualCues: ['Bell ringing', 'Up and down motion', 'Both hands'],
+        startTime: 8,
+        endTime: 12
+      }
+    ],
+    tips: [
+      "Sing in both French and English",
+      "Act out sleeping and waking up",
+      "Use gentle bell-like hand movements",
+      "Perfect for teaching basic French"
+    ],
+    extensions: [
+      "Learn about French culture",
+      "Practice other French words",
+      "Make paper bells craft",
+      "Visit a bell tower if possible"
+    ]
+  },
+
+  {
+    id: 'mary-had-little-lamb',
+    title: 'Mary Had a Little Lamb',
+    category: 'classic',
+    difficulty: 'beginner',
+    duration: '2:15',
+    ageGroup: '1-6 years',
+    icon: '🐑',
+    audioFile: maryHadLittleLambAudio,
+    color: '#74b9ff',
+    description: 'Classic story song about Mary and her loyal lamb',
+    lyrics: [
+      {
+        line: "Mary had a little lamb",
+        signs: [
+          createSignInstruction('Mary', 'Point to girl'),
+          createSignInstruction('Little', 'Show small size with fingers'),
+          createSignInstruction('Lamb', 'Make bleating sound, gentle patting motion')
+        ],
+        startTime: 0,
+        endTime: 4
+      },
+      {
+        line: "Little lamb, little lamb",
+        signs: [
+          createSignInstruction('Little', 'Show small size repeatedly'),
+          createSignInstruction('Lamb', 'Gentle lamb petting motions')
+        ],
+        startTime: 4,
+        endTime: 7
+      },
+      {
+        line: "Mary had a little lamb",
+        signs: [
+          createSignInstruction('Mary', 'Point to girl'),
+          createSignInstruction('Little', 'Show small size'),
+          createSignInstruction('Lamb', 'Cradle like holding lamb')
+        ],
+        startTime: 7,
+        endTime: 11
+      },
+      {
+        line: "Its fleece was white as snow",
+        signs: [
+          createSignInstruction('Fleece', 'Pat soft fur motion'),
+          createSignInstruction('White', 'Show bright white color'),
+          createSignInstruction('Snow', 'Flutter fingers like falling snow')
+        ],
+        startTime: 11,
+        endTime: 15
+      }
+    ],
+    signInstructions: [
+      {
+        lyric: 'Mary had a little lamb',
+        instruction: 'Point to girl, hold pretend lamb, show small size',
+        gestureType: 'body',
+        difficulty: 'easy',
+        duration: 4,
+        visualCues: ['Point to person', 'Cradle lamb', 'Show size'],
+        startTime: 0,
+        endTime: 4
+      },
+      {
+        lyric: 'Its fleece was white as snow',
+        instruction: 'Pat soft fur, show white color, flutter fingers like snow',
+        gestureType: 'hand',
+        difficulty: 'easy', 
+        duration: 4,
+        visualCues: ['Petting motion', 'White gesture', 'Snow falling'],
+        startTime: 8,
+        endTime: 12
+      }
+    ],
+    tips: [
+      "Use gentle petting motions for the lamb",
+      "Show the size difference with hands",
+      "Act out the story as you sing",
+      "Perfect for teaching about farm animals"
+    ],
+    extensions: [
+      "Visit a petting zoo or farm",
+      "Learn about sheep and wool",
+      "Read the full Mary Had a Little Lamb story",
+      "Practice other animal sounds and signs"
+    ]
+  },
+
+  {
+    id: 'baa-black-sheep',
+    title: 'Baa, Baa, Black Sheep',
+    category: 'classic',
+    difficulty: 'beginner',
+    duration: '1:45',
+    ageGroup: '2-6 years',
+    icon: '🖤',
+    audioFile: baaBlackSheepAudio,
+    color: '#636e72',
+    description: 'Traditional nursery rhyme about sharing wool',
+    lyrics: [
+      {
+        line: "Baa, baa, black sheep",
+        signs: [
+          createSignInstruction('Baa', 'Make sheep sounds with mouth'),
+          createSignInstruction('Black', 'Point to black color'),
+          createSignInstruction('Sheep', 'Act like sheep, gentle bleating')
+        ],
+        startTime: 0,
+        endTime: 3
+      },
+      {
+        line: "Have you any wool?",
+        signs: [
+          createSignInstruction('Have', 'Questioning gesture with hands'),
+          createSignInstruction('You', 'Point to sheep'),
+          createSignInstruction('Wool', 'Pat fluffy texture motion')
+        ],
+        startTime: 3,
+        endTime: 6
+      },
+      {
+        line: "Yes sir, yes sir",
+        signs: [
+          createSignInstruction('Yes', 'Nod head enthusiastically'),
+          createSignInstruction('Sir', 'Polite bow gesture')
+        ],
+        startTime: 6,
+        endTime: 8
+      },
+      {
+        line: "Three bags full",
+        signs: [
+          createSignInstruction('Three', 'Hold up three fingers'),
+          createSignInstruction('Bags', 'Show carrying heavy bags'),
+          createSignInstruction('Full', 'Show fullness with round arms')
+        ],
+        startTime: 8,
+        endTime: 11
+      }
+    ],
+    signInstructions: [
+      {
+        lyric: 'Baa, baa, black sheep',
+        instruction: 'Make sheep sounds, show black color, act like sheep',
+        gestureType: 'body',
+        difficulty: 'easy',
+        duration: 3,
+        visualCues: ['Sheep sounds', 'Black gesture', 'Sheep posture'],
+        startTime: 0,
+        endTime: 3
+      },
+      {
+        lyric: 'Have you any wool?',
+        instruction: 'Point to sheep, questioning gesture, touch soft wool',
+        gestureType: 'hand',
+        difficulty: 'easy',
+        duration: 3,
+        visualCues: ['Point gesture', 'Question face', 'Touch wool'],
+        startTime: 3,
+        endTime: 6
+      },
+      {
+        lyric: 'Three bags full',
+        instruction: 'Hold up three fingers, show big bags with arms',
+        gestureType: 'hand',
+        difficulty: 'easy',
+        duration: 3,
+        visualCues: ['Three fingers', 'Big bag shape', 'Full gesture'],
+        startTime: 9,
+        endTime: 12
+      }
+    ],
+    tips: [
+      "Make exaggerated sheep sounds",
+      "Practice counting to three",
+      "Act out the conversation",
+      "Great for teaching about sharing"
+    ],
+    extensions: [
+      "Learn about different sheep colors",
+      "Practice more counting songs",
+      "Make wool crafts",
+      "Discuss sharing and kindness"
+    ]
+  },
+
+  {
+    id: 'humpty-dumpty',
+    title: 'Humpty Dumpty',
+    category: 'classic',
+    difficulty: 'intermediate',
+    duration: '2:00',
+    ageGroup: '3-7 years',
+    icon: '🥚',
+    audioFile: humptyDumptyAudio,
+    color: '#fdcb6e',
+    description: 'Classic nursery rhyme about the famous egg who fell',
+    lyrics: [
+      {
+        line: "Humpty Dumpty sat on a wall",
+        signs: [
+          createSignInstruction('Humpty Dumpty', 'Make egg shape with hands'),
+          createSignInstruction('Sat', 'Sitting motion'),
+          createSignInstruction('Wall', 'Build wall with hands')
+        ],
+        startTime: 0,
+        endTime: 4
+      },
+      {
+        line: "Humpty Dumpty had a great fall",
+        signs: [
+          createSignInstruction('Humpty Dumpty', 'Make egg shape with hands'),
+          createSignInstruction('Great fall', 'Tumble motion, falling gesture')
+        ],
+        startTime: 4,
+        endTime: 8
+      },
+      {
+        line: "All the king's horses and all the king's men",
+        signs: [
+          createSignInstruction('Kings horses', 'Galloping motion'),
+          createSignInstruction('Kings men', 'Marching soldiers, crown gesture')
+        ],
+        startTime: 8,
+        endTime: 12
+      },
+      {
+        line: "Couldn't put Humpty together again",
+        signs: [
+          createSignInstruction('Couldnt put', 'Shaking head, trying to fix gesture'),
+          createSignInstruction('Together again', 'Puzzle pieces trying to fit')
+        ],
+        startTime: 12,
+        endTime: 16
+      }
+    ],
+    signInstructions: [
+      {
+        lyric: 'Humpty Dumpty sat on a wall',
+        instruction: 'Make egg shape with hands, sitting motion, build wall',
+        gestureType: 'body',
+        difficulty: 'medium',
+        duration: 4,
+        visualCues: ['Egg shape', 'Sitting pose', 'Wall building'],
+        startTime: 0,
+        endTime: 4
+      },
+      {
+        lyric: 'Humpty Dumpty had a great fall',
+        instruction: 'Tumble motion, falling gesture, crash landing',
+        gestureType: 'body',
+        difficulty: 'medium',
+        duration: 4,
+        visualCues: ['Tumbling', 'Falling motion', 'Impact gesture'],
+        startTime: 4,
+        endTime: 8
+      },
+      {
+        lyric: 'All the king\'s horses and all the king\'s men',
+        instruction: 'Galloping horses, marching soldiers, royal gestures',
+        gestureType: 'body',
+        difficulty: 'medium',
+        duration: 4,
+        visualCues: ['Horse gallop', 'Marching', 'Crown gesture'],
+        startTime: 8,
+        endTime: 12
+      }
+    ],
+    tips: [
+      "Act out the dramatic fall safely",
+      "Use different voices for characters",
+      "Build tension in the storytelling",
+      "Great for discussing problem-solving"
+    ],
+    extensions: [
+      "Try putting puzzle pieces together",
+      "Learn about castles and kings",
+      "Discuss helping others",
+      "Practice balancing activities safely"
+    ]
+  },
+
+  {
+    id: 'old-macdonald',
+    title: 'Old MacDonald Had a Farm',
+    category: 'classic',
+    difficulty: 'intermediate',
+    duration: '4:00',
+    ageGroup: '2-8 years',
+    icon: '🚜',
+    audioFile: oldMacDonaldAudio,
+    color: '#00b894',
+    description: 'Learn about farm animals and their sounds',
+    lyrics: [
+      {
+        line: "Old MacDonald had a farm",
+        signs: [
+          createSignInstruction('Old MacDonald', 'Point to farmer with overalls'),
+          createSignInstruction('Farm', 'Show large farm with wide arm gesture')
+        ],
+        startTime: 0,
+        endTime: 4
+      },
+      {
+        line: "E-I-E-I-O",
+        signs: [
+          createSignInstruction('E-I-E-I-O', 'Spell out letters with enthusiasm')
+        ],
+        startTime: 4,
+        endTime: 6
+      },
+      {
+        line: "And on his farm he had a cow",
+        signs: [
+          createSignInstruction('On his farm', 'Point to farm area'),
+          createSignInstruction('Cow', 'Make cow horns with fingers, moo sound')
+        ],
+        startTime: 6,
+        endTime: 10
+      },
+      {
+        line: "E-I-E-I-O",
+        signs: [
+          createSignInstruction('E-I-E-I-O', 'Spell out letters with enthusiasm')
+        ],
+        startTime: 10,
+        endTime: 12
+      },
+      {
+        line: "With a moo moo here and a moo moo there",
+        signs: [
+          createSignInstruction('Moo moo', 'Make cow sounds, point left and right'),
+          createSignInstruction('Here and there', 'Point to different locations')
+        ],
+        startTime: 12,
+        endTime: 16
+      },
+      {
+        line: "Everywhere a moo moo",
+        signs: [
+          createSignInstruction('Everywhere', 'Sweep arms all around'),
+          createSignInstruction('Moo moo', 'Enthusiastic cow sounds')
+        ],
+        startTime: 16,
+        endTime: 18
+      },
+      {
+        line: "Old MacDonald had a farm, E-I-E-I-O",
+        signs: [
+          createSignInstruction('Old MacDonald', 'Point to farmer'),
+          createSignInstruction('E-I-E-I-O', 'Big finish with letter spelling')
+        ],
+        startTime: 18,
+        endTime: 22
+      }
+    ],
+    signInstructions: [
+      {
+        lyric: 'Old MacDonald had a farm, E-I-E-I-O',
+        instruction: 'Point to farmer, show large farm, spell out letters',
+        gestureType: 'body',
+        difficulty: 'easy',
+        duration: 6,
+        visualCues: ['Farmer point', 'Big farm gesture', 'Letter spelling'],
+        startTime: 0,
+        endTime: 6
+      },
+      {
+        lyric: 'And on his farm he had a cow',
+        instruction: 'Show farm, point to farmer, make cow horns and udders',
+        gestureType: 'hand',
+        difficulty: 'medium',
+        duration: 4,
+        visualCues: ['Farm gesture', 'Cow horns', 'Udder motion'],
+        startTime: 6,
+        endTime: 10
+      },
+      {
+        lyric: 'With a moo moo here and a moo moo there',
+        instruction: 'Point left and right, make cow sounds, big mouth',
+        gestureType: 'facial',
+        difficulty: 'easy',
+        duration: 4,
+        visualCues: ['Left point', 'Right point', 'Moo sound'],
+        startTime: 14,
+        endTime: 18
+      }
+    ],
+    tips: [
+      "Add different animals in each verse",
+      "Make realistic animal sounds",
+      "Point to different directions",
+      "Great for learning about farms"
+    ],
+    extensions: [
+      "Visit a real farm if possible",
+      "Learn about where food comes from",
+      "Make farm animal crafts",
+      "Practice more animal sounds"
+    ]
+  },
+
+  {
+    id: 'row-row-boat',
+    title: 'Row, Row, Row Your Boat',
+    category: 'classic',
+    difficulty: 'beginner',
+    duration: '1:30',
+    ageGroup: '1-6 years',
+    icon: '🚣',
+    audioFile: rowRowRowBoatAudio,
+    color: '#0984e3',
+    description: 'Gentle rowing motion song about life being like a dream',
+    lyrics: [
+      {
+        line: "Row, row, row your boat",
+        signs: [
+          createSignInstruction('Row', 'Rowing motions with both arms'),
+          createSignInstruction('Your boat', 'Show steering boat motion')
+        ],
+        startTime: 0,
+        endTime: 4
+      },
+      {
+        line: "Gently down the stream",
+        signs: [
+          createSignInstruction('Gently', 'Smooth gentle motions'),
+          createSignInstruction('Down the stream', 'Flowing water motion downward')
+        ],
+        startTime: 4,
+        endTime: 8
+      },
+      {
+        line: "Merrily, merrily, merrily, merrily",
+        signs: [
+          createSignInstruction('Merrily', 'Happy bouncing, smiling, joyful clapping')
+        ],
+        startTime: 8,
+        endTime: 12
+      },
+      {
+        line: "Life is but a dream",
+        signs: [
+          createSignInstruction('Life', 'Big gesture encompassing everything'),
+          createSignInstruction('Dream', 'Dreamy floating gestures, peaceful expression')
+        ],
+        startTime: 12,
+        endTime: 15
+      }
+    ],
+    signInstructions: [
+      {
+        lyric: 'Row, row, row your boat',
+        instruction: 'Rowing motions with both arms, back and forth rhythm',
+        gestureType: 'body',
+        difficulty: 'easy',
+        duration: 4,
+        visualCues: ['Rowing motion', 'Back and forth', 'Boat steering'],
+        startTime: 0,
+        endTime: 4
+      },
+      {
+        lyric: 'Gently down the stream',
+        instruction: 'Smooth gentle motions, flowing water, downstream',
+        gestureType: 'hand',
+        difficulty: 'easy',
+        duration: 4,
+        visualCues: ['Gentle waves', 'Flowing motion', 'Downward'],
+        startTime: 4,
+        endTime: 8
+      },
+      {
+        lyric: 'Merrily, merrily, merrily, merrily',
+        instruction: 'Happy bouncing, smiling, joyful clapping',
+        gestureType: 'facial',
+        difficulty: 'easy',
+        duration: 4,
+        visualCues: ['Happy bouncing', 'Big smile', 'Clapping'],
+        startTime: 8,
+        endTime: 12
+      },
+      {
+        lyric: 'Life is but a dream',
+        instruction: 'Dreamy floating gestures, peaceful expression',
+        gestureType: 'facial',
+        difficulty: 'easy',
+        duration: 3,
+        visualCues: ['Dreamy floating', 'Peaceful face', 'Cloud motions'],
+        startTime: 12,
+        endTime: 15
+      }
+    ],
+    tips: [
+      "Use gentle, flowing movements",
+      "Rock back and forth like in a boat",
+      "Make it peaceful and meditative",
+      "Perfect for calming down time"
+    ],
+    extensions: [
+      "Talk about boats and water safety",
+      "Practice floating in a pool",
+      "Make paper boats",
+      "Discuss dreams and aspirations"
+    ]
+  },
+
+  {
+    id: 'hickory-dickory-dock',
+    title: 'Hickory Dickory Dock',
+    category: 'classic',
+    difficulty: 'beginner',
+    duration: '1:30',
+    ageGroup: '2-6 years',
+    icon: '🕐',
+    audioFile: hickoryDickoryDockAudio,
+    color: '#a29bfe',
+    description: 'Classic nursery rhyme about a mouse and a clock',
+    lyrics: [
+      {
+        line: "Hickory dickory dock",
+        signs: [
+          createSignInstruction('Hickory dickory dock', 'Rhythmic clapping like ticking clock')
+        ],
+        startTime: 0,
+        endTime: 3
+      },
+      {
+        line: "The mouse ran up the clock",
+        signs: [
+          createSignInstruction('Mouse', 'Quick scurrying fingers'),
+          createSignInstruction('Ran up', 'Fingers climbing up motion')
+        ],
+        startTime: 3,
+        endTime: 6
+      },
+      {
+        line: "The clock struck one",
+        signs: [
+          createSignInstruction('Clock struck', 'Strong striking motion'),
+          createSignInstruction('One', 'Hold up one finger')
+        ],
+        startTime: 6,
+        endTime: 8
+      },
+      {
+        line: "The mouse ran down",
+        signs: [
+          createSignInstruction('Mouse', 'Quick scurrying fingers'),
+          createSignInstruction('Ran down', 'Fingers running down motion')
+        ],
+        startTime: 8,
+        endTime: 10
+      },
+      {
+        line: "Hickory dickory dock",
+        signs: [
+          createSignInstruction('Hickory dickory dock', 'Final rhythmic clapping')
+        ],
+        startTime: 10,
+        endTime: 13
+      }
+    ],
+    signInstructions: [
+      {
+        lyric: 'Hickory dickory dock',
+        instruction: 'Rhythmic clapping, like ticking clock sounds',
+        gestureType: 'hand',
+        difficulty: 'easy',
+        duration: 3,
+        visualCues: ['Tick-tock clapping', 'Rhythmic beat', 'Clock motion'],
+        startTime: 0,
+        endTime: 3
+      },
+      {
+        lyric: 'The mouse ran up the clock',
+        instruction: 'Fingers scurry up arm like mouse climbing',
+        gestureType: 'hand',
+        difficulty: 'easy', 
+        duration: 4,
+        visualCues: ['Mouse fingers', 'Climbing up', 'Quick scurrying'],
+        startTime: 3,
+        endTime: 7
+      },
+      {
+        lyric: 'The clock struck one',
+        instruction: 'Point finger up for one, make striking motion',
+        gestureType: 'finger',
+        difficulty: 'easy',
+        duration: 3,
+        visualCues: ['One finger up', 'Clock striking', 'Loud chime gesture'],
+        startTime: 7,
+        endTime: 10
+      },
+      {
+        lyric: 'The mouse ran down',
+        instruction: 'Fingers scurry down arm quickly',
+        gestureType: 'hand', 
+        difficulty: 'easy',
+        duration: 3,
+        visualCues: ['Mouse fingers', 'Running down', 'Quick escape'],
+        startTime: 10,
+        endTime: 13
+      }
+    ],
+    tips: [
+      "Make clock ticking sounds throughout",
+      "Use quick mouse-like finger movements",
+      "Act out the surprise when clock strikes",
+      "Great for teaching time concepts"
+    ],
+    extensions: [
+      "Learn about telling time on clocks",
+      "Practice counting hours 1-12",
+      "Discuss different types of clocks",
+      "Make clock crafts with moving hands"
     ]
   }
 ];

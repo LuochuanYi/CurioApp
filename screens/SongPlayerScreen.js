@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { getSongById, SONG_DIFFICULTIES, SONG_CATEGORIES } from '../data/songs';
 import { useMusicPlayer } from '../hooks/useMusicPlayer';
 import { useDynamicTranslation } from '../hooks/useDynamicTranslation';
+import { SignLanguageAnimation } from '../components';
 import { logAudio, logTranslation, logError, logInfo } from '../utils/logger';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -581,26 +582,28 @@ const SongPlayerScreen = ({ route, navigation }) => {
               {showSignInstructions && currentLyric.signs && (
                 <View style={styles.currentSignsContainer}>
                   <Text style={styles.signsTitle}>{translateText("Signs for this line:")}</Text>
-                  {currentLyric.signs.map((sign, index) => (
-                    <TouchableOpacity
-                      key={index}
-                      style={[
-                        styles.signInstructionCard,
-                        selectedSign?.word === sign.word && styles.selectedSignCard
-                      ]}
-                      onPress={() => handleSignPress(sign)}
-                    >
-                      <Text style={styles.signWord}>{translateText(sign.word)}</Text>
-                      <Text style={styles.signDescription}>{translateText(sign.description)}</Text>
-                      {sign.gestureType && (
-                        <Text style={styles.signType}>
-                          {sign.gestureType === 'hand' ? '✋' : 
-                           sign.gestureType === 'body' ? '🤸' :
-                           sign.gestureType === 'facial' ? '😊' : '👆'} {translateText(sign.gestureType)}
-                        </Text>
-                      )}
-                    </TouchableOpacity>
-                  ))}
+                  <View style={styles.animatedSignsRow}>
+                    {currentLyric.signs.map((sign, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={[
+                          styles.animatedSignCard,
+                          selectedSign?.word === sign.word && styles.selectedAnimatedSignCard
+                        ]}
+                        onPress={() => handleSignPress(sign)}
+                      >
+                        <SignLanguageAnimation
+                          word={translateText(sign.word)}
+                          gestureType={sign.gestureType}
+                          isActive={selectedSign?.word === sign.word}
+                          style={styles.signAnimation}
+                        />
+                        {selectedSign?.word === sign.word && (
+                          <Text style={styles.signDescription}>{translateText(sign.description)}</Text>
+                        )}
+                      </TouchableOpacity>
+                    ))}
+                  </View>
                 </View>
               )}
             </View>
@@ -1056,6 +1059,40 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 
+  // Animated Sign Components
+  animatedSignsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+    paddingVertical: 8,
+  },
+  animatedSignCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 8,
+    margin: 4,
+    minWidth: 80,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'transparent',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  selectedAnimatedSignCard: {
+    borderColor: '#4ecdc4',
+    backgroundColor: '#e8f8f6',
+    shadowOpacity: 0.2,
+  },
+  signAnimation: {
+    marginBottom: 4,
+  },
+
   // All lyrics
   lyricsSection: {
     marginBottom: 24,
@@ -1127,6 +1164,23 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 12,
     color: '#6c757d',
+  },
+
+  // Lyrics Section Animated Signs
+  lyricSignsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 4,
+  },
+  lyricSignItem: {
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+    padding: 4,
+  },
+  smallSignAnimation: {
+    transform: [{ scale: 0.7 }],
   },
 
   // Tips section

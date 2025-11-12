@@ -36,6 +36,35 @@ const ActivityDetailScreen = ({ route, navigation }) => {
   // Import translation service directly for on-demand use
   const { translateContent: translateService } = useDynamicTranslation();
   
+  // Get display content (move this early to avoid initialization issues)
+  const getDisplayContent = () => {
+    if (!isTranslationEnabled) {
+      return {
+        title: activity?.title || '',
+        description: activity?.description || '',
+        learningObjectives: activity?.learningObjectives || [],
+        instructions: activity?.instructions || [],
+        materials: activity?.materials || [],
+        tips: activity?.tips || ''
+      };
+    }
+    
+    // Use cached translations when available
+    const cacheKey = `${activity?.id}_${currentLanguage}`;
+    const cached = translationCache[cacheKey] || {};
+    
+    return {
+      title: cached.title || activity?.title || '',
+      description: cached.description || activity?.description || '',
+      learningObjectives: cached.learningObjectives || activity?.learningObjectives || [],
+      instructions: cached.instructions || activity?.instructions || [],
+      materials: cached.materials || activity?.materials || [],
+      tips: cached.tips || activity?.tips || ''
+    };
+  };
+  
+  const displayContent = getDisplayContent();
+
   // Translation function for UI elements
   const translateText = (text) => {
     if (!text) return text;
@@ -242,32 +271,7 @@ const ActivityDetailScreen = ({ route, navigation }) => {
     }
   };
 
-  // Get display content based on translation state
-  const getDisplayContent = () => {
-    if (!isTranslationEnabled) {
-      return {
-        title: activity?.title || '',
-        description: activity?.description || '',
-        learningObjectives: activity?.learningObjectives || [],
-        instructions: activity?.instructions || [],
-        materials: activity?.materials || [],
-      };
-    }
-    
-    // Use cached translations when available
-    const cacheKey = `${activity?.id}_${currentLanguage}`;
-    const cached = translationCache[cacheKey] || {};
-    
-    return {
-      title: cached.title || activity?.title || '',
-      description: cached.description || activity?.description || '',
-      learningObjectives: cached.learningObjectives || activity?.learningObjectives || [],
-      instructions: cached.instructions || activity?.instructions || [],
-      materials: cached.materials || activity?.materials || [],
-    };
-  };
 
-  const displayContent = getDisplayContent();
 
   const getDifficultyColor = () => {
     return DIFFICULTY_LEVELS[activity.difficulty.id.toUpperCase()]?.color || '#6c757d';

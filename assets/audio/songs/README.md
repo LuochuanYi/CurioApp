@@ -6,12 +6,29 @@ Place the following MP3 files in this directory:
 
 ### 🎵 **Song Files Needed:**
 
-1. **twinkle-star.mp3** - Twinkle, Twinkle, Little Star
+**Original Songs:**
+1. **twinkle-twinkle.mp3** - Twinkle, Twinkle, Little Star
 2. **abc-song.mp3** - A-B-C Song  
-3. **if-youre-happy.mp3** - If You're Happy and You Know It
+3. **if-your-happy.mp3** - If You're Happy and You Know It
 4. **wheels-on-bus.mp3** - The Wheels on the Bus
 5. **rain-rain-go-away.mp3** - Rain, Rain, Go Away
 6. **five-little-ducks.mp3** - Five Little Ducks
+
+**Bedtime Lullabies:**
+7. **brahms-lullaby.mp3** - Brahms' Lullaby
+8. **golden-slumbers.mp3** - Golden Slumbers
+9. **hush-little-baby.mp3** - Hush Little Baby
+10. **rock-a-bye-baby.mp3** - Rock-a-bye Baby
+11. **somewhere-over-rainbow-bedtime.mp3** - Somewhere Over the Rainbow (Bedtime Version)
+
+**NEW Classic Songs Added:**
+12. **frere-jacques.mp3** - Frère Jacques (Brother John) ✅
+13. **mary-had-a-little-lamb.mp3** - Mary Had a Little Lamb ✅
+14. **baa-baa-black-sheep.mp3** - Baa, Baa, Black Sheep ✅
+15. **humpty-dumpty.mp3** - Humpty Dumpty ✅
+16. **Hickory_dickory-dock.mp3** - Hickory Dickory Dock ✅
+17. **macdonald-had-a-farm.mp3** - Old MacDonald Had a Farm ✅
+18. **Row-row-row-your-boat.mp3** - Row, Row, Row Your Boat ✅
 
 ### 📋 **Audio Requirements:**
 - **Format:** MP3

@@ -1,0 +1,317 @@
+{
+  "common": {
+    "home": "Home",
+    "monitor": "Monitor",
+    "engage": "Engage",
+    "personalize": "Personalize",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "done": "Done",
+    "edit": "Edit",
+    "settings": "settings"
+  },
+  "personalize": {
+    "title": "Your Family Space",
+    "subtitle": "Updated {{date}}",
+    "familyPreferences": "Family preferences & settings",
+    "familyRoutines": "Family Routines",
+    "routinesCount": "{{count}} routines",
+    "safetyControls": "Safety & Controls",
+    "languagePreferences": "Language Preferences",
+    "ageGroups": "Age Groups",
+    "ageGroupsDescription": "Content filtering based on child's age",
+    "ageGroupsMultipleDescription": "Content for {{count}} age groups",
+    "contentFilter": "Content Filter",
+    "contentFilterDescription": "Age-appropriate content only",
+    "environmentalAlerts": "Environment Alerts",
+    "environmentalAlertsDescription": "Air quality & safety notifications",
+    "aqiThreshold": "AQI Alert Threshold",
+    "aqiThresholdDescription": "Get notified when air quality exceeds this level",
+    "selectAgeGroups": "Select Age Groups",
+    "selectAgeGroupsSubtitle": "Choose one or more age groups for content filtering",
+    "aqiAlertThreshold": "AQI Alert Threshold",
+    "alertWhenExceeds": "Alert when AQI exceeds:",
+    "goodAirQuality": "Good air quality - safe for outdoor activities",
+    "moderateAirQuality": "Moderate - sensitive individuals should limit prolonged outdoor exertion", 
+    "unhealthyAirQuality": "Unhealthy - everyone should limit outdoor activities",
+    "aqiGood": "Good (25)",
+    "aqiUnhealthy": "Unhealthy (150)"
+  },
+  "routines": {
+    "storyTime": "Story time",
+    "quietTime": "Quiet time"
+  },
+  "ageGroups": {
+    "1-3": "1-3 years",
+    "3-5": "3-5 years", 
+    "5-7": "5-7 years",
+    "7-10": "7-10 years",
+    "10+": "10+ years",
+    "toddlerDescription": "Toddler content with simple concepts",
+    "preschoolDescription": "Preschool stories and basic learning",
+    "earlyElementaryDescription": "Early elementary, longer stories",
+    "advancedDescription": "Advanced stories and complex themes",
+    "matureDescription": "Mature content for older children"
+  },
+  "languages": {
+    "english": "English",
+    "french": "Français", 
+    "chinese": "中文",
+    "ukrainian": "Українська",
+    "spanish": "Español",
+    "flemish": "Vlaams (Dutch)"
+  },
+  "home": {
+    "welcome": {
+      "title": "🌟 Welcome to Curio! 🌟",
+      "description": "Ready for amazing adventures? Let's start exploring stories and songs together!"
+    },
+    "sections": {
+      "quickActions": {
+        "title": "⚡ Let's Play! ⚡",
+        "description": "Pick something fun to do right now!",
+        "bedtimeStories": "🌙 Sleepy Time Stories",
+        "bedtimeDescription": "Cozy stories for bedtime snuggles",
+        "surpriseMe": "🎲 Surprise Me!", 
+        "surpriseDescription": "A magical surprise just for you!",
+        "continueReading": "📖 Keep Reading",
+        "continuePickUp": "Continue your adventure!",
+        "startNew": "Start something new and exciting!",
+        "exploreContent": "🚀 Explore Everything",
+        "exploreDescription": "Discover all our amazing stories & songs!"
+      },
+      "stories": {
+        "recent": "📚 Your Story Adventures",
+        "featured": "✨ Amazing Stories",
+        "recentDescription": "Jump back into your favorite adventures!",
+        "featuredDescription": "Wonderful stories picked just for you!",
+        "continueProgress": "Keep going • {{progress}}% done!",
+        "inProgress": "adventure in progress"
+      },
+      "songs": {
+        "featured": "🎵 Fun Songs to Sing",
+        "description": "Catchy tunes and sing-along favorites that make you smile!"
+      },
+      "airQuality": {
+        "title": "Today's Air Quality",
+        "description": "Monitor air quality to plan outdoor activities safely",
+        "loading": "Loading...",
+        "chartTitle": "24-Hour Trend",
+        "tapToView": "Tap to view detailed recommendations"
+      }
+    },
+    "empty": {
+      "stories": {
+        "title": "🌟 Ready for your first story?",
+        "description": "Tap \"🚀 Explore Everything\" above to discover magical stories waiting just for you!"
+      },
+      "songs": {
+        "title": "🎵 Let's find some music!",
+        "description": "Tap \"🚀 Explore Everything\" to discover fun songs you can sing and dance to!"
+      }
+    },
+    "navigation": {
+      "hint": "🌈 Ready to explore? Tap \"💡 Engage\" below to discover all our amazing stories and songs!"
+    }
+  },
+  "stories": {
+    "categories": {
+      "bedtime": "Bedtime",
+      "classic": "Classic Tales", 
+      "adventure": "Adventure",
+      "educational": "Educational",
+      "modern": "Modern Tales"
+    }
+  },
+  "engage": {
+    "header": {
+      "title": "Discover & Learn",
+      "subtitle": "Stories, songs, and learning adventures curated just for you"
+    },
+    "welcome": {
+      "title": "Ready for Adventure?", 
+      "description": "Start exploring stories and songs perfectly matched to your interests and age group. Every adventure is waiting!"
+    },
+    "sections": {
+      "stories": {
+        "title": "Stories",
+        "description": "Immersive tales that spark imagination and learning",
+        "browseCategories": "Browse by Category:",
+        "allCategories": "All Categories",
+        "viewAll": "View All Stories"
+      },
+      "songs": {
+        "title": "Sing-Along Songs",
+        "description": "Musical adventures and educational songs for every mood",
+        "viewAll": "View All Songs"
+      },
+      "learning": {
+        "title": "Learning Categories",
+        "description": "Educational content organized by subject and skill",
+        "mathematics": "Mathematics",
+        "science": "Science",
+        "language": "Language Arts",
+        "arts": "Arts & Creativity",
+        "social": "Social Studies",
+        "mathDescription": "Numbers, counting, and basic math concepts",
+        "scienceDescription": "Explore the natural world and scientific discovery",
+        "languageDescription": "Reading, writing, and language development",
+        "artsDescription": "Creative expression through art, music, and imagination",
+        "socialDescription": "Community, cultures, and social understanding"
+      },
+      "recommendations": {
+        "title": "Recommendations",
+        "description": "Personalized picks based on your preferences and activity",
+        "forYou": "For You",
+        "trending": "Trending Now",
+        "newReleases": "New Releases"
+      },
+      "activities": {
+        "drawTell": "Draw & Tell",
+        "singAlong": "Sing Along"
+      }
+    },
+    "categories": {
+      "adventure": "Adventure",
+      "fantasy": "Fantasy", 
+      "educational": "Educational",
+      "bedtime": "Bedtime",
+      "classic": "Classic Tales",
+      "modern": "Modern Stories",
+      "science": "Science Fiction",
+      "animals": "Animals",
+      "friendship": "Friendship",
+      "family": "Family"
+    },
+    "empty": {
+      "title": "Loading Amazing Content...",
+      "description": "We're preparing wonderful stories and songs just for you!"
+    },
+    "accessibility": {
+      "categoryFilter": "Browse {{category}} category",
+      "storyCard": "{{title}} story in {{category}} category, duration {{duration}}",
+      "songCard": "{{title}} song, duration {{duration}}",
+      "learningCard": "{{subject}} learning category with {{count}} activities"
+    }
+  },
+  "monitor": {
+    "header": {
+      "title": "Safety Monitor",
+      "subtitle": "Keep your environment safe and comfortable"
+    },
+    "status": {
+      "updating": "Updating...",
+      "active": "Active"
+    },
+    "welcome": {
+      "title": "Your Safety Guardian",
+      "description": "We're actively monitoring your environment. Green means everything is perfect, yellow indicates minor changes to be aware of."
+    },
+    "sections": {
+      "liveSensors": {
+        "title": "Live Sensors", 
+        "description": "Real-time monitoring of your environment. Tap any sensor for detailed information and history."
+      },
+      "recentAlerts": {
+        "title": "Recent Alerts",
+        "description": "Review recent environment changes and notifications",
+        "noAlertsDescription": "All clear! No alerts in the past 24 hours. Great job maintaining a safe environment!"
+      },
+      "safetyProgress": {
+        "title": "Safety Progress",
+        "description": "Track your safety monitoring streak and maintain healthy environments"
+      },
+      "emergencyActions": {
+        "title": "Emergency Actions",
+        "description": "Need help immediately? Tap the button below to instantly notify your parent or guardian."
+      }
+    },
+    "sensors": {
+      "airQuality": {
+        "title": "Air Quality",
+        "good": "Good",
+        "low": "Low",
+        "goodDescription": "Clean and fresh",
+        "lowDescription": "Monitor ventilation"
+      },
+      "sound": {
+        "title": "Sound Level",
+        "normal": "Normal", 
+        "loud": "Loud",
+        "normalDescription": "Perfect for focus",
+        "loudDescription": "Consider quieter activities"
+      },
+      "motion": {
+        "title": "Activity Level",
+        "active": "Active",
+        "still": "Still", 
+        "activeDescription": "Great energy level",
+        "stillDescription": "Nice and calm"
+      },
+      "stable": "✓ Stable",
+      "changing": "⚠ Changing",
+      "tapForDetails": "Tap for details →"
+    },
+    "alerts": {
+      "title": "Recent Alerts",
+      "description": "Review recent environment changes and notifications",
+      "allClear": "All clear! No alerts in the past 24 hours. Great job maintaining a safe environment!",
+      "airQualityAdvice": "Check ventilation and consider air purifier",
+      "soundAdvice": "Noise levels elevated, consider quieter activities", 
+      "activityAdvice": "Increased movement detected, great activity level",
+      "airQualityMessage": "Air quality dropped",
+      "soundMessage": "Loud noise detected", 
+      "motionMessage": "High activity detected",
+      "airQualityDescription": "Check ventilation and consider air purifier",
+      "soundDescription": "Noise levels elevated, consider quieter activities",
+      "motionDescription": "Increased movement detected, great activity level"
+    },
+    "progress": {
+      "title": "Safety Progress",
+      "description": "Track your safety monitoring streak and maintain healthy environments",
+      "daysSafe": "Days Safe",
+      "weeklyGoal": "Weekly Goal",
+      "goalComplete": "7/7 days ✅",
+      "daysLabel": "Days Safe",
+      "achievements": {
+        "airQuality": "Perfect Air Quality Week",
+        "quietMaster": "Quiet Environment Master",
+        "perfectAirQuality": "Perfect Air Quality Week",
+        "quietEnvironment": "Quiet Environment Master"
+      }
+    },
+    "emergency": {
+      "title": "Emergency Actions",
+      "description": "Need help immediately? Tap the button below to instantly notify your parent or guardian.",
+      "notifyParent": "Notify Parent",
+      "instantAlert": "Instant alert with your location"
+    },
+    "empty": {
+      "title": "All Clear!",
+      "description": "Your environment has been stable and safe. Keep up the great work maintaining optimal conditions!"
+    },
+    "accessibility": {
+      "sensorCard": "{{title}}: {{value}}, {{description}}, tap for details",
+      "alertItem": "Alert: {{message}} at {{time}}",
+      "emergencyButton": "Emergency button to notify parent immediately"
+    }
+  },
+  "accessibility": {
+    "ageGroupsButton": "Age groups: {{groups}}, tap to change",
+    "languageSelection": "Select {{language}} language",
+    "contentFilterSwitch": "Content filter {{status}}",
+    "environmentalAlertsSwitch": "Environmental alerts {{status}}",
+    "aqiThresholdButton": "Air quality threshold set to {{value}} AQI, tap to adjust",
+    "tabNavigation": "{{label}} tab{{active}}",
+    "routineButton": "{{label}} routine at {{time}}, tap to edit",
+    "storyButton": "{{title}} story, {{duration}}, {{category}}{{progress}}",
+    "songButton": "{{title}} song, {{duration}}, {{category}}",
+    "quickActionButton": "{{action}} quick action",
+    "airQualityButton": "View detailed air quality information",
+    "curioBranding": "Curio branding - Nurture imagination, together!",
+    "enabled": "enabled",
+    "disabled": "disabled",
+    "currentlySelected": ", currently selected"
+  }
+}

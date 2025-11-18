@@ -586,8 +586,8 @@ const styles = StyleSheet.create({
   },
   brandingImage: {
     width: '100%',
-    height: 130,
-    resizeMode: 'contain',
+    height: 180,
+    resizeMode: 'cover',
   },
 
   // Welcome hint - Playful Kid Design

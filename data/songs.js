@@ -30,6 +30,13 @@ const hickoryDickoryDockAudio = require('../assets/audio/songs/Hickory_dickory-d
 const oldMacDonaldAudio = require('../assets/audio/songs/macdonald-had-a-farm.mp3');
 const rowRowRowBoatAudio = require('../assets/audio/songs/Row-row-row-your-boat.mp3');
 
+// New bedtime lullabies and sleep songs
+const babyLullabyAudio = require('../assets/audio/songs/baby-sleep-lullaby.mp3');
+const schubertSerenaude = require('../assets/audio/songs/schubert-serenade-schwanengesang.mp3');
+const sleepBabyLullabyAudio = require('../assets/audio/songs/sleep-sleep-baby-lullaby.mp3');
+const moonlightSonataLullabyAudio = require('../assets/audio/songs/beethoven-moonlight-sonata-first-theme-piano-sonata-no-14-401567.mp3');
+const lavendersBlueAudio = require('../assets/audio/songs/lavenders-blue-lullaby.mp3');
+
 // console.log('✅ All audio files configured:', { // Disabled to reduce log noise
 //   // Original songs
 //   twinkleTwinkle: !!twinkleTwinkleAudio,
@@ -1732,6 +1739,533 @@ export const SONGS_LIBRARY = [
       "Practice counting hours 1-12",
       "Discuss different types of clocks",
       "Make clock crafts with moving hands"
+    ]
+  },
+  {
+    id: 'baby-sleep-lullaby',
+    title: 'Baby Sleep Lullaby',
+    category: 'bedtime',
+    difficulty: 'easy',
+    duration: 180,
+    audioFile: babyLullabyAudio,
+    description: 'A gentle, soothing lullaby perfect for bedtime with calming melodies.',
+    educationalValue: 'Promotes relaxation, sleep preparation, and emotional comfort.',
+    ageGroup: '0-5',
+    learningObjectives: ['Relaxation', 'Sleep routine', 'Emotional comfort'],
+    culturalContext: 'Traditional sleep song found in many cultures worldwide.',
+    lyrics: [
+      {
+        line: 'Sleep little baby, close your eyes',
+        signs: [
+          createSignInstruction('Sleep', 'Rest head on hands like sleeping'),
+          createSignInstruction('Little baby', 'Rock arms like holding baby'),
+          createSignInstruction('Close your eyes', 'Gently close eyes with hands')
+        ],
+        startTime: 0,
+        endTime: 4
+      },
+      {
+        line: 'Dream of clouds in starry skies',
+        signs: [
+          createSignInstruction('Dream', 'Rest head on hands, peaceful expression'),
+          createSignInstruction('Clouds', 'Make fluffy cloud shapes with hands'),
+          createSignInstruction('Starry skies', 'Point up, twinkle fingers like stars')
+        ],
+        startTime: 4,
+        endTime: 8
+      },
+      {
+        line: 'Angels watch you through the night',
+        signs: [
+          createSignInstruction('Angels', 'Spread arms like wings'),
+          createSignInstruction('Watch you', 'Protective gesture over baby'),
+          createSignInstruction('Through the night', 'Show darkness then protection')
+        ],
+        startTime: 8,
+        endTime: 12
+      },
+      {
+        line: 'Until the morning brings new light',
+        signs: [
+          createSignInstruction('Morning', 'Show sun rising with hands'),
+          createSignInstruction('New light', 'Spreading brightness gesture'),
+          createSignInstruction('Until', 'Show passage of time')
+        ],
+        startTime: 12,
+        endTime: 16
+      },
+      {
+        line: 'Hush now baby, drift away',
+        signs: [
+          createSignInstruction('Hush now', 'Gentle shushing motion'),
+          createSignInstruction('Baby', 'Rock arms tenderly'),
+          createSignInstruction('Drift away', 'Gentle floating motion')
+        ],
+        startTime: 16,
+        endTime: 20
+      },
+      {
+        line: 'Tomorrow brings a brand new day',
+        signs: [
+          createSignInstruction('Tomorrow', 'Point to new day ahead'),
+          createSignInstruction('Brand new day', 'Fresh start gesture, sun rising'),
+          createSignInstruction('Brings', 'Offering gesture with both hands')
+        ],
+        startTime: 20,
+        endTime: 24
+      }
+    ],
+    signInstructions: [
+      {
+        lyric: 'Sleep little baby, close your eyes',
+        instruction: 'Gently close eyes with hands, rock side to side',
+        gestureType: 'hand',
+        difficulty: 'easy',
+        duration: 4,
+        visualCues: ['Closing eyes', 'Rocking motion', 'Peaceful expression'],
+        startTime: 0,
+        endTime: 4
+      },
+      {
+        lyric: 'Dream of clouds in starry skies',
+        instruction: 'Point up to sky, make cloud shapes with hands',
+        gestureType: 'hand',
+        difficulty: 'easy',
+        duration: 4,
+        visualCues: ['Sky pointing', 'Cloud shapes', 'Dreamy movement'],
+        startTime: 4,
+        endTime: 8
+      },
+      {
+        lyric: 'Angels watch you through the night',
+        instruction: 'Spread arms like wings, protective gesture over baby',
+        gestureType: 'arms',
+        difficulty: 'easy',
+        duration: 4,
+        visualCues: ['Angel wings', 'Protection', 'Watching over'],
+        startTime: 8,
+        endTime: 12
+      }
+    ],
+    tips: [
+      "Use soft, gentle movements throughout",
+      "Maintain calm, soothing expression",
+      "Rock gently to match the rhythm",
+      "Perfect for establishing bedtime routine"
+    ],
+    extensions: [
+      "Talk about nighttime and daytime",
+      "Practice bedtime routines",
+      "Learn about stars and moon"
+    ]
+  },
+  {
+    id: 'schubert-serenade',
+    title: 'Schubert Serenade (Schwanengesang)',
+    category: 'bedtime',
+    difficulty: 'intermediate',
+    duration: 240,
+    audioFile: schubertSerenaude,
+    description: 'Classical lullaby adaptation of Schubert\'s beautiful serenade, perfect for peaceful sleep.',
+    educationalValue: 'Introduction to classical music, cultural appreciation, and advanced listening skills.',
+    ageGroup: '3-8',
+    learningObjectives: ['Classical music appreciation', 'Cultural learning', 'Advanced listening'],
+    culturalContext: 'Austrian classical composition by Franz Schubert, adapted as a gentle lullaby.',
+    lyrics: [
+      {
+        line: 'Softly sing the evening breeze',
+        signs: [
+          createSignInstruction('Softly sing', 'Gentle singing motion with hands'),
+          createSignInstruction('Evening breeze', 'Wave hands like gentle wind'),
+          createSignInstruction('Breeze', 'Flowing wind motion through trees')
+        ],
+        startTime: 0,
+        endTime: 5
+      },
+      {
+        line: 'Through the whispering willow trees',
+        signs: [
+          createSignInstruction('Whispering', 'Gentle finger to lips'),
+          createSignInstruction('Willow trees', 'Arms sway like willow branches'),
+          createSignInstruction('Through', 'Movement through the trees')
+        ],
+        startTime: 5,
+        endTime: 10
+      },
+      {
+        line: 'Stars above shine gentle light',
+        signs: [
+          createSignInstruction('Stars above', 'Point to stars, twinkle fingers'),
+          createSignInstruction('Shine', 'Gentle brightness with hands'),
+          createSignInstruction('Gentle light', 'Soft, warm light gesture')
+        ],
+        startTime: 10,
+        endTime: 15
+      },
+      {
+        line: 'Blessing dreams throughout the night',
+        signs: [
+          createSignInstruction('Blessing', 'Protective, loving gesture'),
+          createSignInstruction('Dreams', 'Peaceful sleep motion'),
+          createSignInstruction('Throughout the night', 'Show full night passage')
+        ],
+        startTime: 15,
+        endTime: 20
+      },
+      {
+        line: 'Close your eyes and drift away',
+        signs: [
+          createSignInstruction('Close your eyes', 'Gently close eyes'),
+          createSignInstruction('Drift away', 'Peaceful floating motion'),
+          createSignInstruction('And', 'Smooth connecting gesture')
+        ],
+        startTime: 20,
+        endTime: 25
+      },
+      {
+        line: 'To peaceful dreams until the day',
+        signs: [
+          createSignInstruction('Peaceful dreams', 'Serene sleeping gesture'),
+          createSignInstruction('Until the day', 'Show sunrise approaching'),
+          createSignInstruction('To', 'Guiding gesture toward dreams')
+        ],
+        startTime: 25,
+        endTime: 30
+      }
+    ],
+    signInstructions: [
+      {
+        lyric: 'Softly sing the evening breeze',
+        instruction: 'Wave hands gently like wind through trees',
+        gestureType: 'hand',
+        difficulty: 'intermediate',
+        duration: 5,
+        visualCues: ['Flowing wind', 'Gentle swaying', 'Soft movement'],
+        startTime: 0,
+        endTime: 5
+      },
+      {
+        lyric: 'Through the whispering willow trees',
+        instruction: 'Arms sway like willow branches, fingers flutter',
+        gestureType: 'arms',
+        difficulty: 'intermediate',
+        duration: 5,
+        visualCues: ['Willow branches', 'Swaying motion', 'Delicate flutter'],
+        startTime: 5,
+        endTime: 10
+      },
+      {
+        lyric: 'Stars above shine gentle light',
+        instruction: 'Point to stars, twinkle fingers, gentle brightness',
+        gestureType: 'hand',
+        difficulty: 'easy',
+        duration: 5,
+        visualCues: ['Star pointing', 'Twinkling', 'Soft light'],
+        startTime: 10,
+        endTime: 15
+      }
+    ],
+    tips: [
+      "Emphasize the classical, elegant nature",
+      "Use flowing, graceful movements",
+      "Introduce concept of classical music",
+      "Perfect for older children appreciating beauty"
+    ],
+    extensions: [
+      "Learn about Franz Schubert and classical music",
+      "Explore different musical instruments",
+      "Discuss Austrian culture and history"
+    ]
+  },
+  {
+    id: 'sleep-sleep-baby',
+    title: 'Sleep! Sleep! Baby Lullaby',
+    category: 'bedtime',
+    difficulty: 'easy',
+    duration: 150,
+    audioFile: sleepBabyLullabyAudio,
+    description: 'A repetitive, soothing lullaby with simple words perfect for very young children.',
+    educationalValue: 'Language repetition, sleep routine establishment, and comfort association.',
+    ageGroup: '0-3',
+    learningObjectives: ['Sleep routine', 'Language repetition', 'Emotional comfort'],
+    culturalContext: 'Simple, universal sleep song style found across many cultures.',
+    lyrics: [
+      {
+        line: 'Sleep, sleep, little baby',
+        signs: [
+          createSignInstruction('Sleep, sleep', 'Repeated rocking motion'),
+          createSignInstruction('Little baby', 'Rock arms like holding baby'),
+          createSignInstruction('Sleep', 'Eyes closing gesture')
+        ],
+        startTime: 0,
+        endTime: 3
+      },
+      {
+        line: 'Sleep, sleep, through the night',
+        signs: [
+          createSignInstruction('Sleep, sleep', 'Continued rocking motion'),
+          createSignInstruction('Through the night', 'Show darkness, peaceful rest'),
+          createSignInstruction('Night', 'Peaceful sleeping pose')
+        ],
+        startTime: 3,
+        endTime: 6
+      },
+      {
+        line: 'Sleep, sleep, angels near you',
+        signs: [
+          createSignInstruction('Sleep, sleep', 'Gentle rocking continues'),
+          createSignInstruction('Angels near you', 'Angel wings, protective presence'),
+          createSignInstruction('Near', 'Nearby presence around baby')
+        ],
+        startTime: 6,
+        endTime: 9
+      },
+      {
+        line: 'Sleep, sleep, till morning light',
+        signs: [
+          createSignInstruction('Sleep, sleep', 'Soothing rocking motion'),
+          createSignInstruction('Till morning', 'Show time passing to dawn'),
+          createSignInstruction('Light', 'Gentle sunrise gesture')
+        ],
+        startTime: 9,
+        endTime: 12
+      },
+      {
+        line: 'Sleep, sleep, mama loves you',
+        signs: [
+          createSignInstruction('Sleep, sleep', 'Loving rocking motion'),
+          createSignInstruction('Mama loves you', 'Heart gesture, pointing to baby'),
+          createSignInstruction('Loves', 'Hands to heart, then to baby')
+        ],
+        startTime: 12,
+        endTime: 15
+      },
+      {
+        line: 'Sleep, sleep, everything\'s right',
+        signs: [
+          createSignInstruction('Sleep, sleep', 'Final gentle rocking'),
+          createSignInstruction('Everything\'s right', 'All is well gesture'),
+          createSignInstruction('Right', 'Peaceful, secure feeling')
+        ],
+        startTime: 15,
+        endTime: 18
+      }
+    ],
+    signInstructions: [
+      {
+        lyric: 'Sleep, sleep, little baby',
+        instruction: 'Rock baby motion, eyes closing gesture',
+        gestureType: 'arms',
+        difficulty: 'easy',
+        duration: 3,
+        visualCues: ['Rocking motion', 'Baby cradle', 'Sleep gesture'],
+        startTime: 0,
+        endTime: 3
+      },
+      {
+        lyric: 'Sleep, sleep, through the night',
+        instruction: 'Show darkness with hands, peaceful sleeping pose',
+        gestureType: 'hand',
+        difficulty: 'easy',
+        duration: 3,
+        visualCues: ['Night darkness', 'Peaceful sleep', 'Calm rest'],
+        startTime: 3,
+        endTime: 6
+      },
+      {
+        lyric: 'Sleep, sleep, angels near you',
+        instruction: 'Angel wings gesture, protective presence around baby',
+        gestureType: 'arms',
+        difficulty: 'easy',
+        duration: 3,
+        visualCues: ['Angel wings', 'Protection', 'Nearby presence'],
+        startTime: 6,
+        endTime: 9
+      }
+    ],
+    tips: [
+      "Emphasize the repetitive 'sleep, sleep' for comfort",
+      "Use very gentle, minimal movements",
+      "Perfect for infants and toddlers",
+      "Create strong sleep association"
+    ],
+    extensions: [
+      "Practice saying 'sleep' in different languages",
+      "Talk about nighttime routines",
+      "Learn about different ways babies sleep"
+    ]
+  },
+  {
+    id: 'moonlight-sonata-lullaby',
+    title: 'Moonlight Sonata Lullaby',
+    category: 'bedtime',
+    difficulty: 'intermediate',
+    duration: 200,
+    audioFile: moonlightSonataLullabyAudio,
+    description: 'A gentle adaptation of Beethoven\'s Moonlight Sonata as a peaceful bedtime lullaby.',
+    educationalValue: 'Classical music introduction, artistic appreciation, and sophisticated listening skills.',
+    ageGroup: '4-10',
+    learningObjectives: ['Classical music appreciation', 'Artistic beauty', 'Advanced listening'],
+    culturalContext: 'German classical masterpiece by Ludwig van Beethoven, reimagined for children.',
+    lyrics: [
+      {
+        line: 'Moonlight softly glows tonight',
+        signs: [
+          createSignInstruction('Moonlight', 'Create moon shape with hands'),
+          createSignInstruction('Softly glows', 'Gentle glowing motion'),
+          createSignInstruction('Tonight', 'Show nighttime ambiance')
+        ],
+        startTime: 0,
+        endTime: 4
+      },
+      {
+        line: 'Silver beams of gentle light',
+        signs: [
+          createSignInstruction('Silver beams', 'Show light rays flowing down'),
+          createSignInstruction('Gentle light', 'Soft, shimmering motion'),
+          createSignInstruction('Light', 'Silver shimmer with fingers')
+        ],
+        startTime: 4,
+        endTime: 8
+      },
+      {
+        line: 'Dancing on your sleepy face',
+        signs: [
+          createSignInstruction('Dancing', 'Gentle finger dancing motion'),
+          createSignInstruction('Sleepy face', 'Gentle touch near face'),
+          createSignInstruction('On your face', 'Light dancing near face')
+        ],
+        startTime: 8,
+        endTime: 12
+      },
+      {
+        line: 'Dreams will take you to a peaceful place',
+        signs: [
+          createSignInstruction('Dreams', 'Peaceful sleeping gesture'),
+          createSignInstruction('Take you', 'Guiding motion away'),
+          createSignInstruction('Peaceful place', 'Serene, safe space gesture')
+        ],
+        startTime: 12,
+        endTime: 16
+      },
+      {
+        line: 'Like Beethoven\'s melody so sweet',
+        signs: [
+          createSignInstruction('Beethoven\'s melody', 'Classical music conducting'),
+          createSignInstruction('So sweet', 'Beautiful, sweet gesture'),
+          createSignInstruction('Melody', 'Flowing musical motion')
+        ],
+        startTime: 16,
+        endTime: 20
+      },
+      {
+        line: 'Your slumber will be calm and complete',
+        signs: [
+          createSignInstruction('Slumber', 'Deep, peaceful sleep'),
+          createSignInstruction('Calm and complete', 'Perfect rest gesture'),
+          createSignInstruction('Complete', 'Wholeness, peace gesture')
+        ],
+        startTime: 20,
+        endTime: 24
+      }
+    ],
+    tips: [
+      "Move with the classical music's rhythm",
+      "Introduce children to Beethoven's beauty",
+      "Use elegant, refined gestures",
+      "Great for developing musical sophistication"
+    ],
+    extensions: [
+      "Learn about Ludwig van Beethoven",
+      "Explore classical piano music",
+      "Discuss how music can paint pictures with sound"
+    ]
+  },
+  {
+    id: 'lavenders-blue-lullaby',
+    title: 'Lavender\'s Blue Lullaby',
+    category: 'bedtime',
+    difficulty: 'easy',
+    duration: 160,
+    audioFile: lavendersBlueAudio,
+    description: 'A traditional English lullaby about lavender, perfect for peaceful bedtime with nature themes.',
+    educationalValue: 'Traditional folk music, nature appreciation, and cultural heritage.',
+    ageGroup: '2-7',
+    learningObjectives: ['Folk traditions', 'Nature connection', 'Cultural heritage'],
+    culturalContext: 'Traditional English nursery rhyme and lullaby, celebrating nature and simple beauty.',
+    lyrics: [
+      {
+        line: 'Lavender\'s blue, dilly dilly',
+        signs: [
+          createSignInstruction('Lavender\'s blue', 'Show blue color, gentle flower swaying'),
+          createSignInstruction('Dilly dilly', 'Gentle swaying motion'),
+          createSignInstruction('Blue', 'Blue color gesture')
+        ],
+        startTime: 0,
+        endTime: 3
+      },
+      {
+        line: 'Lavender\'s green',
+        signs: [
+          createSignInstruction('Lavender\'s green', 'Show green color, leaves growing'),
+          createSignInstruction('Green', 'Green nature gesture'),
+          createSignInstruction('Lavender', 'Flower swaying motion')
+        ],
+        startTime: 3,
+        endTime: 6
+      },
+      {
+        line: 'When I am king, dilly dilly',
+        signs: [
+          createSignInstruction('When I am king', 'Royal gesture, crown motion'),
+          createSignInstruction('King', 'Crown on head gesture'),
+          createSignInstruction('Dilly dilly', 'Gentle royal wave')
+        ],
+        startTime: 6,
+        endTime: 9
+      },
+      {
+        line: 'You shall be queen',
+        signs: [
+          createSignInstruction('You shall be queen', 'Point to child, crown gesture'),
+          createSignInstruction('Queen', 'Elegant queen gesture'),
+          createSignInstruction('Shall be', 'Future pointing motion')
+        ],
+        startTime: 9,
+        endTime: 12
+      },
+      {
+        line: 'Sleep now my baby, dilly dilly',
+        signs: [
+          createSignInstruction('Sleep now', 'Gentle sleep gesture'),
+          createSignInstruction('My baby', 'Loving embrace motion'),
+          createSignInstruction('Dilly dilly', 'Soothing rocking motion')
+        ],
+        startTime: 12,
+        endTime: 15
+      },
+      {
+        line: 'Dream sweet dreams',
+        signs: [
+          createSignInstruction('Dream', 'Peaceful dreaming gesture'),
+          createSignInstruction('Sweet dreams', 'Beautiful, peaceful motion'),
+          createSignInstruction('Sweet', 'Gentle, loving gesture')
+        ],
+        startTime: 15,
+        endTime: 18
+      }
+    ],
+    tips: [
+      "Emphasize the playful 'dilly dilly' rhythm",
+      "Connect children to nature and flowers",
+      "Use traditional folk singing style",
+      "Great for teaching about colors and nature"
+    ],
+    extensions: [
+      "Learn about lavender plants and their uses",
+      "Explore traditional English folk songs",
+      "Discuss colors in nature",
+      "Practice gardening or flower identification"
     ]
   }
 ];

@@ -127,3 +127,11 @@ tmp/
 
 # Audio placeholder files (we want to ignore these but keep the real mp3 files)
 *.placeholder
+
+# Expo build artifacts and hashed assets (only in root assets/ folder)
+/assets/[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]*
+/assets/assets/
+/assets/translations/
+/index.html
+/metadata.json
+*.zip

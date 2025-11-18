@@ -423,8 +423,8 @@ const EngageScreen = ({ navigation }) => {
           source={require('../assets/images/engagescreen-head.png')}
           style={{
             width: '100%',
-            height: 100,
-            resizeMode: 'contain',
+            height: 140,
+            resizeMode: 'cover',
             backgroundColor: CURIO_THEME.colors.surface,
           }}
           accessible={true}
@@ -550,7 +550,7 @@ const EngageScreen = ({ navigation }) => {
             </View>
           ) : (
             <TranslatedSongsList 
-              songs={getSongsByCategory(selectedSongCategory).slice(0, 6)}
+              songs={getSongsByCategory(selectedSongCategory)}
               onSongPress={handleSongPress}
             />
           )}

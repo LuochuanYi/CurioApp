@@ -423,7 +423,7 @@ const EngageScreen = ({ navigation }) => {
           source={require('../assets/images/engagescreen-head.png')}
           style={{
             width: '100%',
-            height: 140,
+            height: 200,
             resizeMode: 'cover',
             backgroundColor: CURIO_THEME.colors.surface,
           }}

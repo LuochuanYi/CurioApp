@@ -586,7 +586,7 @@ const styles = StyleSheet.create({
   },
   brandingImage: {
     width: '100%',
-    height: 180,
+    height: 240,
     resizeMode: 'cover',
   },
 

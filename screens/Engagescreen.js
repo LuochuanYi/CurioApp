@@ -428,7 +428,7 @@ const EngageScreen = ({ navigation }) => {
             backgroundColor: CURIO_THEME.colors.surface,
           }}
           accessible={true}
-          accessibilityLabel="Engage Screen - Create together!"
+          accessibilityLabel="Engage Screen - Create together! - Enhanced Header v2"
         />
       </View>
 

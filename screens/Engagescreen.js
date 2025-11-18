@@ -420,7 +420,7 @@ const EngageScreen = ({ navigation }) => {
         ...CURIO_THEME.shadows.card
       }}>
         <Image
-          source={require('../assets/images/engagescreen-head-v2.png')}
+          source={require('../assets/images/engagescreen-head-v3.png')}
           style={{
             width: '100%',
             height: 200,

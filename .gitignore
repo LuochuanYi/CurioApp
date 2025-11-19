@@ -132,6 +132,4 @@ tmp/
 /assets/[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]*
 /assets/assets/
 /assets/translations/
-/index.html
-/metadata.json
 *.zip

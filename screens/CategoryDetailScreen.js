@@ -19,6 +19,7 @@ import {
 } from '../data/learningCategories';
 import { useDynamicTranslation } from '../hooks/useDynamicTranslation';
 import { logTranslation, logError } from '../utils/logger';
+import { GameActivityManager } from '../components';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -26,6 +27,8 @@ const CategoryDetailScreen = ({ route, navigation }) => {
   const { categoryId } = route.params;
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showGames, setShowGames] = useState(false);
+  const [selectedActivity, setSelectedActivity] = useState(null);
   const { t, i18n } = useTranslation();
   
   // Translation toggle state
@@ -86,6 +89,22 @@ const CategoryDetailScreen = ({ route, navigation }) => {
 
   const handleBackPress = () => {
     navigation.goBack();
+  };
+
+  const handlePlayGames = (activity) => {
+    setSelectedActivity(activity);
+    setShowGames(true);
+  };
+
+  const handleGamesComplete = (gameResults) => {
+    setShowGames(false);
+    setSelectedActivity(null);
+    // Could show a completion message or navigate somewhere
+  };
+
+  const handleExitGames = () => {
+    setShowGames(false);
+    setSelectedActivity(null);
   };
 
   // Handle translation toggle
@@ -351,13 +370,12 @@ const CategoryDetailScreen = ({ route, navigation }) => {
             </View>
           ) : (
             displayContent.activities.map((activity, index) => (
-              <TouchableOpacity
+              <View
                 key={activity.id}
                 style={[
                   styles.activityCard,
                   { borderLeftColor: getDifficultyColor(activity.difficulty) }
                 ]}
-                onPress={() => handleActivityPress(activity)}
                 accessible={true}
                 accessibilityRole="button"
                 accessibilityLabel={`${activity.title}, ${activity.difficulty.name} difficulty, ${activity.duration}`}
@@ -396,11 +414,35 @@ const CategoryDetailScreen = ({ route, navigation }) => {
                     )}
                   </View>
                   
-                  <View style={styles.startButton}>
-                    <Text style={styles.startIcon}>▶️</Text>
+                  <View style={styles.activityButtons}>
+                    <TouchableOpacity 
+                      style={styles.gamesButton}
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        handlePlayGames(activity);
+                      }}
+                      accessible={true}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Play games for ${activity.title}`}
+                    >
+                      <Text style={styles.gamesIcon}>🎮</Text>
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity 
+                      style={styles.startButton}
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        handleActivityPress(activity);
+                      }}
+                      accessible={true}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Start ${activity.title}`}
+                    >
+                      <Text style={styles.startIcon}>▶️</Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
-              </TouchableOpacity>
+              </View>
             ))
           )}
         </View>
@@ -408,6 +450,16 @@ const CategoryDetailScreen = ({ route, navigation }) => {
         {/* Bottom spacing */}
         <View style={styles.bottomSpacing} />
       </ScrollView>
+
+      {/* Interactive Learning Games Modal */}
+      {showGames && selectedActivity && (
+        <GameActivityManager
+          activity={selectedActivity}
+          onGameComplete={handleGamesComplete}
+          onExitGame={handleExitGames}
+          language={currentLanguage}
+        />
+      )}
     </SafeAreaView>
   );
 };
@@ -657,6 +709,10 @@ const styles = StyleSheet.create({
     color: '#495057',
     fontWeight: '500',
   },
+  activityButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
   startButton: {
     width: 40,
     height: 40,
@@ -668,6 +724,17 @@ const styles = StyleSheet.create({
   startIcon: {
     fontSize: 16,
     color: '#fff',
+  },
+  gamesButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#ff6b35',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  gamesIcon: {
+    fontSize: 16,
   },
 
   // Empty State

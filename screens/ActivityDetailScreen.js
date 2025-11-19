@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { DIFFICULTY_LEVELS } from '../data/learningCategories';
 import { useDynamicTranslation } from '../hooks/useDynamicTranslation';
 import { logNavigation, logTranslation, logError, logInfo } from '../utils/logger';
+import { GameActivityManager } from '../components';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -23,6 +24,7 @@ const ActivityDetailScreen = ({ route, navigation }) => {
   const [completedSteps, setCompletedSteps] = useState([]);
   const [activityProgress, setActivityProgress] = useState(0);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [showGames, setShowGames] = useState(false);
   const { t, i18n } = useTranslation();
   
   // Translation toggle state
@@ -174,12 +176,29 @@ const ActivityDetailScreen = ({ route, navigation }) => {
   const handleCompleteActivity = () => {
     Alert.alert(
       translateText('Great Job! 🎉'),
-      translateText('You\'ve completed this activity! Would you like to try another one?'),
+      translateText('You\'ve completed this activity! Want to play some games to practice what you learned?'),
       [
-        { text: translateText('Stay Here'), style: 'cancel' },
+        { text: translateText('Just Browse'), onPress: () => navigation.goBack() },
+        { text: translateText('Play Games! 🎮'), onPress: () => setShowGames(true) },
+      ]
+    );
+  };
+
+  const handleGamesComplete = (gameResults) => {
+    setShowGames(false);
+    
+    Alert.alert(
+      translateText('🎉 Awesome Learning!'),
+      translateText(`You completed ${gameResults.gamesPlayed} games with an average score of ${gameResults.averageScore}%! Great job!`),
+      [
+        { text: translateText('Play Again'), onPress: () => setShowGames(true) },
         { text: translateText('Browse More'), onPress: () => navigation.goBack() }
       ]
     );
+  };
+
+  const handleExitGames = () => {
+    setShowGames(false);
   };
 
   // Handle translation toggle
@@ -612,6 +631,16 @@ const ActivityDetailScreen = ({ route, navigation }) => {
             </View>
           </View>
         </View>
+      )}
+
+      {/* Interactive Learning Games */}
+      {showGames && (
+        <GameActivityManager
+          activity={activity}
+          onGameComplete={handleGamesComplete}
+          onExitGame={handleExitGames}
+          language={currentLanguage}
+        />
       )}
     </SafeAreaView>
   );

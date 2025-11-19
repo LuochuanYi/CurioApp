@@ -85,6 +85,13 @@ export const LEARNING_ACTIVITIES = {
       difficulty: DIFFICULTY_LEVELS.BEGINNER,
       duration: '10-15 min',
       ageGroup: '3-6 years',
+      vocabulary: [
+        { word: 'Cat', definition: 'A furry pet animal' },
+        { word: 'Hat', definition: 'Something you wear on your head' },
+        { word: 'Bat', definition: 'A wooden stick used in baseball' },
+        { word: 'Mat', definition: 'A small rug on the floor' },
+        { word: 'Rat', definition: 'A small mouse-like animal' }
+      ],
       instructions: [
         'Say a simple word like "cat"',
         'Help your child find words that rhyme',
@@ -121,6 +128,13 @@ export const LEARNING_ACTIVITIES = {
       difficulty: DIFFICULTY_LEVELS.BEGINNER,
       duration: '15-25 min',
       ageGroup: '3-7 years',
+      vocabulary: [
+        { word: 'Apple', definition: 'A red or green fruit that grows on trees' },
+        { word: 'Ball', definition: 'A round object used for playing games' },
+        { word: 'Cat', definition: 'A furry pet animal that says meow' },
+        { word: 'Dog', definition: 'A friendly pet animal that barks' },
+        { word: 'Egg', definition: 'An oval object that comes from chickens' }
+      ],
       instructions: [
         'Choose a letter of the day',
         'Hunt around the house for objects starting with that letter',
@@ -139,6 +153,13 @@ export const LEARNING_ACTIVITIES = {
       difficulty: DIFFICULTY_LEVELS.INTERMEDIATE,
       duration: '10-20 min',
       ageGroup: '4-8 years',
+      vocabulary: [
+        { word: 'Question', definition: 'A sentence that asks for information' },
+        { word: 'Answer', definition: 'A response to a question' },
+        { word: 'Listen', definition: 'To pay attention to sounds or words' },
+        { word: 'Share', definition: 'To tell someone about something' },
+        { word: 'Feeling', definition: 'An emotion like happy, sad, or excited' }
+      ],
       instructions: [
         'Use conversation starter cards or prompts',
         'Take turns asking and answering questions',
@@ -157,6 +178,13 @@ export const LEARNING_ACTIVITIES = {
       difficulty: DIFFICULTY_LEVELS.BEGINNER,
       duration: '15-20 min',
       ageGroup: '2-6 years',
+      vocabulary: [
+        { word: 'Loud', definition: 'Making a lot of noise' },
+        { word: 'Quiet', definition: 'Making very little noise' },
+        { word: 'Chirp', definition: 'The sound birds make' },
+        { word: 'Buzz', definition: 'The sound bees or flies make' },
+        { word: 'Listen', definition: 'To pay attention to sounds' }
+      ],
       instructions: [
         'Walk around your home or yard quietly',
         'Listen carefully for different sounds',
@@ -501,6 +529,13 @@ export const LEARNING_ACTIVITIES = {
       difficulty: DIFFICULTY_LEVELS.INTERMEDIATE,
       duration: '20-30 min',
       ageGroup: '4-10 years',
+      vocabulary: [
+        { word: 'Density', definition: 'How heavy something is compared to its size' },
+        { word: 'Layer', definition: 'One level stacked on top of another' },
+        { word: 'Float', definition: 'To stay on top of a liquid' },
+        { word: 'Sink', definition: 'To go down to the bottom' },
+        { word: 'Liquid', definition: 'Something that flows like water' }
+      ],
       instructions: [
         'Gather honey, dish soap, water (with food coloring), and oil',
         'Slowly pour each liquid into a clear glass',
@@ -520,6 +555,13 @@ export const LEARNING_ACTIVITIES = {
       difficulty: DIFFICULTY_LEVELS.BEGINNER,
       duration: '10 min daily for 2-3 weeks',
       ageGroup: '3-8 years',
+      vocabulary: [
+        { word: 'Seed', definition: 'A small part of a plant that grows into a new plant' },
+        { word: 'Sprout', definition: 'When a seed starts to grow' },
+        { word: 'Roots', definition: 'Parts of plants that grow down into soil' },
+        { word: 'Sunlight', definition: 'Light from the sun that plants need to grow' },
+        { word: 'Growth', definition: 'Getting bigger or taller over time' }
+      ],
       instructions: [
         'Plant seeds in small pots with soil',
         'Water gently and place in sunlight',
@@ -967,6 +1009,13 @@ export const LEARNING_ACTIVITIES = {
       difficulty: DIFFICULTY_LEVELS.BEGINNER,
       duration: '30-45 min',
       ageGroup: '3-10 years',
+      vocabulary: [
+        { word: 'Collage', definition: 'Art made by gluing different materials together' },
+        { word: 'Natural', definition: 'Things that come from nature, not made by people' },
+        { word: 'Arrange', definition: 'To put things in a nice order or pattern' },
+        { word: 'Texture', definition: 'How something feels when you touch it' },
+        { word: 'Creative', definition: 'Using imagination to make something new' }
+      ],
       instructions: [
         'Go on a nature walk to collect leaves, flowers, twigs',
         'Arrange materials on paper to create pictures',

@@ -19,6 +19,7 @@ import {
 
 import { useDynamicTranslation } from '../hooks/useDynamicTranslation';
 import { useUserProgress } from '../hooks/useUserProgress';
+import { useProgressSync, useAchievementNotifications } from '../hooks/useProgressIntegration';
 
 // 🎮 Main Game Activity Manager Component
 export const GameActivityManager = ({ 
@@ -29,6 +30,8 @@ export const GameActivityManager = ({
 }) => {
   const { translateContent } = useDynamicTranslation();
   const { updateActivityProgress, getActivityProgress } = useUserProgress();
+  const { syncGameCompletion, syncActivityCompletion } = useProgressSync();
+  const { triggerAchievementCheck } = useAchievementNotifications();
   const [currentGame, setCurrentGame] = useState(null);
   const [gameResults, setGameResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
@@ -263,7 +266,7 @@ export const GameActivityManager = ({
   };
 
   // 🎉 Handle game completion
-  const handleGameComplete = (gameType, results) => {
+  const handleGameComplete = async (gameType, results) => {
     const gameResult = {
       gameType,
       score: results.score || 0,
@@ -274,7 +277,7 @@ export const GameActivityManager = ({
     const updatedResults = [...gameResults, gameResult];
     setGameResults(updatedResults);
 
-    // Update user progress
+    // Update legacy user progress
     updateActivityProgress(activity.id, {
       gameResults: updatedResults,
       lastPlayed: new Date().toISOString(),
@@ -284,30 +287,81 @@ export const GameActivityManager = ({
       )
     });
 
-    // Show completion feedback
-    Alert.alert(
-      '🎉 Game Complete!',
-      `Great job! You scored ${results.score}% on ${gameType}. Would you like to try another game?`,
-      [
-        { text: 'Play Another', onPress: () => setCurrentGame(null) },
-        { text: 'Finish', onPress: () => handleFinishGames() }
-      ]
-    );
+    // 📊 Enhanced Progress Tracking
+    try {
+      await syncGameCompletion({
+        gameType,
+        score: results.score || 0,
+        timeSpent: results.timeSpent || 60, // Default 1 minute if not provided
+        accuracy: results.accuracy || (results.score || 0),
+        difficulty: results.difficulty || 'medium',
+        category: activity.category,
+        activityId: activity.id
+      });
+
+      // Check for new achievements
+      const newAchievements = await triggerAchievementCheck();
+      
+      // Enhanced completion alert with achievement info
+      let alertMessage = `Great job! You scored ${results.score}% on ${gameType}.`;
+      if (newAchievements && newAchievements.length > 0) {
+        alertMessage += `\n\n🏆 Achievement unlocked: ${newAchievements[0].title}!`;
+      }
+
+      Alert.alert(
+        '🎉 Game Complete!',
+        alertMessage,
+        [
+          { text: 'Play Another', onPress: () => setCurrentGame(null) },
+          { text: 'Finish', onPress: () => handleFinishGames() }
+        ]
+      );
+    } catch (error) {
+      console.warn('Enhanced progress tracking failed:', error);
+      
+      // Fallback to basic completion alert
+      Alert.alert(
+        '🎉 Game Complete!',
+        `Great job! You scored ${results.score}% on ${gameType}. Would you like to try another game?`,
+        [
+          { text: 'Play Another', onPress: () => setCurrentGame(null) },
+          { text: 'Finish', onPress: () => handleFinishGames() }
+        ]
+      );
+    }
   };
 
-  const handleFinishGames = () => {
+  const handleFinishGames = async () => {
     setShowResults(true);
     
     // Calculate overall performance
     const totalScore = gameResults.reduce((sum, result) => sum + (result.score || 0), 0);
     const averageScore = gameResults.length > 0 ? Math.round(totalScore / gameResults.length) : 0;
+    const totalTimeSpent = gameResults.reduce((sum, result) => sum + (result.details?.timeSpent || 60), 0);
+
+    // 📊 Enhanced Progress: Record activity completion with game data
+    try {
+      await syncActivityCompletion({
+        activityId: activity.id,
+        category: activity.category,
+        duration: totalTimeSpent,
+        score: averageScore,
+        gamesPlayed: gameResults.length,
+        gameResults: gameResults
+      });
+      
+      console.log('✅ Activity completion synced with enhanced progress');
+    } catch (error) {
+      console.warn('Enhanced activity sync failed:', error);
+    }
 
     setTimeout(() => {
       onGameComplete({
         gamesPlayed: gameResults.length,
         averageScore,
         results: gameResults,
-        activityId: activity.id
+        activityId: activity.id,
+        totalTimeSpent
       });
     }, 2000);
   };

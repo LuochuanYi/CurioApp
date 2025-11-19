@@ -3,7 +3,9 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Image
 import { STORY_CATEGORIES, STORY_LIBRARY, getStoriesByCategory } from '../data/stories';
 import { SONGS_LIBRARY, getSongsByCategory, SONG_CATEGORIES } from '../data/songs';
 import { useUserProgress } from '../hooks/useUserProgress';
+import { useEnhancedProgress } from '../hooks/useEnhancedProgress';
 import { CurioHeader, CurioCard, CurioButton, CurioMascot, CURIO_THEME, TEXT_STYLES } from '../components';
+import { ProgressSummary } from '../components/ProgressDashboard';
 import { useTranslation } from 'react-i18next';
 
 // Custom hook for air quality data (simulated)
@@ -90,6 +92,22 @@ const HomeScreen = ({ navigation }) => {
   const userProgressHook = useUserProgress();
   const { userProgress, loading: progressLoading, updateDailyStreak, isBedtime } = userProgressHook;
   
+  // Enhanced progress tracking
+  const {
+    currentLevel,
+    progressToNextLevel,
+    stats,
+    getTodayStats,
+    isLoading: enhancedProgressLoading
+  } = useEnhancedProgress();
+
+  const [todayStats, setTodayStats] = useState({
+    activitiesCompleted: 0,
+    gamesPlayed: 0,
+    pointsEarned: 0,
+    goalProgress: 0
+  });
+  
   console.log('HomeScreen: Got user progress data:', { progressLoading, userProgress });
   
   const featuredContent = getFeaturedContent(userProgressHook);
@@ -101,6 +119,24 @@ const HomeScreen = ({ navigation }) => {
       updateDailyStreak();
     }
   }, [progressLoading]);
+
+  // Load today's stats for enhanced progress
+  useEffect(() => {
+    const loadTodayStats = async () => {
+      try {
+        if (getTodayStats) {
+          const stats = await getTodayStats();
+          setTodayStats(stats);
+        }
+      } catch (error) {
+        console.warn('Failed to load today stats:', error);
+      }
+    };
+
+    if (!enhancedProgressLoading) {
+      loadTodayStats();
+    }
+  }, [enhancedProgressLoading, getTodayStats]);
   
   const handleNavigation = (screen) => {
     if (navigation && screen !== 'Home') {
@@ -175,6 +211,17 @@ const HomeScreen = ({ navigation }) => {
           accessibilityLabel={t('accessibility.curioBranding')}
         />
       </View>
+
+      {/* Enhanced Progress Summary */}
+      {!enhancedProgressLoading && currentLevel && (
+        <ProgressSummary
+          currentLevel={currentLevel}
+          progressToNextLevel={progressToNextLevel}
+          todayStats={todayStats}
+          learningStreak={stats.learningStreak || 0}
+          totalPoints={stats.totalPoints || 0}
+        />
+      )}
 
       {/* Welcome hint */}
       {(!featuredContent.hasRecentActivity && userProgress.stats.storiesCompleted === 0) && (
@@ -492,8 +539,8 @@ const HomeScreen = ({ navigation }) => {
       <View style={{
         backgroundColor: '#FFFFFF',
         flexDirection: 'row',
-        paddingVertical: CURIO_THEME.spacing.lg,
-        paddingHorizontal: CURIO_THEME.spacing.screenPadding,
+        paddingVertical: CURIO_THEME.spacing.md,
+        paddingHorizontal: CURIO_THEME.spacing.sm,
         borderTopWidth: 4,
         borderTopColor: '#FFE0B2',
         elevation: 8,
@@ -504,18 +551,19 @@ const HomeScreen = ({ navigation }) => {
       }}>
         {[
           { key: 'Home', icon: '🏠', label: t('common.home'), active: true, color: '#FF6B6B', bgColor: '#FFEBEE' },
-          { key: 'Monitor', icon: '📊', label: t('common.monitor'), active: false, color: '#4ECDC4', bgColor: '#E0F2F1' },
-          { key: 'Engage', icon: '💡', label: t('common.engage'), active: false, color: '#FFEAA7', bgColor: '#FFFDE7' },
-          { key: 'Personalize', icon: '👤', label: t('common.personalize'), active: false, color: '#DDA0DD', bgColor: '#F3E5F5' }
+          { key: 'Progress', icon: '📈', label: 'Progress', active: false, color: '#4ECDC4', bgColor: '#E0F2F1' },
+          { key: 'Monitor', icon: '📊', label: t('common.monitor'), active: false, color: '#FFEAA7', bgColor: '#FFFDE7' },
+          { key: 'Engage', icon: '💡', label: t('common.engage'), active: false, color: '#DDA0DD', bgColor: '#F3E5F5' },
+          { key: 'Personalize', icon: '👤', label: t('common.personalize'), active: false, color: '#9C27B0', bgColor: '#F8BBD9' }
         ].map((navItem) => (
           <TouchableOpacity
             key={navItem.key}
             style={{
               flex: 1,
               alignItems: 'center',
-              paddingVertical: CURIO_THEME.spacing.sm,
-              paddingHorizontal: CURIO_THEME.spacing.xs,
-              borderRadius: 16,
+              paddingVertical: 8,
+              paddingHorizontal: 4,
+              borderRadius: 12,
               backgroundColor: navItem.active ? navItem.bgColor : 'transparent',
               elevation: navItem.active ? 3 : 0,
               shadowColor: navItem.color,
@@ -533,8 +581,8 @@ const HomeScreen = ({ navigation }) => {
             accessibilityState={{ selected: navItem.active }}
           >
             <Text style={{ 
-              fontSize: 28, 
-              marginBottom: CURIO_THEME.spacing.xs,
+              fontSize: 20, 
+              marginBottom: 4,
               opacity: navItem.active ? 1 : 0.7,
               textShadowColor: navItem.active ? 'rgba(0, 0, 0, 0.1)' : 'transparent',
               textShadowOffset: { width: 1, height: 1 },
@@ -547,18 +595,18 @@ const HomeScreen = ({ navigation }) => {
               { 
                 color: navItem.active ? navItem.color : '#757575',
                 fontWeight: navItem.active ? '800' : '600',
-                fontSize: 11,
+                fontSize: 9,
               }
             ]}>
               {navItem.label}
             </Text>
             {navItem.active && (
               <View style={{
-                width: 40,
-                height: 4,
+                width: 30,
+                height: 3,
                 backgroundColor: navItem.color,
                 borderRadius: 2,
-                marginTop: 4,
+                marginTop: 2,
               }} />
             )}
           </TouchableOpacity>

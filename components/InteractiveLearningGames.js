@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
-  Animated
+  Animated,
+  ScrollView
 } from 'react-native';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -158,14 +159,26 @@ export const VocabularyMatchingGame = ({ words, onComplete, difficulty = 'beginn
 };
 
 // 🧩 Comprehension Quiz Component
-export const ComprehensionQuiz = ({ questions, onComplete, storyContext = null }) => {
+export const ComprehensionQuiz = ({ questions, onComplete, onClose, storyContext = null }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
-  const [answers, setAnswers] = useState([]);
+  const [answers, setAnswers] = useState({}); // Change to object to track by question index
   const [showExplanation, setShowExplanation] = useState(false);
   const [quizComplete, setQuizComplete] = useState(false);
 
   const question = questions[currentQuestion];
+
+  // Effect to restore state when navigating to a previously answered question
+  useEffect(() => {
+    const currentAnswer = answers[currentQuestion];
+    if (currentAnswer) {
+      setSelectedAnswer(currentAnswer.selectedAnswer);
+      setShowExplanation(true);
+    } else {
+      setSelectedAnswer(null);
+      setShowExplanation(false);
+    }
+  }, [currentQuestion, answers]);
 
   const handleAnswerSelect = (answerIndex) => {
     setSelectedAnswer(answerIndex);
@@ -180,55 +193,138 @@ export const ComprehensionQuiz = ({ questions, onComplete, storyContext = null }
       timeTaken: Date.now() // Could track actual time
     };
     
-    setAnswers([...answers, newAnswer]);
+    setAnswers({...answers, [currentQuestion]: newAnswer});
     setShowExplanation(true);
+  };
 
-    // Auto-advance after showing explanation
-    setTimeout(() => {
-      if (currentQuestion < questions.length - 1) {
-        setCurrentQuestion(currentQuestion + 1);
-        setSelectedAnswer(null);
-        setShowExplanation(false);
-      } else {
-        // Quiz complete
-        setQuizComplete(true);
-        const correctAnswers = [...answers, newAnswer].filter(a => a.isCorrect).length;
-        const score = Math.round((correctAnswers / questions.length) * 100);
-        
-        setTimeout(() => {
-          onComplete({
-            score,
-            correctAnswers,
-            totalQuestions: questions.length,
-            answers: [...answers, newAnswer]
-          });
-        }, 2000);
-      }
-    }, 3000);
+  const handleNextQuestion = () => {
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion(currentQuestion + 1);
+    } else {
+      // Quiz complete
+      setQuizComplete(true);
+      const answersArray = Object.values(answers);
+      const correctAnswers = answersArray.filter(a => a.isCorrect).length;
+      const score = Math.round((correctAnswers / questions.length) * 100);
+      
+      setTimeout(() => {
+        onComplete({
+          score,
+          correctAnswers,
+          totalQuestions: questions.length,
+          answers: answersArray
+        });
+      }, 1000);
+    }
+  };
+
+  const handlePreviousQuestion = () => {
+    if (currentQuestion > 0) {
+      setCurrentQuestion(currentQuestion - 1);
+      // State will be restored by useEffect
+    }
   };
 
   if (quizComplete) {
-    const correctAnswers = answers.filter(a => a.isCorrect).length;
+    const answersArray = Object.values(answers);
+    const correctAnswers = answersArray.filter(a => a.isCorrect).length;
     const score = Math.round((correctAnswers / questions.length) * 100);
     
     return (
       <View style={styles.gameContainer}>
-        <View style={styles.quizCompleteContainer}>
-          <Text style={styles.quizCompleteTitle}>Quiz Complete! 🎉</Text>
-          <Text style={styles.scoreText}>Your Score: {score}%</Text>
-          <Text style={styles.scoreDetails}>
-            {correctAnswers} out of {questions.length} correct
-          </Text>
-          
-          <View style={styles.performanceIndicator}>
-            {score >= 80 ? (
-              <Text style={styles.excellentPerformance}>Excellent work! 🌟</Text>
-            ) : score >= 60 ? (
-              <Text style={styles.goodPerformance}>Good job! Keep practicing! 👍</Text>
-            ) : (
-              <Text style={styles.needsPractice}>Keep practicing to improve! 📚</Text>
+        {/* Fixed Header */}
+        <View style={styles.gameHeader}>
+          <View style={styles.headerTop}>
+            <Text style={styles.gameTitle}>🎉 Quiz Results</Text>
+            {onClose && (
+              <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+                <Text style={styles.closeButtonText}>✕</Text>
+              </TouchableOpacity>
             )}
           </View>
+          <Text style={styles.gameProgress}>Final Score: {score}%</Text>
+        </View>
+
+        <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContent}>
+          <View style={styles.quizCompleteContainer}>
+            <Text style={styles.scoreText}>{correctAnswers} out of {questions.length} correct</Text>
+            
+            <View style={styles.performanceIndicator}>
+              {score >= 80 ? (
+                <Text style={styles.excellentPerformance}>Excellent work! 🌟</Text>
+              ) : score >= 60 ? (
+                <Text style={styles.goodPerformance}>Good job! Keep practicing! 👍</Text>
+              ) : (
+                <Text style={styles.needsPractice}>Keep practicing to improve! 📚</Text>
+              )}
+            </View>
+
+            {/* Question Review */}
+            <View style={styles.questionReview}>
+              <Text style={styles.reviewTitle}>📋 Question Review</Text>
+              {questions.map((question, qIndex) => {
+                const userAnswer = answers[qIndex];
+                const isCorrect = userAnswer?.isCorrect || false;
+                
+                return (
+                  <View key={qIndex} style={styles.reviewQuestion}>
+                    <Text style={styles.reviewQuestionText}>
+                      {qIndex + 1}. {question.question}
+                    </Text>
+                    
+                    <View style={styles.reviewAnswers}>
+                      {question.options.map((option, optIndex) => {
+                        const isUserChoice = userAnswer?.selectedAnswer === optIndex;
+                        const isCorrectAnswer = optIndex === question.correctAnswer;
+                        
+                        return (
+                          <View
+                            key={optIndex}
+                            style={[
+                              styles.reviewAnswer,
+                              isCorrectAnswer && styles.correctReviewAnswer,
+                              isUserChoice && !isCorrectAnswer && styles.incorrectReviewAnswer,
+                              isUserChoice && isCorrectAnswer && styles.userCorrectAnswer
+                            ]}
+                          >
+                            <Text style={[
+                              styles.reviewAnswerLetter,
+                              isCorrectAnswer && styles.correctAnswerText,
+                              isUserChoice && !isCorrectAnswer && { color: '#dc3545' }
+                            ]}>
+                              {String.fromCharCode(65 + optIndex)}
+                            </Text>
+                            <Text style={[
+                              styles.reviewAnswerText,
+                              isCorrectAnswer && styles.correctAnswerText,
+                              isUserChoice && !isCorrectAnswer && { color: '#dc3545' }
+                            ]}>
+                              {option}
+                            </Text>
+                            {isUserChoice && (
+                              <Text style={styles.reviewAnswerIcon}>
+                                {isCorrectAnswer ? '✓' : '✗'}
+                              </Text>
+                            )}
+                            {isCorrectAnswer && !isUserChoice && (
+                              <Text style={styles.reviewAnswerIcon}>✓</Text>
+                            )}
+                          </View>
+                        );
+                      })}
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+        </ScrollView>
+
+        {/* Bottom Navigation */}
+        <View style={styles.bottomNavigation}>
+          <TouchableOpacity style={styles.navButton} onPress={onClose}>
+            <Text style={styles.navButtonText}>Back to Activity</Text>
+          </TouchableOpacity>
         </View>
       </View>
     );
@@ -236,21 +332,35 @@ export const ComprehensionQuiz = ({ questions, onComplete, storyContext = null }
 
   return (
     <View style={styles.gameContainer}>
+      {/* Fixed Header */}
       <View style={styles.gameHeader}>
-        <Text style={styles.gameTitle}>🧩 Comprehension Quiz</Text>
+        <View style={styles.headerTop}>
+          <Text style={styles.gameTitle}>🧩 Comprehension Quiz</Text>
+          {onClose && (
+            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+              <Text style={styles.closeButtonText}>✕</Text>
+            </TouchableOpacity>
+          )}
+        </View>
         <Text style={styles.gameProgress}>
           Question {currentQuestion + 1} of {questions.length}
         </Text>
       </View>
 
-      {storyContext && currentQuestion === 0 && (
-        <View style={styles.storyContext}>
-          <Text style={styles.storyTitle}>📖 Story Recap</Text>
-          <Text style={styles.storyText}>{storyContext}</Text>
-        </View>
-      )}
+      {/* Scrollable Content Area */}
+      <ScrollView 
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={true}
+      >
+        {storyContext && currentQuestion === 0 && (
+          <View style={styles.storyContext}>
+            <Text style={styles.storyTitle}>📖 Story Recap</Text>
+            <Text style={styles.storyText}>{storyContext}</Text>
+          </View>
+        )}
 
-      <View style={styles.questionContainer}>
+        <View style={styles.questionContainer}>
         <Text style={styles.questionText}>{question.question}</Text>
         
         <View style={styles.answersContainer}>
@@ -293,11 +403,32 @@ export const ComprehensionQuiz = ({ questions, onComplete, storyContext = null }
           </View>
         )}
 
-        {selectedAnswer !== null && !showExplanation && (
-          <TouchableOpacity style={styles.submitButton} onPress={handleSubmitAnswer}>
-            <Text style={styles.submitButtonText}>Submit Answer</Text>
-          </TouchableOpacity>
-        )}
+          {selectedAnswer !== null && !showExplanation && (
+            <TouchableOpacity style={styles.submitButton} onPress={handleSubmitAnswer}>
+              <Text style={styles.submitButtonText}>Submit Answer</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </ScrollView>
+
+      {/* Fixed Navigation at Bottom */}
+      <View style={styles.bottomNavigation}>
+        <TouchableOpacity 
+          style={[styles.navButton, currentQuestion === 0 && styles.navButtonDisabled]} 
+          onPress={handlePreviousQuestion}
+          disabled={currentQuestion === 0}
+        >
+          <Text style={styles.navButtonText}>Previous</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.navButton} 
+          onPress={handleNextQuestion}
+        >
+          <Text style={styles.navButtonText}>
+            {currentQuestion < questions.length - 1 ? 'Next' : 'Finish Quiz'}
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -586,12 +717,14 @@ const styles = StyleSheet.create({
   gameContainer: {
     flex: 1,
     backgroundColor: '#f8f9fa',
-    padding: 20,
   },
   
   gameHeader: {
     alignItems: 'center',
-    marginBottom: 20,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 10,
+    backgroundColor: '#f8f9fa',
   },
   
   gameTitle: {
@@ -840,8 +973,7 @@ const styles = StyleSheet.create({
   
   quizCompleteContainer: {
     alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
+    paddingVertical: 20,
   },
   
   quizCompleteTitle: {
@@ -856,12 +988,101 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#007bff',
     marginBottom: 8,
+    textAlign: 'center',
   },
   
   scoreDetails: {
     fontSize: 18,
     color: '#6c757d',
     marginBottom: 24,
+  },
+  
+  // Question Review Styles
+  questionReview: {
+    width: '100%',
+    marginTop: 20,
+  },
+  
+  reviewTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#495057',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  
+  reviewQuestion: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  
+  reviewQuestionText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2c3e50',
+    marginBottom: 12,
+    lineHeight: 22,
+  },
+  
+  reviewAnswers: {
+    gap: 8,
+  },
+  
+  reviewAnswer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    backgroundColor: '#f8f9fa',
+  },
+  
+  correctReviewAnswer: {
+    backgroundColor: '#d4edda',
+    borderColor: '#28a745',
+  },
+  
+  incorrectReviewAnswer: {
+    backgroundColor: '#f8d7da',
+    borderColor: '#dc3545',
+  },
+  
+  userCorrectAnswer: {
+    backgroundColor: '#d1ecf1',
+    borderColor: '#17a2b8',
+  },
+  
+  reviewAnswerLetter: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#e9ecef',
+    color: '#495057',
+    textAlign: 'center',
+    lineHeight: 24,
+    fontWeight: 'bold',
+    marginRight: 12,
+    fontSize: 14,
+  },
+  
+  reviewAnswerText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#495057',
+  },
+  
+  reviewAnswerIcon: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 8,
   },
   
   performanceIndicator: {
@@ -1030,6 +1251,81 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#6c757d',
     textAlign: 'center',
+  },
+
+  // Quiz Layout Styles
+  scrollContainer: {
+    flex: 1,
+  },
+  
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  
+  bottomNavigation: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#e9ecef',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+
+  // Quiz Navigation Styles
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  
+  closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#dc3545',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  
+  navigationControls: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 20,
+    paddingHorizontal: 8,
+  },
+  
+  navButton: {
+    backgroundColor: '#007bff',
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  
+  navButtonDisabled: {
+    backgroundColor: '#6c757d',
+  },
+  
+  navButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

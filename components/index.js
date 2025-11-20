@@ -15,17 +15,5 @@ export {
 
 export { default as GameActivityManager } from './GameActivityManager';
 
-// Enhanced Progress Dashboard Components
-export {
-  AchievementBadge,
-  LevelProgressBar,
-  StatsDashboard,
-  AchievementsGallery,
-  AchievementUnlockModal,
-  DailyGoalsProgress,
-  RecentAchievements,
-  ProgressSummary
-} from './ProgressDashboard';
-
 // Re-export theme for components
 export { CURIO_THEME, COMPONENT_STYLES, TEXT_STYLES } from '../theme';

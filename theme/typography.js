@@ -24,6 +24,14 @@ export const FONTS = {
   }
 };
 
+// Font Weights
+export const FONT_WEIGHTS = {
+  normal: '400',
+  medium: '500', 
+  semiBold: '600',
+  bold: '700',
+};
+
 // Typography Hierarchy (as defined in style guide)
 export const TYPOGRAPHY = {
   // Headers - Bold, rounded sans-serif
@@ -116,5 +124,8 @@ export const TYPOGRAPHY = {
     letterSpacing: 0.1,
   },
 };
+
+// Add weights to TYPOGRAPHY object
+TYPOGRAPHY.weights = FONT_WEIGHTS;
 
 export default TYPOGRAPHY;

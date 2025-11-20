@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { CurioMascot } from './CurioMascot';
 import { CURIO_THEME, TEXT_STYLES } from '../theme';
 
@@ -9,6 +9,7 @@ export const CurioHeader = ({
   showMascot = true,
   mascotSize = 'medium',
   centerAlign = false,
+  onBackPress,
   style,
   titleStyle,
   subtitleStyle,
@@ -18,29 +19,64 @@ export const CurioHeader = ({
     <View 
       style={[
         {
-          flexDirection: centerAlign ? 'column' : 'row',
-          alignItems: centerAlign ? 'center' : 'flex-start',
+          flexDirection: 'row',
+          alignItems: 'center',
           paddingVertical: CURIO_THEME.spacing.lg,
           paddingHorizontal: CURIO_THEME.spacing.screenPadding,
+          backgroundColor: CURIO_THEME.colors.background,
+          borderBottomWidth: 1,
+          borderBottomColor: CURIO_THEME.colors.border,
         },
         style
       ]} 
       {...props}
     >
+      {/* Back Button */}
+      {onBackPress && (
+        <TouchableOpacity 
+          onPress={onBackPress}
+          style={{
+            marginRight: CURIO_THEME.spacing.md,
+            padding: CURIO_THEME.spacing.sm,
+            borderRadius: CURIO_THEME.radius.button,
+            backgroundColor: CURIO_THEME.colors.surface,
+            borderWidth: 1,
+            borderColor: CURIO_THEME.colors.border,
+            minWidth: 44,
+            minHeight: 44,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Text style={{
+            fontSize: 20,
+            color: CURIO_THEME.colors.primary,
+            fontWeight: '600',
+          }}>
+            ←
+          </Text>
+        </TouchableOpacity>
+      )}
+
+      {/* Mascot */}
       {showMascot && (
         <View style={{
-          marginRight: centerAlign ? 0 : CURIO_THEME.spacing.md,
-          marginBottom: centerAlign ? CURIO_THEME.spacing.md : 0,
+          marginRight: CURIO_THEME.spacing.md,
         }}>
           <CurioMascot size={mascotSize} />
         </View>
       )}
       
-      <View style={{ flex: centerAlign ? 0 : 1, alignItems: centerAlign ? 'center' : 'flex-start' }}>
+      {/* Title and Subtitle */}
+      <View style={{ 
+        flex: 1, 
+        alignItems: centerAlign ? 'center' : 'flex-start',
+        justifyContent: 'center'
+      }}>
         {title && (
           <Text 
             style={[
-              centerAlign ? TEXT_STYLES.h1 : TEXT_STYLES.h2, 
+              TEXT_STYLES.h3, 
               { textAlign: centerAlign ? 'center' : 'left' },
               titleStyle
             ]}

@@ -19,7 +19,6 @@ import {
 
 import { useDynamicTranslation } from '../hooks/useDynamicTranslation';
 import { useUserProgress } from '../hooks/useUserProgress';
-import { useProgressSync, useAchievementNotifications } from '../hooks/useProgressIntegration';
 
 // 🎮 Main Game Activity Manager Component
 export const GameActivityManager = ({ 
@@ -30,8 +29,6 @@ export const GameActivityManager = ({
 }) => {
   const { translateContent } = useDynamicTranslation();
   const { updateActivityProgress, getActivityProgress } = useUserProgress();
-  const { syncGameCompletion, syncActivityCompletion } = useProgressSync();
-  const { triggerAchievementCheck } = useAchievementNotifications();
   const [currentGame, setCurrentGame] = useState(null);
   const [gameResults, setGameResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
@@ -287,37 +284,26 @@ export const GameActivityManager = ({
       )
     });
 
-    // 📊 Enhanced Progress Tracking
+    // 📊 Basic Progress Tracking
     try {
-      await syncGameCompletion({
-        gameType,
+      // Update basic activity progress
+      updateActivityProgress(activity.id, {
+        completed: true,
         score: results.score || 0,
-        timeSpent: results.timeSpent || 60, // Default 1 minute if not provided
-        accuracy: results.accuracy || (results.score || 0),
-        difficulty: results.difficulty || 'medium',
-        category: activity.category,
-        activityId: activity.id
+        timeSpent: results.timeSpent || 60
       });
 
-      // Check for new achievements
-      const newAchievements = await triggerAchievementCheck();
-      
-      // Enhanced completion alert with achievement info
-      let alertMessage = `Great job! You scored ${results.score}% on ${gameType}.`;
-      if (newAchievements && newAchievements.length > 0) {
-        alertMessage += `\n\n🏆 Achievement unlocked: ${newAchievements[0].title}!`;
-      }
-
+      // Simple completion alert
       Alert.alert(
         '🎉 Game Complete!',
-        alertMessage,
+        `Great job! You scored ${results.score}% on ${gameType}.`,
         [
           { text: 'Play Another', onPress: () => setCurrentGame(null) },
           { text: 'Finish', onPress: () => handleFinishGames() }
         ]
       );
     } catch (error) {
-      console.warn('Enhanced progress tracking failed:', error);
+      console.warn('Progress tracking failed:', error);
       
       // Fallback to basic completion alert
       Alert.alert(
@@ -339,20 +325,18 @@ export const GameActivityManager = ({
     const averageScore = gameResults.length > 0 ? Math.round(totalScore / gameResults.length) : 0;
     const totalTimeSpent = gameResults.reduce((sum, result) => sum + (result.details?.timeSpent || 60), 0);
 
-    // 📊 Enhanced Progress: Record activity completion with game data
+    // 📊 Basic Progress: Record activity completion
     try {
-      await syncActivityCompletion({
-        activityId: activity.id,
-        category: activity.category,
-        duration: totalTimeSpent,
+      updateActivityProgress(activity.id, {
+        completed: true,
         score: averageScore,
-        gamesPlayed: gameResults.length,
-        gameResults: gameResults
+        timeSpent: totalTimeSpent,
+        gamesPlayed: gameResults.length
       });
       
-      console.log('✅ Activity completion synced with enhanced progress');
+      console.log('✅ Activity completion recorded');
     } catch (error) {
-      console.warn('Enhanced activity sync failed:', error);
+      console.warn('Activity progress update failed:', error);
     }
 
     setTimeout(() => {
@@ -450,6 +434,7 @@ export const GameActivityManager = ({
 
     const gameProps = {
       onComplete: (results) => handleGameComplete(currentGame.type, results),
+      onClose: onExitGame, // Add close handler for games that support it
       difficulty: currentGame.difficulty,
       ...currentGame.data && { [getGameDataProp(currentGame.type)]: currentGame.data }
     };

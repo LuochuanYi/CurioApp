@@ -6,8 +6,8 @@
 
 This document provides a detailed technical architecture overview of CurioApp, focusing on system design, data flow, component architecture, and implementation patterns. It serves as a reference for developers, architects, and technical stakeholders.
 
-**Version**: 1.4.0  
-**Last Updated**: November 11, 2025  
+**Version**: 1.5.0  
+**Last Updated**: November 20, 2025  
 **Audience**: Technical Team, Architects, DevOps Engineers  
 
 ---
@@ -98,16 +98,21 @@ App.js
 │   │   │   ├── TodayHighlight
 │   │   │   ├── QuickActions
 │   │   │   └── FeaturedContent
-│   │   ├── EngageScreen
-│   │   │   ├── StoriesSection
-│   │   │   │   ├── TranslatedSongsList
+│   │   ├── EngageScreen (3-Column Grid Layout)
+│   │   │   ├── StoriesSection → StoryCategoryScreen
+│   │   │   │   ├── Story Categories Grid
+│   │   │   │   ├── Search & Filtering
 │   │   │   │   └── StoryCard (Dynamic Translation)
-│   │   │   ├── SongsSection
+│   │   │   ├── SongsSection → SongCategoryScreen
+│   │   │   │   ├── Music Interface
+│   │   │   │   ├── Play Controls
 │   │   │   │   └── SongCard (Dynamic Translation)
-│   │   │   ├── LearningSection
-│   │   │   │   └── TranslatedLearningCategories
-│   │   │   └── RecommendationsSection
-│   │   │       └── TranslatedRecommendations
+│   │   │   ├── LearningSection → LearningCategoryScreen
+│   │   │   │   ├── Activity Categories
+│   │   │   │   ├── Difficulty Filtering
+│   │   │   │   └── ActivityCard (Dynamic Translation)
+│   │   │   └── Enhanced Navigation
+│   │   │       └── Back Button Integration
 │   │   ├── MonitorScreen
 │   │   │   ├── EnvironmentStatus
 │   │   │   ├── SafetyAlerts
@@ -1517,6 +1522,6 @@ eventBus.subscribe('language_changed', async (event) => {
 
 *This architecture documentation serves as a comprehensive guide for understanding CurioApp's technical implementation. For specific implementation details, refer to the source code and additional documentation files.*
 
-**Last Updated**: November 11, 2025  
-**Version**: 1.4.0 - Stable Logging  
+**Last Updated**: November 20, 2025  
+**Version**: 1.5.0 - Enhanced UI & Navigation  
 **Maintainers**: Technical Architecture Team

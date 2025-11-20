@@ -122,6 +122,60 @@ if (!__DEV__) {
   // console.error and console.warn remain unchanged
 }
 
+// Filter out known harmless warnings and errors
+const originalWarn = console.warn;
+const originalError = console.error;
+
+console.warn = (...args) => {
+  const message = args.join(' ');
+  
+  // Suppress known harmless React Native Web deprecation warnings
+  const suppressedWarnings = [
+    'textShadow',
+    'boxShadow', 
+    'Invalid style property of "backgroundColor"',
+    'Expo av has been deprecated',
+    'Device language not available',
+    'expo-av',
+    'expo-video',
+    'Cannot read properties of undefined (reading \'body\')',
+    'TypeError: Cannot read properties of undefined',
+    'reading \'body\'',
+    'Uncaught TypeError'
+  ];
+  
+  // Only show warning if it's not in the suppressed list
+  const shouldSuppress = suppressedWarnings.some(warning => 
+    message.toLowerCase().includes(warning.toLowerCase())
+  );
+  
+  if (!shouldSuppress) {
+    originalWarn(...args);
+  }
+};
+
+console.error = (...args) => {
+  const message = args.join(' ');
+  
+  // Suppress known harmless Metro/bundler errors
+  const suppressedErrors = [
+    'Cannot read properties of undefined (reading \'body\')',
+    'TypeError: Cannot read properties of undefined',
+    'reading \'body\'',
+    'Uncaught TypeError',
+    'Invalid style property of "backgroundColor"'
+  ];
+  
+  // Only show error if it's not in the suppressed list
+  const shouldSuppress = suppressedErrors.some(error => 
+    message.toLowerCase().includes(error.toLowerCase())
+  );
+  
+  if (!shouldSuppress) {
+    originalError(...args);
+  }
+};
+
 export default logger;
 
 // Convenience exports

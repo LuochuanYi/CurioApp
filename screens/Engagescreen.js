@@ -88,145 +88,8 @@ import { getCategoriesList } from '../data/learningCategories';
 // Get learning categories from data
 const learningCategories = getCategoriesList();
 
-// Component for dynamically translated song categories
-const TranslatedSongCategories = ({ selectedCategory, onCategorySelect }) => {
-  const [translatedCategories, setTranslatedCategories] = useState([]);
-  const { translateContent, currentLanguage } = useDynamicTranslation();
-
-  useEffect(() => {
-    const translateCategories = async () => {
-      const categories = Object.values(SONG_CATEGORIES);
-      
-      if (currentLanguage === 'en') {
-        setTranslatedCategories(categories);
-        return;
-      }
-
-      const translated = await Promise.all(
-        categories.map(async (category) => {
-          const translatedName = await translateContent(category.name);
-          return {
-            ...category,
-            name: translatedName,
-            originalName: category.name
-          };
-        })
-      );
-      setTranslatedCategories(translated);
-    };
-
-    translateCategories();
-  }, [currentLanguage]);
-
-  return (
-    <ScrollView 
-      horizontal 
-      showsHorizontalScrollIndicator={false} 
-      contentContainerStyle={{ paddingRight: CURIO_THEME.spacing.screenPadding }}
-      style={{ marginBottom: CURIO_THEME.spacing.md }}
-    >
-      {translatedCategories.map((category) => {
-        const categorySongCount = getSongsByCategory(category.id).length;
-        return (
-          <TouchableOpacity
-            key={category.id}
-            onPress={() => onCategorySelect(category.id)}
-            style={{
-              paddingVertical: CURIO_THEME.spacing.sm,
-              paddingHorizontal: CURIO_THEME.spacing.md,
-              backgroundColor: selectedCategory === category.id ? category.color : CURIO_THEME.colors.background,
-              borderRadius: CURIO_THEME.radius.button,
-              marginRight: CURIO_THEME.spacing.sm,
-              borderWidth: 1,
-              borderColor: selectedCategory === category.id ? category.color : CURIO_THEME.colors.lightGray,
-            }}
-            accessible={true}
-            accessibilityLabel={`Filter by ${category.name} songs`}
-            accessibilityRole="button"
-          >
-            <Text style={[
-              TEXT_STYLES.buttonSecondary,
-              { color: selectedCategory === category.id ? CURIO_THEME.colors.textInverse : CURIO_THEME.colors.textPrimary }
-            ]}>
-              {category.icon} {category.name} ({categorySongCount})
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-    </ScrollView>
-  );
-};
-
-// Component for dynamically translated songs list
-const TranslatedSongsList = ({ songs, onSongPress }) => {
-  const [translatedSongs, setTranslatedSongs] = useState(songs);
-  const { translateContent, currentLanguage } = useDynamicTranslation();
-
-  useEffect(() => {
-    const translateSongs = async () => {
-      if (currentLanguage === 'en') {
-        setTranslatedSongs(songs);
-        return;
-      }
-
-      const translated = await Promise.all(
-        songs.map(async (song) => {
-          const translatedTitle = await translateContent(song.title);
-          return {
-            ...song,
-            title: translatedTitle,
-            originalTitle: song.title
-          };
-        })
-      );
-      setTranslatedSongs(translated);
-    };
-
-    translateSongs();
-  }, [songs, currentLanguage]);
-
-  return (
-    <>
-      {translatedSongs.map((song, index) => {
-        const difficulty = SONG_DIFFICULTIES[song.difficulty.toUpperCase()];
-        const songColors = [
-          CURIO_THEME.colors.goldenYellow,
-          CURIO_THEME.colors.softMint,
-          CURIO_THEME.colors.accentOrange,
-          CURIO_THEME.colors.skyBlue
-        ];
-        
-        return (
-          <TouchableOpacity
-            key={song.id}
-            onPress={() => onSongPress(song)}
-            style={styles.listItem}
-            accessible={true}
-            accessibilityLabel={`${song.title} song, ${difficulty?.name} difficulty, ${song.duration} long`}
-            accessibilityRole="button"
-          >
-            <View style={[styles.listIconContainer, { backgroundColor: songColors[index % songColors.length] }]}>
-              <Text style={styles.listIcon}>🎵</Text>
-            </View>
-            <View style={styles.listContent}>
-              <Text style={styles.listTitle} numberOfLines={2}>
-                {song.title}
-              </Text>
-              <Text style={styles.listSubtitle}>
-                {song.duration} • {difficulty?.name}
-              </Text>
-              {song.originalTitle && song.originalTitle !== song.title && (
-                <Text style={styles.originalTitle} numberOfLines={1}>
-                  {song.originalTitle}
-                </Text>
-              )}
-            </View>
-          </TouchableOpacity>
-        );
-      })}
-    </>
-  );
-};
+// Removed unused TranslatedSongCategories and TranslatedSongsList components
+// Now using consistent grid layout for all sections
 
 // Component for dynamically translated learning categories
 const TranslatedLearningCategories = ({ categories, onCategoryPress }) => {
@@ -367,7 +230,6 @@ const EngageScreen = ({ navigation }) => {
   const { t } = useTranslation();
   const { currentLanguage } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState('bedtime');
-  const [selectedSongCategory, setSelectedSongCategory] = useState('classic');
   const { data: contentData, loading: contentLoading } = useContentData(selectedCategory);
 
   const handleNavigation = (screen) => {
@@ -376,14 +238,32 @@ const EngageScreen = ({ navigation }) => {
     }
   };
 
-  const handleStoryPress = (story) => {
-    console.log(`Open story: ${story.title}`);
-    navigation?.navigate('StoryDetail', { story });
+  const handleStoryPress = (storyOrCategory) => {
+    if (storyOrCategory.category) {
+      // Navigate to dedicated story category screen
+      console.log(`Navigate to story category: ${storyOrCategory.category}`);
+      navigation?.navigate('StoryCategoryScreen', { 
+        categoryId: storyOrCategory.category
+      });
+    } else {
+      // Navigate to individual story
+      console.log(`Open story: ${storyOrCategory.title}`);
+      navigation?.navigate('StoryDetail', { story: storyOrCategory });
+    }
   };
 
-  const handleSongPress = (song) => {
-    console.log(`Play song: ${song.title}`);
-    navigation?.navigate('SongPlayer', { song });
+  const handleSongPress = (songOrCategory) => {
+    if (songOrCategory.category) {
+      // Navigate to dedicated song category screen
+      console.log(`Navigate to song category: ${songOrCategory.category}`);
+      navigation?.navigate('SongCategoryScreen', { 
+        categoryId: songOrCategory.category
+      });
+    } else {
+      // Navigate to individual song
+      console.log(`Play song: ${songOrCategory.title}`);
+      navigation?.navigate('SongPlayer', { song: songOrCategory });
+    }
   };
 
   const handleCategoryPress = (category) => {
@@ -393,7 +273,9 @@ const EngageScreen = ({ navigation }) => {
 
   const handleLearningCategoryPress = (category) => {
     console.log(`Navigate to learning category: ${category.name}`);
-    navigation?.navigate('CategoryDetail', { categoryId: category.id });
+    navigation?.navigate('LearningCategoryScreen', { 
+      categoryId: category.id
+    });
   };
 
   const handleActivityPress = (activityType) => {
@@ -436,89 +318,48 @@ const EngageScreen = ({ navigation }) => {
 
       {/* Stories Section */}
       <View style={styles.section}>
-        <View style={[styles.sectionHeader, styles.centeredSectionHeader]}>
+        <View style={styles.sectionHeader}>
           <Text style={styles.sectionIcon}>📚</Text>
           <Text style={styles.sectionTitle}>{t('engage.sections.stories.title')}</Text>
+          <View style={{
+            backgroundColor: CURIO_THEME.colors.primary,
+            paddingHorizontal: CURIO_THEME.spacing.md,
+            paddingVertical: CURIO_THEME.spacing.xs,
+            borderRadius: CURIO_THEME.radius.badge,
+          }}>
+            <Text style={[TEXT_STYLES.caption, { color: CURIO_THEME.colors.textInverse }]}>
+              {contentData?.categories?.length || 0} categories
+            </Text>
+          </View>
         </View>
 
-        {/* Story Categories Filter - Curio Style */}
-        <Text style={[TEXT_STYLES.bodyMedium, { marginBottom: CURIO_THEME.spacing.sm }]}>
-          {t('engage.sections.stories.browseCategories')}
-        </Text>
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false} 
-          contentContainerStyle={{ paddingRight: CURIO_THEME.spacing.screenPadding }}
-          style={{ marginBottom: CURIO_THEME.spacing.md }}
-        >
-          {contentData?.categories && contentData.categories.map((category) => {
-            const categoryStoryCount = getStoriesByCategory(category.id).length;
-            return (
-              <TouchableOpacity
-                key={category.id}
-                onPress={() => handleCategoryPress(category)}
-                style={{
-                  paddingVertical: CURIO_THEME.spacing.sm,
-                  paddingHorizontal: CURIO_THEME.spacing.md,
-                  backgroundColor: selectedCategory === category.id ? (category.color || CURIO_THEME.colors.goldenYellow) : CURIO_THEME.colors.background,
-                  borderRadius: CURIO_THEME.radius.button,
-                  marginRight: CURIO_THEME.spacing.sm,
-                  borderWidth: 1,
-                  borderColor: selectedCategory === category.id ? (category.color || CURIO_THEME.colors.goldenYellow) : CURIO_THEME.colors.lightGray,
-                }}
-                accessible={true}
-                accessibilityLabel={`Filter by ${category.name} stories`}
-                accessibilityRole="button"
-              >
-                <Text style={[
-                  TEXT_STYLES.buttonSecondary,
-                  { color: selectedCategory === category.id ? CURIO_THEME.colors.textInverse : CURIO_THEME.colors.textPrimary }
-                ]}>
-                  {category.icon} {category.name} ({categoryStoryCount})
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-
-        {/* Stories List */}
-        <View style={styles.listContainer}>
+        {/* Story Categories Grid */}
+        <View style={styles.gridContainer}>
           {contentLoading ? (
-            // Loading indicator for translation
             <View style={styles.loadingContainer}>
               <Text style={styles.loadingText}>{t('common.loading')}</Text>
             </View>
           ) : (
-            contentData?.stories?.slice(0, 6).map((story) => {
-              const categoryInfo = STORY_CATEGORIES[story.category?.toUpperCase()] || {};
-              
+            contentData?.categories?.map((category) => {
+              const categoryStoryCount = getStoriesByCategory(category.id).length;
               return (
                 <TouchableOpacity
-                  key={story.id}
-                  onPress={() => handleStoryPress(story)}
-                  style={styles.listItem}
+                  key={category.id}
+                  onPress={() => handleStoryPress({ category: category.id })}
+                  style={styles.gridItem}
                   accessible={true}
-                  accessibilityLabel={`${story.title} story, ${story.duration}, rating ${story.rating} stars`}
+                  accessibilityLabel={`${category.name} category with ${categoryStoryCount} stories`}
                   accessibilityRole="button"
                 >
-                  <View style={[styles.listIconContainer, { backgroundColor: categoryInfo.color || CURIO_THEME.colors.skyBlue }]}>
-                    <Text style={styles.listIcon}>
-                      {categoryInfo.icon || '📚'}
-                    </Text>
+                  <View style={[styles.iconContainer, { backgroundColor: category.color || CURIO_THEME.colors.skyBlue }]}>
+                    <Text style={styles.gridIcon}>{category.icon || '📚'}</Text>
                   </View>
-                  <View style={styles.listContent}>
-                    <Text style={styles.listTitle} numberOfLines={2}>
-                      {story.title}
-                    </Text>
-                    <Text style={styles.listSubtitle}>
-                      {story.duration} • ⭐ {story.rating}
-                    </Text>
-                    {story.originalTitle && story.originalTitle !== story.title && (
-                      <Text style={styles.originalTitle} numberOfLines={1}>
-                        {story.originalTitle}
-                      </Text>
-                    )}
-                  </View>
+                  <Text style={styles.gridTitle} numberOfLines={2}>
+                    {category.name}
+                  </Text>
+                  <Text style={styles.gridSubtitle}>
+                    {categoryStoryCount} stories
+                  </Text>
                 </TouchableOpacity>
               );
             })
@@ -528,31 +369,51 @@ const EngageScreen = ({ navigation }) => {
 
       {/* Songs Section */}
       <View style={styles.section}>
-        <View style={[styles.sectionHeader, styles.centeredSectionHeader]}>
+        <View style={styles.sectionHeader}>
           <Text style={styles.sectionIcon}>🎵</Text>
           <Text style={styles.sectionTitle}>{t('engage.sections.songs.title')}</Text>
+          <View style={{
+            backgroundColor: CURIO_THEME.colors.primary,
+            paddingHorizontal: CURIO_THEME.spacing.md,
+            paddingVertical: CURIO_THEME.spacing.xs,
+            borderRadius: CURIO_THEME.radius.badge,
+          }}>
+            <Text style={[TEXT_STYLES.caption, { color: CURIO_THEME.colors.textInverse }]}>
+              {Object.values(SONG_CATEGORIES).length} categories
+            </Text>
+          </View>
         </View>
 
-        {/* Song Categories Filter - Curio Style */}
-        <Text style={[TEXT_STYLES.bodyMedium, { marginBottom: CURIO_THEME.spacing.sm }]}>
-          {t('engage.sections.stories.browseCategories')}
-        </Text>
-        <TranslatedSongCategories 
-          selectedCategory={selectedSongCategory}
-          onCategorySelect={setSelectedSongCategory}
-        />
-
-        {/* Songs List */}
-        <View style={styles.listContainer}>
+        {/* Song Categories Grid */}
+        <View style={styles.gridContainer}>
           {contentLoading ? (
             <View style={styles.loadingContainer}>
               <Text style={styles.loadingText}>{t('common.loading')}</Text>
             </View>
           ) : (
-            <TranslatedSongsList 
-              songs={getSongsByCategory(selectedSongCategory)}
-              onSongPress={handleSongPress}
-            />
+            Object.values(SONG_CATEGORIES).map((category) => {
+              const categorySongCount = getSongsByCategory(category.id).length;
+              return (
+                <TouchableOpacity
+                  key={category.id}
+                  onPress={() => handleSongPress({ category: category.id })}
+                  style={styles.gridItem}
+                  accessible={true}
+                  accessibilityLabel={`${category.name} category with ${categorySongCount} songs`}
+                  accessibilityRole="button"
+                >
+                  <View style={[styles.iconContainer, { backgroundColor: category.color || CURIO_THEME.colors.goldenYellow }]}>
+                    <Text style={styles.gridIcon}>{category.icon}</Text>
+                  </View>
+                  <Text style={styles.gridTitle} numberOfLines={2}>
+                    {category.name}
+                  </Text>
+                  <Text style={styles.gridSubtitle}>
+                    {categorySongCount} songs
+                  </Text>
+                </TouchableOpacity>
+              );
+            })
           )}
         </View>
       </View>
@@ -721,19 +582,21 @@ const styles = StyleSheet.create({
     gap: CURIO_THEME.spacing.sm,
   },
   
-  // Grid Layout (keeping for Learning Categories)
+  // Grid Layout - 3 Column Layout for all sections
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: CURIO_THEME.spacing.md,
+    paddingHorizontal: 8,
   },
   gridItem: {
-    width: '47%',
+    flexBasis: '30%',
+    maxWidth: '30%',
     backgroundColor: CURIO_THEME.colors.surface,
-    padding: CURIO_THEME.spacing.md,
+    padding: CURIO_THEME.spacing.sm,
     borderRadius: CURIO_THEME.radius.md,
     alignItems: 'center',
+    marginBottom: CURIO_THEME.spacing.md,
     elevation: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -741,25 +604,25 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
   },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
+    width: 40,
+    height: 40,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: CURIO_THEME.spacing.sm,
+    marginBottom: CURIO_THEME.spacing.xs,
   },
   gridIcon: {
-    fontSize: 24,
+    fontSize: 20,
   },
   gridTitle: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
     color: CURIO_THEME.colors.textPrimary,
     textAlign: 'center',
-    marginBottom: 4,
+    marginBottom: 3,
   },
   gridSubtitle: {
-    fontSize: 12,
+    fontSize: 10,
     color: CURIO_THEME.colors.textSecondary,
     textAlign: 'center',
   },

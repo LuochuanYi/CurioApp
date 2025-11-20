@@ -3,9 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Image
 import { STORY_CATEGORIES, STORY_LIBRARY, getStoriesByCategory } from '../data/stories';
 import { SONGS_LIBRARY, getSongsByCategory, SONG_CATEGORIES } from '../data/songs';
 import { useUserProgress } from '../hooks/useUserProgress';
-import { useEnhancedProgress } from '../hooks/useEnhancedProgress';
 import { CurioHeader, CurioCard, CurioButton, CurioMascot, CURIO_THEME, TEXT_STYLES } from '../components';
-import { ProgressSummary } from '../components/ProgressDashboard';
 import { useTranslation } from 'react-i18next';
 
 // Custom hook for air quality data (simulated)
@@ -92,25 +90,14 @@ const HomeScreen = ({ navigation }) => {
   const userProgressHook = useUserProgress();
   const { userProgress, loading: progressLoading, updateDailyStreak, isBedtime } = userProgressHook;
   
-  // Enhanced progress tracking
-  const {
-    currentLevel,
-    progressToNextLevel,
-    stats,
-    getTodayStats,
-    isLoading: enhancedProgressLoading
-  } = useEnhancedProgress();
-
-  const [todayStats, setTodayStats] = useState({
-    activitiesCompleted: 0,
-    gamesPlayed: 0,
-    pointsEarned: 0,
-    goalProgress: 0
-  });
-  
   console.log('HomeScreen: Got user progress data:', { progressLoading, userProgress });
   
-  const featuredContent = getFeaturedContent(userProgressHook);
+  const featuredContent = getFeaturedContent(userProgressHook) || {
+    stories: [],
+    songs: [],
+    inProgress: [],
+    hasRecentActivity: false
+  };
   
   console.log('HomeScreen: Got featured content:', featuredContent);
   
@@ -120,23 +107,7 @@ const HomeScreen = ({ navigation }) => {
     }
   }, [progressLoading]);
 
-  // Load today's stats for enhanced progress
-  useEffect(() => {
-    const loadTodayStats = async () => {
-      try {
-        if (getTodayStats) {
-          const stats = await getTodayStats();
-          setTodayStats(stats);
-        }
-      } catch (error) {
-        console.warn('Failed to load today stats:', error);
-      }
-    };
 
-    if (!enhancedProgressLoading) {
-      loadTodayStats();
-    }
-  }, [enhancedProgressLoading, getTodayStats]);
   
   const handleNavigation = (screen) => {
     if (navigation && screen !== 'Home') {
@@ -212,19 +183,8 @@ const HomeScreen = ({ navigation }) => {
         />
       </View>
 
-      {/* Enhanced Progress Summary */}
-      {!enhancedProgressLoading && currentLevel && (
-        <ProgressSummary
-          currentLevel={currentLevel}
-          progressToNextLevel={progressToNextLevel}
-          todayStats={todayStats}
-          learningStreak={stats.learningStreak || 0}
-          totalPoints={stats.totalPoints || 0}
-        />
-      )}
-
       {/* Welcome hint */}
-      {(!featuredContent.hasRecentActivity && userProgress.stats.storiesCompleted === 0) && (
+      {(!featuredContent?.hasRecentActivity && userProgress?.stats?.storiesCompleted === 0) && (
         <View style={styles.welcomeHint}>
           <Text style={styles.welcomeIcon}>👋</Text>
           <View style={styles.welcomeTextContainer}>
@@ -312,7 +272,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionIcon}>📚</Text>
           <Text style={styles.sectionTitle}>
-            {featuredContent.hasRecentActivity ? t('home.sections.stories.recent') : t('home.sections.stories.featured')}
+            {featuredContent?.hasRecentActivity ? t('home.sections.stories.recent') : t('home.sections.stories.featured')}
           </Text>
           {userProgress.stats.currentStreak > 0 && (
             <View style={styles.streakBadge}>
@@ -321,7 +281,7 @@ const HomeScreen = ({ navigation }) => {
           )}
         </View>
         <Text style={styles.sectionDescription}>
-          {featuredContent.hasRecentActivity ? 
+          {featuredContent?.hasRecentActivity ? 
             t('home.sections.stories.recentDescription') :
             t('home.sections.stories.featuredDescription')
           }
@@ -527,7 +487,7 @@ const HomeScreen = ({ navigation }) => {
       </View>
 
       {/* Navigation Hint for first-time users */}
-      {(!featuredContent.hasRecentActivity && userProgress.stats.storiesCompleted === 0) && (
+      {(!featuredContent?.hasRecentActivity && userProgress?.stats?.storiesCompleted === 0) && (
         <View style={styles.navigationHint}>
           <Text style={styles.navigationHintText}>
             {t('home.navigation.hint')}
@@ -551,7 +511,6 @@ const HomeScreen = ({ navigation }) => {
       }}>
         {[
           { key: 'Home', icon: '🏠', label: t('common.home'), active: true, color: '#FF6B6B', bgColor: '#FFEBEE' },
-          { key: 'Progress', icon: '📈', label: 'Progress', active: false, color: '#4ECDC4', bgColor: '#E0F2F1' },
           { key: 'Monitor', icon: '📊', label: t('common.monitor'), active: false, color: '#FFEAA7', bgColor: '#FFFDE7' },
           { key: 'Engage', icon: '💡', label: t('common.engage'), active: false, color: '#DDA0DD', bgColor: '#F3E5F5' },
           { key: 'Personalize', icon: '👤', label: t('common.personalize'), active: false, color: '#9C27B0', bgColor: '#F8BBD9' }

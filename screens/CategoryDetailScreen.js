@@ -17,6 +17,7 @@ import {
   getActivitiesByDifficulty,
   searchActivities
 } from '../data/learningCategories';
+import { SONG_CATEGORIES, getSongsByCategory } from '../data/songs';
 import { useDynamicTranslation } from '../hooks/useDynamicTranslation';
 import { logTranslation, logError } from '../utils/logger';
 import { GameActivityManager } from '../components';
@@ -24,7 +25,7 @@ import { GameActivityManager } from '../components';
 const { width: screenWidth } = Dimensions.get('window');
 
 const CategoryDetailScreen = ({ route, navigation }) => {
-  const { categoryId } = route.params;
+  const { categoryId, categoryType = 'learning' } = route.params;
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showGames, setShowGames] = useState(false);
@@ -48,28 +49,47 @@ const CategoryDetailScreen = ({ route, navigation }) => {
     return t(text, { defaultValue: text });
   };
   
-  const category = Object.values(LEARNING_CATEGORIES).find(cat => cat.id === categoryId);
-  
+  const category = categoryType === 'songs' 
+    ? Object.values(SONG_CATEGORIES).find(cat => cat.id === categoryId)
+    : Object.values(LEARNING_CATEGORIES).find(cat => cat.id === categoryId);
+
   const filteredActivities = useMemo(() => {
-    let activities = getActivitiesByCategory(categoryId);
-    
-    // Filter by difficulty
-    if (selectedDifficulty !== 'all') {
-      activities = getActivitiesByDifficulty(categoryId, selectedDifficulty);
+    if (categoryType === 'songs') {
+      // For songs, get songs by category and filter by search query
+      let songs = getSongsByCategory(categoryId) || [];
+      
+      if (searchQuery.trim()) {
+        const lowerQuery = searchQuery.toLowerCase();
+        songs = songs.filter(song => 
+          song.title?.toLowerCase().includes(lowerQuery) ||
+          song.description?.toLowerCase().includes(lowerQuery) ||
+          (song.learningGoals && song.learningGoals.some(goal => goal?.toLowerCase().includes(lowerQuery)))
+        );
+      }
+      
+      return songs;
+    } else {
+      // For learning activities
+      let activities = getActivitiesByCategory(categoryId) || [];
+      
+      // Filter by difficulty
+      if (selectedDifficulty !== 'all') {
+        activities = getActivitiesByDifficulty(categoryId, selectedDifficulty) || [];
+      }
+      
+      // Filter by search query
+      if (searchQuery.trim()) {
+        const lowerQuery = searchQuery.toLowerCase();
+        activities = activities.filter(activity => 
+          activity.title?.toLowerCase().includes(lowerQuery) ||
+          activity.description?.toLowerCase().includes(lowerQuery) ||
+          (activity.learningGoals && activity.learningGoals.some(goal => goal?.toLowerCase().includes(lowerQuery)))
+        );
+      }
+      
+      return activities;
     }
-    
-    // Filter by search query
-    if (searchQuery.trim()) {
-      const lowerQuery = searchQuery.toLowerCase();
-      activities = activities.filter(activity => 
-        activity.title.toLowerCase().includes(lowerQuery) ||
-        activity.description.toLowerCase().includes(lowerQuery) ||
-        activity.learningGoals.some(goal => goal.toLowerCase().includes(lowerQuery))
-      );
-    }
-    
-    return activities;
-  }, [categoryId, selectedDifficulty, searchQuery]);
+  }, [categoryId, categoryType, selectedDifficulty, searchQuery]);
 
   if (!category) {
     return (
@@ -80,11 +100,15 @@ const CategoryDetailScreen = ({ route, navigation }) => {
   }
 
   const handleActivityPress = (activity) => {
-    navigation.navigate('ActivityDetail', { 
-      activity,
-      categoryId,
-      categoryName: category.name 
-    });
+    if (categoryType === 'songs') {
+      navigation.navigate('SongPlayer', { song: activity });
+    } else {
+      navigation.navigate('ActivityDetail', { 
+        activity,
+        categoryId,
+        categoryName: category.name 
+      });
+    }
   };
 
   const handleBackPress = () => {
@@ -238,7 +262,10 @@ const CategoryDetailScreen = ({ route, navigation }) => {
           <View style={styles.headerTextContainer}>
             <Text style={styles.categoryTitle}>{displayContent.categoryName}</Text>
             <Text style={styles.categorySubtitle}>
-              {category.totalActivities} {translateText("activities")} • {translateText(category.ageGroup)}
+              {categoryType === 'songs' 
+                ? `${filteredActivities.length} ${translateText("songs")}` 
+                : `${category?.totalActivities || filteredActivities.length} ${translateText("activities")}${category?.ageGroup ? ` • ${translateText(category.ageGroup)}` : ''}`
+              }
             </Text>
             <Text style={styles.categoryDescription}>{displayContent.categoryDescription}</Text>
           </View>
@@ -304,95 +331,117 @@ const CategoryDetailScreen = ({ route, navigation }) => {
           </View>
         </View>
 
-        {/* Difficulty Filter */}
-        <View style={styles.filterSection}>
-          <Text style={styles.filterTitle}>{translateText("Difficulty Level:")}</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.difficultyScroll}>
-            <TouchableOpacity
-              style={[
-                styles.difficultyChip,
-                selectedDifficulty === 'all' && styles.selectedDifficultyChip
-              ]}
-              onPress={() => setSelectedDifficulty('all')}
-            >
-              <Text style={[
-                styles.difficultyText,
-                selectedDifficulty === 'all' && styles.selectedDifficultyText
-              ]}>
-                {translateText("All Levels")}
-              </Text>
-            </TouchableOpacity>
-            
-            {Object.values(DIFFICULTY_LEVELS).map(difficulty => (
+        {/* Difficulty Filter - Only show for learning activities */}
+        {categoryType !== 'songs' && (
+          <View style={styles.filterSection}>
+            <Text style={styles.filterTitle}>{translateText("Difficulty Level:")}</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.difficultyScroll}>
               <TouchableOpacity
-                key={difficulty.id}
                 style={[
                   styles.difficultyChip,
-                  { borderColor: difficulty.color },
-                  selectedDifficulty === difficulty.id && [
-                    styles.selectedDifficultyChip,
-                    { backgroundColor: difficulty.color }
-                  ]
+                  selectedDifficulty === 'all' && styles.selectedDifficultyChip
                 ]}
-                onPress={() => setSelectedDifficulty(difficulty.id)}
+                onPress={() => setSelectedDifficulty('all')}
               >
-                <Text style={styles.difficultyIcon}>{difficulty.icon}</Text>
                 <Text style={[
                   styles.difficultyText,
-                  selectedDifficulty === difficulty.id && styles.selectedDifficultyText
+                  selectedDifficulty === 'all' && styles.selectedDifficultyText
                 ]}>
-                  {translateText(difficulty.name)}
+                  {translateText("All Levels")}
                 </Text>
               </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+              
+              {Object.values(DIFFICULTY_LEVELS).map(difficulty => (
+                <TouchableOpacity
+                  key={difficulty.id}
+                  style={[
+                    styles.difficultyChip,
+                    { borderColor: difficulty.color },
+                    selectedDifficulty === difficulty.id && [
+                      styles.selectedDifficultyChip,
+                      { backgroundColor: difficulty.color }
+                    ]
+                  ]}
+                  onPress={() => setSelectedDifficulty(difficulty.id)}
+                >
+                  <Text style={styles.difficultyIcon}>{difficulty.icon}</Text>
+                  <Text style={[
+                    styles.difficultyText,
+                    selectedDifficulty === difficulty.id && styles.selectedDifficultyText
+                  ]}>
+                    {translateText(difficulty.name)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )}
 
         {/* Results Header */}
         <View style={styles.resultsHeader}>
           <Text style={styles.resultsTitle}>
             {searchQuery ? translateText(`Search Results`) : 
+             categoryType === 'songs' ? translateText('Songs') :
              selectedDifficulty === 'all' ? translateText('All Activities') : 
              `${translateText(DIFFICULTY_LEVELS[selectedDifficulty.toUpperCase()]?.name)} ${translateText('Activities')}`}
           </Text>
-          <Text style={styles.resultsCount}>{filteredActivities.length} {translateText("activities")}</Text>
+          <Text style={styles.resultsCount}>
+            {filteredActivities.length} {categoryType === 'songs' ? translateText("songs") : translateText("activities")}
+          </Text>
         </View>
 
-        {/* Activities List */}
+        {/* Activities/Songs List */}
         <View style={styles.activitiesContainer}>
           {filteredActivities.length === 0 ? (
             <View style={styles.emptyState}>
               <Text style={styles.emptyIcon}>🔍</Text>
-              <Text style={styles.emptyTitle}>{translateText("No activities found")}</Text>
+              <Text style={styles.emptyTitle}>
+                {translateText(categoryType === 'songs' ? "No songs found" : "No activities found")}
+              </Text>
               <Text style={styles.emptySubtitle}>
-                {searchQuery ? translateText('Try a different search term') : translateText('Try changing the difficulty filter')}
+                {searchQuery ? translateText('Try a different search term') : 
+                 categoryType === 'songs' ? translateText('No songs in this category') :
+                 translateText('Try changing the difficulty filter')}
               </Text>
             </View>
           ) : (
-            displayContent.activities.map((activity, index) => (
+            filteredActivities.map((activity, index) => (
               <View
                 key={activity.id}
                 style={[
                   styles.activityCard,
-                  { borderLeftColor: getDifficultyColor(activity.difficulty) }
+                  { borderLeftColor: categoryType === 'songs' ? (category?.color || '#6c5ce7') : getDifficultyColor(activity.difficulty) }
                 ]}
                 accessible={true}
                 accessibilityRole="button"
-                accessibilityLabel={`${activity.title}, ${activity.difficulty.name} difficulty, ${activity.duration}`}
+                accessibilityLabel={categoryType === 'songs' 
+                  ? `${activity.title}, ${activity.duration}` 
+                  : `${activity.title}, ${activity.difficulty.name} difficulty, ${activity.duration}`
+                }
               >
                 <View style={styles.activityHeader}>
                   <View style={styles.activityTitleContainer}>
                     <Text style={styles.activityTitle}>{activity.title}</Text>
-                    <View style={[
-                      styles.difficultyBadge,
-                      { backgroundColor: getDifficultyColor(activity.difficulty) }
-                    ]}>
-                      <Text style={styles.difficultyBadgeText}>{activity.difficulty.icon}</Text>
-                    </View>
+                    {categoryType !== 'songs' && (
+                      <View style={[
+                        styles.difficultyBadge,
+                        { backgroundColor: getDifficultyColor(activity.difficulty) }
+                      ]}>
+                        <Text style={styles.difficultyBadgeText}>{activity.difficulty.icon}</Text>
+                      </View>
+                    )}
+                    {categoryType === 'songs' && (
+                      <View style={[styles.difficultyBadge, { backgroundColor: category?.color || '#6c5ce7' }]}>
+                        <Text style={styles.difficultyBadgeText}>{activity.icon || '🎵'}</Text>
+                      </View>
+                    )}
                   </View>
                   <View style={styles.activityMeta}>
                     <Text style={styles.activityDuration}>⏱️ {activity.duration}</Text>
                     <Text style={styles.activityAgeGroup}>👶 {translateText(activity.ageGroup)}</Text>
+                    {categoryType === 'songs' && (
+                      <Text style={styles.activityCategory}>🎵 {translateText(activity.category)}</Text>
+                    )}
                   </View>
                 </View>
                 
@@ -402,12 +451,12 @@ const CategoryDetailScreen = ({ route, navigation }) => {
                 
                 <View style={styles.activityFooter}>
                   <View style={styles.learningGoals}>
-                    {activity.learningGoals.slice(0, 3).map((goal, goalIndex) => (
+                    {activity.learningGoals && activity.learningGoals.slice(0, 3).map((goal, goalIndex) => (
                       <View key={goalIndex} style={styles.goalTag}>
                         <Text style={styles.goalText}>{translateText(goal)}</Text>
                       </View>
                     ))}
-                    {activity.learningGoals.length > 3 && (
+                    {activity.learningGoals && activity.learningGoals.length > 3 && (
                       <View style={styles.goalTag}>
                         <Text style={styles.goalText}>+{activity.learningGoals.length - 3}</Text>
                       </View>
@@ -415,30 +464,32 @@ const CategoryDetailScreen = ({ route, navigation }) => {
                   </View>
                   
                   <View style={styles.activityButtons}>
-                    <TouchableOpacity 
-                      style={styles.gamesButton}
-                      onPress={(e) => {
-                        e.stopPropagation();
-                        handlePlayGames(activity);
-                      }}
-                      accessible={true}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Play games for ${activity.title}`}
-                    >
-                      <Text style={styles.gamesIcon}>🎮</Text>
-                    </TouchableOpacity>
+                    {categoryType !== 'songs' && (
+                      <TouchableOpacity 
+                        style={styles.gamesButton}
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          handlePlayGames(activity);
+                        }}
+                        accessible={true}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Play games for ${activity.title}`}
+                      >
+                        <Text style={styles.gamesIcon}>🎮</Text>
+                      </TouchableOpacity>
+                    )}
                     
                     <TouchableOpacity 
-                      style={styles.startButton}
+                      style={[styles.startButton, categoryType === 'songs' && { backgroundColor: '#6c5ce7' }]}
                       onPress={(e) => {
                         e.stopPropagation();
                         handleActivityPress(activity);
                       }}
                       accessible={true}
                       accessibilityRole="button"
-                      accessibilityLabel={`Start ${activity.title}`}
+                      accessibilityLabel={categoryType === 'songs' ? `Play ${activity.title}` : `Start ${activity.title}`}
                     >
-                      <Text style={styles.startIcon}>▶️</Text>
+                      <Text style={styles.startIcon}>{categoryType === 'songs' ? '🎵' : '▶️'}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -675,6 +726,11 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   activityAgeGroup: {
+    fontSize: 13,
+    color: '#6c757d',
+    fontWeight: '500',
+  },
+  activityCategory: {
     fontSize: 13,
     color: '#6c757d',
     fontWeight: '500',

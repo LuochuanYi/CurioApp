@@ -11,7 +11,11 @@ import PersonalizeScreen from './screens/PersonlizeScreen';
 import StoryDetailScreen from './screens/StoryDetailScreen';
 import SongPlayerScreen from './screens/SongPlayerScreen';
 import CategoryDetailScreen from './screens/CategoryDetailScreen';
+import StoryCategoryScreen from './screens/StoryCategoryScreen';
+import SongCategoryScreen from './screens/SongCategoryScreen';
+import LearningCategoryScreen from './screens/LearningCategoryScreen';
 import ActivityDetailScreen from './screens/ActivityDetailScreen';
+
 
 const Stack = createNativeStackNavigator();
 
@@ -63,12 +67,34 @@ export default function App() {
             }}
           />
           <Stack.Screen 
+            name="StoryCategoryScreen" 
+            component={StoryCategoryScreen}
+            options={{
+              title: 'Story Category',
+            }}
+          />
+          <Stack.Screen 
+            name="SongCategoryScreen" 
+            component={SongCategoryScreen}
+            options={{
+              title: 'Song Category',
+            }}
+          />
+          <Stack.Screen 
+            name="LearningCategoryScreen" 
+            component={LearningCategoryScreen}
+            options={{
+              title: 'Learning Category',
+            }}
+          />
+          <Stack.Screen 
             name="ActivityDetail" 
             component={ActivityDetailScreen}
             options={{
               title: 'Activity',
             }}
           />
+
         </Stack.Navigator>
       </NavigationContainer>
     </LanguageProvider>

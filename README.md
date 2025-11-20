@@ -4,7 +4,7 @@
 
 > *Nurture imagination, together!* - A React Native educational app with advanced internationalization and dynamic content translation.
 
-[![Version](https://img.shields.io/badge/version-1.4.0-blue.svg)](https://github.com/LuochuanYi/CurioApp)
+[![Version](https://img.shields.io/badge/version-1.5.0-blue.svg)](https://github.com/LuochuanYi/CurioApp)
 [![React Native](https://img.shields.io/badge/React%20Native-0.81.5-green.svg)](https://reactnative.dev/)
 [![Expo](https://img.shields.io/badge/Expo-54+-black.svg)](https://expo.dev/)
 [![i18next](https://img.shields.io/badge/i18next-25.6+-orange.svg)](https://www.i18next.com/)
@@ -25,6 +25,9 @@ CurioApp is a cutting-edge multilingual educational platform designed for childr
 - ⚡ **Performance Optimized**: Smart caching, centralized logging, and efficient state management
 - 🔊 **Audio System**: Fully functional background music and audio playback
 - 📊 **Production Logging**: Intelligent logging system with memory optimization
+- 🎯 **3-Column Grid Layout**: Enhanced content discovery with optimized browsing experience
+- 🏷️ **Dedicated Category Screens**: Specialized interfaces for Stories, Songs, and Learning activities
+- ↩️ **Enhanced Navigation**: Seamless back navigation with improved user experience
 
 ### 🎨 Creative UI Design
 - **📖 Opened Book Shapes** for stories with realistic spine and page details
@@ -186,7 +189,10 @@ CurioApp/
 ├── 📱 App.js                          # Root application component
 ├── 📁 screens/                        # Main application screens
 │   ├── HomeScreen.js                  # Dashboard and quick actions
-│   ├── EngageScreen.js               # Stories, songs, and learning content
+│   ├── EngageScreen.js               # Main content discovery with 3-column grid
+│   ├── StoryCategoryScreen.js        # Dedicated story browsing interface
+│   ├── SongCategoryScreen.js         # Music-focused interface with audio controls
+│   ├── LearningCategoryScreen.js     # Educational activities with difficulty filtering
 │   ├── MonitorScreen.js              # Safety monitoring interface
 │   └── PersonalizeScreen.js          # User preferences and settings
 ├── 🎨 components/                     # Reusable UI components
@@ -604,9 +610,9 @@ npx expo start --web
 
 ## 🚀 Implementation Status
 
-### Current Implementation (v1.4.0 - Stable Logging)
+### Current Implementation (v1.5.0 - Enhanced UI & Navigation)
 
-**Status**: ✅ **PRODUCTION READY** - **Latest: Logging Optimization Complete**
+**Status**: ✅ **PRODUCTION READY** - **Latest: 3-Column Grid & Dedicated Category Screens**
 
 **Core Features Completed**:
 
@@ -623,6 +629,11 @@ npx expo start --web
 - ✅ **Audio Playback**: Background music working in SongPlayerScreen
 - ✅ **Performance Optimization**: Reduced console noise by 90%
 - ✅ **Debug Components**: Clean production-ready codebase
+- ✅ **3-Column Grid Layout**: Enhanced EngageScreen with optimal content browsing
+- ✅ **Dedicated Category Screens**: Specialized interfaces for Stories, Songs, and Learning
+- ✅ **Enhanced Navigation**: Back button functionality with seamless user experience
+- ✅ **Theme System Optimization**: Fixed typography and color property structures
+- ✅ **Metro Bundler Stability**: Comprehensive cache management and build optimization
 
 **Technical Implementation**:
 
@@ -706,4 +717,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 *Built with ❤️ for families worldwide. Empowering children to learn, grow, and imagine in their native language.*
 
-**CurioApp v1.4.0** | **Repository**: [https://github.com/LuochuanYi/CurioApp](https://github.com/LuochuanYi/CurioApp) | *Last Updated: November 2025*
+**CurioApp v1.5.0** | **Repository**: [https://github.com/LuochuanYi/CurioApp](https://github.com/LuochuanYi/CurioApp) | *Last Updated: November 20, 2025*

@@ -34,6 +34,9 @@ export const COLORS = {
   cardShadow: 'rgba(0, 0, 0, 0.08)',       // Subtle shadow
   buttonShadow: 'rgba(74, 144, 226, 0.25)', // Blue button shadow
   
+  // Border Colors
+  border: '#E5E7EB',       // Light gray border
+  
   // Mascot Colors (for Curio the Bot)
   mascotBody: '#4A90E2',   // Sky Blue body
   mascotEyes: '#FF9500',   // Orange eyes

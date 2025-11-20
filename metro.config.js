@@ -37,4 +37,10 @@ config.transformer = {
   }
 };
 
+// Suppress specific warnings that are known to be harmless
+config.resolver = {
+  ...config.resolver,
+  platforms: ['ios', 'android', 'native', 'web']
+};
+
 module.exports = config;

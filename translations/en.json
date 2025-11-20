@@ -9,7 +9,9 @@
     "cancel": "Cancel",
     "done": "Done",
     "edit": "Edit",
-    "settings": "settings"
+    "settings": "settings",
+    "songs": "songs",
+    "activities": "activities"
   },
   "personalize": {
     "title": "Your Family Space",

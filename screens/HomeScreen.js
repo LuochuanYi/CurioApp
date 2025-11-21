@@ -173,7 +173,7 @@ const HomeScreen = ({ navigation }) => {
       flex: 1, 
       backgroundColor: CURIO_THEME.colors.surface 
     }}>
-      {/* Curio Branding Header - Mobile Style */}
+      {/* Curio Branding Header - Enhanced Brand Promise */}
       <View style={styles.brandingHeader}>
         <Image
           source={require('../assets/images/curio-branding.png')}
@@ -181,6 +181,13 @@ const HomeScreen = ({ navigation }) => {
           accessible={true}
           accessibilityLabel={t('accessibility.curioBranding')}
         />
+        {/* Brand Promise Overlay */}
+        <View style={styles.brandPromiseOverlay}>
+          <Text style={styles.brandPromiseText}>
+            Nurture Imagination, Together
+          </Text>
+          <View style={styles.brandPromiseUnderline} />
+        </View>
       </View>
 
       {/* Welcome hint */}
@@ -595,6 +602,33 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 240,
     resizeMode: 'cover',
+  },
+  brandPromiseOverlay: {
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
+    right: 20,
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderRadius: 20,
+  },
+  brandPromiseText: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    letterSpacing: 0.5,
+    textShadowColor: '#FF6B6B',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 4,
+  },
+  brandPromiseUnderline: {
+    width: 60,
+    height: 3,
+    backgroundColor: '#4ECDC4',
+    borderRadius: 2,
+    marginTop: 8,
   },
 
   // Welcome hint - Playful Kid Design

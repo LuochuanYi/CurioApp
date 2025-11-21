@@ -144,9 +144,10 @@ export const CurioLogo = ({
               color: CURIO_THEME.colors.primary,
               marginTop: CURIO_THEME.spacing.xs,
               textAlign: 'center',
+              fontWeight: '600',
             }
           ]}>
-            Weaving stories, nurturing minds.
+            Nurture Imagination, Together
           </Text>
         )}
       </View>

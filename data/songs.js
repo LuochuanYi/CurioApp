@@ -37,6 +37,15 @@ const sleepBabyLullabyAudio = require('../assets/audio/songs/sleep-sleep-baby-lu
 const moonlightSonataLullabyAudio = require('../assets/audio/songs/beethoven-moonlight-sonata-first-theme-piano-sonata-no-14-401567.mp3');
 const lavendersBlueAudio = require('../assets/audio/songs/lavenders-blue-lullaby.mp3');
 
+// Chinese Lullabies and Songs - Popular traditional and modern Chinese children's music
+// Note: Audio files should be placed in assets/audio/songs/chinese/ directory
+// Placeholder require statements - update with actual file names when audio files are added
+const xiaoXingXingAudio = require('../assets/audio/songs/chinese/xiao-xing-xing-chinese.mp3');
+const yaolanQuAudio = require('../assets/audio/songs/chinese/yaolan-qu-chinese-lullaby.mp3'); 
+const liangZhiLaoHuAudio = require('../assets/audio/songs/chinese/liang-zhi-lao-hu-two-tigers.mp3');
+const shuYaziAudio = require('../assets/audio/songs/chinese/shu-yazi-counting-ducks.mp3');
+const xiaoYianZhiAudio = require('../assets/audio/songs/chinese/xiao-yian-zhi-little-swallow.mp3');
+
 // console.log('✅ All audio files configured:', { // Disabled to reduce log noise
 //   // Original songs
 //   twinkleTwinkle: !!twinkleTwinkleAudio,
@@ -123,6 +132,12 @@ export const SONG_CATEGORIES = {
     name: 'Calming',
     icon: '😌',
     color: '#1abc9c'
+  },
+  CHINESE: {
+    id: 'chinese',
+    name: 'Chinese 中文',
+    icon: '🇨🇳',
+    color: '#e74c3c'
   }
 };
 
@@ -2267,6 +2282,439 @@ export const SONGS_LIBRARY = [
       "Discuss colors in nature",
       "Practice gardening or flower identification"
     ]
+  },
+
+  // CHINESE LULLABIES & CHILDREN'S SONGS 中文儿歌
+  {
+    id: 'xiao-xing-xing',
+    title: '小星星 (Xiǎo Xīngxīng) - Little Star',
+    category: 'chinese',
+    difficulty: 'beginner',
+    duration: '2:30',
+    ageGroup: '2-8 years',
+    icon: '⭐',
+    color: '#ffd60a',
+    audioFile: xiaoXingXingAudio,
+    description: 'Chinese version of Twinkle Twinkle Little Star - perfect for bilingual learning',
+    learningGoals: [
+      'Chinese language exposure',
+      'Bilingual vocabulary development',
+      'Star and night sky concepts',
+      'Cultural appreciation'
+    ],
+    lyrics: [
+      {
+        line: "一闪一闪小星星 (Yī shǎn yī shǎn xiǎo xīngxīng)",
+        translation: "Twinkle, twinkle, little star",
+        signs: [
+          createSignInstruction('一闪一闪', 'Open and close fingers like sparkling stars'),
+          createSignInstruction('小星星', 'Point fingers upward, wiggle like twinkling')
+        ],
+        startTime: 0,
+        endTime: 4
+      },
+      {
+        line: "天上挂着小眼睛 (Tiānshàng guàzhe xiǎo yǎnjīng)",
+        translation: "Hanging in the sky like little eyes",
+        signs: [
+          createSignInstruction('天上', 'Point upward to the sky'),
+          createSignInstruction('小眼睛', 'Point to eyes then make small circles')
+        ],
+        startTime: 4,
+        endTime: 8
+      },
+      {
+        line: "照在西边照东边 (Zhào zài xībiān zhào dōngbiān)",
+        translation: "Shining west and shining east",
+        signs: [
+          createSignInstruction('照', 'Make shining gesture with hands'),
+          createSignInstruction('西边东边', 'Point west then east')
+        ],
+        startTime: 8,
+        endTime: 12
+      },
+      {
+        line: "好像千万小眼睛 (Hǎoxiàng qiān wàn xiǎo yǎnjīng)",
+        translation: "Like thousands of little eyes",
+        signs: [
+          createSignInstruction('好像', 'Gesture indicating similarity'),
+          createSignInstruction('千万', 'Show many with spread fingers'),
+          createSignInstruction('小眼睛', 'Many small eye gestures')
+        ],
+        startTime: 12,
+        endTime: 16
+      }
+    ],
+    tips: [
+      "Compare Chinese and English versions",
+      "Practice Chinese pronunciation slowly",
+      "Use visual aids for new vocabulary",
+      "Encourage bilingual thinking"
+    ],
+    extensions: [
+      "Learn basic Chinese numbers",
+      "Compare star stories across cultures",
+      "Practice Chinese greetings",
+      "Explore Chinese character writing"
+    ],
+    culturalContext: "This beloved Chinese children's song uses the same melody as Twinkle Twinkle Little Star but with beautiful Chinese lyrics about stars as eyes in the sky.",
+    languageNotes: {
+      pronunciation: "Chinese is a tonal language - encourage listening to native pronunciation",
+      vocabulary: "星星 (xīngxīng) means star, 小 (xiǎo) means little/small",
+      cultural: "Stars have special significance in Chinese culture and poetry"
+    }
+  },
+
+  {
+    id: 'yaolan-qu',
+    title: '摇篮曲 (Yáolán Qū) - Chinese Lullaby',
+    category: 'chinese',
+    difficulty: 'beginner',
+    duration: '3:30',
+    ageGroup: '0-6 years',
+    icon: '🌙',
+    color: '#a29bfe',
+    audioFile: yaolanQuAudio,
+    description: 'Traditional Chinese lullaby with gentle rocking rhythm and soothing melody',
+    learningGoals: [
+      'Chinese lullaby tradition',
+      'Gentle rhythm and rocking motions',
+      'Bedtime vocabulary in Chinese',
+      'Cultural bonding experience'
+    ],
+    lyrics: [
+      {
+        line: "宝宝睡，宝宝睡 (Bǎobao shuì, bǎobao shuì)",
+        translation: "Baby sleep, baby sleep",
+        signs: [
+          createSignInstruction('宝宝', 'Rock arms like holding baby'),
+          createSignInstruction('睡', 'Rest head on hands like sleeping')
+        ],
+        startTime: 0,
+        endTime: 4
+      },
+      {
+        line: "妈妈哄你快入睡 (Māmā hǒng nǐ kuài rùshuì)",
+        translation: "Mama helps you fall asleep quickly",
+        signs: [
+          createSignInstruction('妈妈', 'Point to mother figure'),
+          createSignInstruction('哄你', 'Gentle soothing motion'),
+          createSignInstruction('快入睡', 'Quick sleeping gesture')
+        ],
+        startTime: 4,
+        endTime: 8
+      },
+      {
+        line: "风不吹，浪不高 (Fēng bù chuī, làng bù gāo)",
+        translation: "Wind doesn't blow, waves aren't high",
+        signs: [
+          createSignInstruction('风不吹', 'Still air gesture, no wind'),
+          createSignInstruction('浪不高', 'Gentle, low wave motions')
+        ],
+        startTime: 8,
+        endTime: 12
+      },
+      {
+        line: "小宝宝啊快睡觉 (Xiǎo bǎobao a kuài shuìjiào)",
+        translation: "Little baby, quickly go to sleep",
+        signs: [
+          createSignInstruction('小宝宝', 'Small rocking motion'),
+          createSignInstruction('快睡觉', 'Gentle sleep encouragement')
+        ],
+        startTime: 12,
+        endTime: 16
+      }
+    ],
+    tips: [
+      "Use very gentle, flowing movements",
+      "Rock naturally to the Chinese rhythm",
+      "Focus on soothing tone over perfect pronunciation",
+      "Perfect for Chinese-speaking families"
+    ],
+    extensions: [
+      "Learn about Chinese family structure",
+      "Practice other Chinese baby words",
+      "Explore Chinese bedtime traditions",
+      "Compare lullabies across cultures"
+    ],
+    culturalContext: "Traditional Chinese lullabies often reference natural elements like wind and waves, reflecting the connection to nature in Chinese culture.",
+    languageNotes: {
+      pronunciation: "宝宝 (bǎobao) is the affectionate term for baby in Chinese",
+      vocabulary: "睡觉 (shuìjiào) means to sleep, 妈妈 (māmā) means mama",
+      cultural: "Chinese lullabies emphasize peaceful natural imagery"
+    }
+  },
+
+  {
+    id: 'liang-zhi-lao-hu',
+    title: '两只老虎 (Liǎng Zhī Lǎohǔ) - Two Tigers',
+    category: 'chinese',
+    difficulty: 'beginner',
+    duration: '2:45',
+    ageGroup: '2-6 years',
+    icon: '🐅',
+    color: '#ff7675',
+    audioFile: liangZhiLaoHuAudio,
+    description: 'Chinese adaptation of Frère Jacques with silly tigers missing body parts - children love the humor!',
+    learningGoals: [
+      'Animal vocabulary in Chinese',
+      'Body parts identification',
+      'Humor and playfulness',
+      'Cultural adaptation understanding'
+    ],
+    lyrics: [
+      {
+        line: "两只老虎，两只老虎 (Liǎng zhī lǎohǔ, liǎng zhī lǎohǔ)",
+        translation: "Two tigers, two tigers",
+        signs: [
+          createSignInstruction('两只', 'Hold up two fingers'),
+          createSignInstruction('老虎', 'Make tiger claws and roar gesture')
+        ],
+        startTime: 0,
+        endTime: 3
+      },
+      {
+        line: "跑得快，跑得快 (Pǎo de kuài, pǎo de kuài)",
+        translation: "Run fast, run fast",
+        signs: [
+          createSignInstruction('跑得快', 'Running motion with arms, fast pace')
+        ],
+        startTime: 3,
+        endTime: 6
+      },
+      {
+        line: "一只没有眼睛 (Yī zhī méiyǒu yǎnjīng)",
+        translation: "One has no eyes",
+        signs: [
+          createSignInstruction('一只', 'Hold up one finger'),
+          createSignInstruction('没有眼睛', 'Cover eyes, shake head')
+        ],
+        startTime: 6,
+        endTime: 9
+      },
+      {
+        line: "一只没有尾巴 (Yī zhī méiyǒu wěiba)",
+        translation: "One has no tail",
+        signs: [
+          createSignInstruction('一只', 'Hold up one finger'),
+          createSignInstruction('没有尾巴', 'Point to where tail should be, shake head')
+        ],
+        startTime: 9,
+        endTime: 12
+      },
+      {
+        line: "真奇怪！真奇怪！ (Zhēn qíguài! Zhēn qíguài!)",
+        translation: "So strange! So strange!",
+        signs: [
+          createSignInstruction('真奇怪', 'Exaggerated surprised expression and gesture')
+        ],
+        startTime: 12,
+        endTime: 15
+      }
+    ],
+    tips: [
+      "Emphasize the silly, playful nature",
+      "Make exaggerated expressions for 'strange'",
+      "Act out the missing body parts dramatically",
+      "Great for teaching Chinese body vocabulary"
+    ],
+    extensions: [
+      "Learn more animal names in Chinese",
+      "Practice body parts vocabulary",
+      "Compare to the original Frère Jacques",
+      "Create silly animal stories"
+    ],
+    culturalContext: "This adaptation shows how Chinese culture adopts and transforms Western songs, making them uniquely Chinese with different lyrics and cultural humor.",
+    languageNotes: {
+      pronunciation: "老虎 (lǎohǔ) means tiger, 眼睛 (yǎnjīng) means eyes",
+      vocabulary: "没有 (méiyǒu) means 'don't have' or 'without'",
+      cultural: "Chinese children find the absurd tigers very funny"
+    }
+  },
+
+  {
+    id: 'shu-yazi',
+    title: '数鸭子 (Shǔ Yāzi) - Counting Ducks',
+    category: 'chinese',
+    difficulty: 'intermediate',
+    duration: '3:45',
+    ageGroup: '3-8 years',
+    icon: '🦆',
+    color: '#fdcb6e',
+    audioFile: shuYaziAudio,
+    description: 'Educational Chinese song about counting ducks under a bridge - perfect for learning Chinese numbers',
+    learningGoals: [
+      'Chinese numbers 1-10',
+      'Counting skills',
+      'Animal vocabulary',
+      'Mathematical concepts in Chinese'
+    ],
+    lyrics: [
+      {
+        line: "门前大桥下 (Ménqián dàqiáo xià)",
+        translation: "Under the big bridge in front of the door",
+        signs: [
+          createSignInstruction('门前', 'Point to door area'),
+          createSignInstruction('大桥', 'Make bridge shape with arms'),
+          createSignInstruction('下', 'Point underneath')
+        ],
+        startTime: 0,
+        endTime: 4
+      },
+      {
+        line: "游过一群鸭 (Yóu guò yī qún yā)",
+        translation: "Swims a group of ducks",
+        signs: [
+          createSignInstruction('游过', 'Swimming motions'),
+          createSignInstruction('一群鸭', 'Show group of ducks with multiple duck gestures')
+        ],
+        startTime: 4,
+        endTime: 8
+      },
+      {
+        line: "快来快来数一数 (Kuài lái kuài lái shǔ yī shǔ)",
+        translation: "Come quickly, come quickly and count",
+        signs: [
+          createSignInstruction('快来', 'Beckoning motion, urgent'),
+          createSignInstruction('数一数', 'Counting gesture with fingers')
+        ],
+        startTime: 8,
+        endTime: 12
+      },
+      {
+        line: "二四六七八 (Èr sì liù qī bā)",
+        translation: "Two, four, six, seven, eight",
+        signs: [
+          createSignInstruction('二', 'Hold up two fingers'),
+          createSignInstruction('四', 'Hold up four fingers'),
+          createSignInstruction('六', 'Hold up six fingers'),
+          createSignInstruction('七', 'Hold up seven fingers'),
+          createSignInstruction('八', 'Hold up eight fingers')
+        ],
+        startTime: 12,
+        endTime: 16
+      }
+    ],
+    tips: [
+      "Practice Chinese numbers before singing",
+      "Use fingers to show each number clearly",
+      "Act out swimming ducks energetically",
+      "Great for mathematical thinking in Chinese"
+    ],
+    extensions: [
+      "Learn all Chinese numbers 1-20",
+      "Practice counting objects in Chinese",
+      "Visit a pond to count real ducks",
+      "Learn about Chinese mathematical concepts"
+    ],
+    culturalContext: "This educational song reflects the Chinese emphasis on early mathematics education, making learning numbers fun and memorable through music.",
+    languageNotes: {
+      pronunciation: "数 (shǔ) means to count, 鸭子 (yāzi) means duck",
+      vocabulary: "Chinese numbers have unique pronunciations to learn",
+      cultural: "Counting songs are very popular in Chinese education"
+    }
+  },
+
+  {
+    id: 'xiao-yian-zhi',
+    title: '小燕子 (Xiǎo Yànzi) - Little Swallow',
+    category: 'chinese',
+    difficulty: 'beginner',
+    duration: '2:30',
+    ageGroup: '2-7 years',
+    icon: '🐦',
+    color: '#00b894',
+    audioFile: xiaoYianZhiAudio,
+    description: 'Beloved Chinese children\'s song about a little swallow bringing spring joy and happiness',
+    learningGoals: [
+      'Seasonal vocabulary in Chinese',
+      'Bird and nature appreciation',
+      'Spring concepts and renewal',
+      'Gentle movement coordination'
+    ],
+    lyrics: [
+      {
+        line: "小燕子，穿花衣 (Xiǎo yànzi, chuān huā yī)",
+        translation: "Little swallow, wearing flowery clothes",
+        signs: [
+          createSignInstruction('小燕子', 'Flying bird motion with arms'),
+          createSignInstruction('穿花衣', 'Show beautiful colorful clothing gesture')
+        ],
+        startTime: 0,
+        endTime: 4
+      },
+      {
+        line: "年年春天来这里 (Nián nián chūntiān lái zhèlǐ)",
+        translation: "Every year in spring comes here",
+        signs: [
+          createSignInstruction('年年', 'Show yearly cycles with circular motion'),
+          createSignInstruction('春天', 'Show flowers blooming, spring awakening'),
+          createSignInstruction('来这里', 'Flying toward us gesture')
+        ],
+        startTime: 4,
+        endTime: 8
+      },
+      {
+        line: "我问燕子你为啥来 (Wǒ wèn yànzi nǐ wèi shá lái)",
+        translation: "I ask the swallow why do you come",
+        signs: [
+          createSignInstruction('我问', 'Point to self, questioning gesture'),
+          createSignInstruction('燕子', 'Flying bird motion'),
+          createSignInstruction('为啥来', 'Questioning why gesture, approaching motion')
+        ],
+        startTime: 8,
+        endTime: 12
+      },
+      {
+        line: "燕子说这里的春天最美丽 (Yànzi shuō zhèlǐ de chūntiān zuì měilì)",
+        translation: "The swallow says spring here is most beautiful",
+        signs: [
+          createSignInstruction('燕子说', 'Bird talking gesture'),
+          createSignInstruction('春天', 'Show blooming flowers and greenery'),
+          createSignInstruction('最美丽', 'Show beauty and happiness, spreading arms wide')
+        ],
+        startTime: 12,
+        endTime: 16
+      },
+      {
+        line: "小燕子，告诉你 (Xiǎo yànzi, gàosu nǐ)",
+        translation: "Little swallow, let me tell you",
+        signs: [
+          createSignInstruction('小燕子', 'Gentle bird flying motion'),
+          createSignInstruction('告诉你', 'Sharing/telling gesture toward bird')
+        ],
+        startTime: 16,
+        endTime: 20
+      },
+      {
+        line: "今年这里更美丽 (Jīnnián zhèlǐ gèng měilì)",
+        translation: "This year here is even more beautiful",
+        signs: [
+          createSignInstruction('今年', 'Point to current time'),
+          createSignInstruction('更美丽', 'Enhanced beauty gesture, even more wonderful')
+        ],
+        startTime: 20,
+        endTime: 24
+      }
+    ],
+    tips: [
+      "Use graceful flying motions for the swallow",
+      "Emphasize the beauty and joy of spring",
+      "Make the conversation between child and bird interactive",
+      "Perfect for teaching about seasons and nature"
+    ],
+    extensions: [
+      "Learn about swallows and migration patterns",
+      "Explore spring flowers and seasonal changes",
+      "Practice other Chinese nature vocabulary",
+      "Discuss environmental beauty and appreciation"
+    ],
+    culturalContext: "This song reflects the Chinese appreciation for nature and seasonal cycles. Swallows are symbols of good fortune and spring renewal in Chinese culture.",
+    languageNotes: {
+      pronunciation: "燕子 (yànzi) means swallow, 春天 (chūntiān) means spring",
+      vocabulary: "美丽 (měilì) means beautiful, 年年 (nián nián) means every year",
+      cultural: "Swallows returning in spring is a celebrated natural phenomenon in Chinese culture"
+    }
   }
 ];
 

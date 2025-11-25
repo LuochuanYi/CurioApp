@@ -273,13 +273,31 @@ export const useMusicPlayer = (song) => {
             try {
               // Use Expo Audio API for all platforms (including web)
               logAudio('Creating audio with Expo Audio API for:', song.title);
+              logAudio('Audio file path:', song.audioFile);
               
+              // Enhanced audio loading with better error handling and format support
               const { sound } = await Audio.Sound.createAsync(
                 song.audioFile, // Direct use of require()'d asset
                 { 
                   shouldPlay: false, 
                   isLooping: true,
-                  volume: musicVolume 
+                  volume: musicVolume,
+                  // Enhanced audio configuration for better compatibility
+                  progressUpdateIntervalMillis: 1000,
+                  positionMillis: 0,
+                  rate: 1.0,
+                  shouldCorrectPitch: true,
+                  // Web-specific audio format support
+                  ...(Platform.OS === 'web' && {
+                    html5: true,
+                    preload: 'auto'
+                  })
+                },
+                // Status update callback for debugging
+                (status) => {
+                  if (status.error) {
+                    logError('Audio status error:', status.error);
+                  }
                 }
               );
 
@@ -326,8 +344,26 @@ export const useMusicPlayer = (song) => {
               logError('Audio error details:', {
                 message: audioError.message,
                 name: audioError.name,
-                stack: audioError.stack
+                stack: audioError.stack,
+                audioFile: song.audioFile
               });
+              
+              // Enhanced error message with specific guidance
+              let errorMessage = 'Audio playback failed: ';
+              if (audioError.message.includes('not supported') || audioError.message.includes('no supported source')) {
+                errorMessage += 'Audio format not supported. Try refreshing the app or check if MP3 files are properly loaded.';
+                setError(errorMessage);
+              } else if (audioError.message.includes('Network')) {
+                errorMessage += 'Network error loading audio. Check your connection.';
+                setError(errorMessage);
+              } else if (audioError.message.includes('decode')) {
+                errorMessage += 'Audio file corrupted or invalid format.';
+                setError(errorMessage);
+              } else {
+                errorMessage += audioError.message;
+                setError(errorMessage);
+              }
+              
               logAudio('🎵 Falling back to synthetic melody');
               
               // Use fallback melody generation with estimated duration
@@ -337,6 +373,9 @@ export const useMusicPlayer = (song) => {
                   audioSound.current = createSimpleMelody(song.id, estimatedDuration);
                   setDuration(estimatedDuration);
                   logAudio('✅ Fallback melody created for:', song.title, 'with duration:', estimatedDuration, 's');
+                  
+                  // Clear the error since we have a fallback
+                  setError(null);
                 } catch (melodyError) {
                   logError('❌ Failed to create fallback melody:', melodyError);
                 }

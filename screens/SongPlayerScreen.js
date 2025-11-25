@@ -15,6 +15,7 @@ import { useMusicPlayer } from '../hooks/useMusicPlayer';
 import { useDynamicTranslation } from '../hooks/useDynamicTranslation';
 import { SignLanguageAnimation } from '../components';
 import { logAudio, logTranslation, logError, logInfo } from '../utils/logger';
+import AudioTestButton from '../components/AudioTestButton';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -417,13 +418,46 @@ const SongPlayerScreen = ({ route, navigation }) => {
         {/* Error Display */}
         {musicPlayer.error && (
           <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>⚠️ {translateText(musicPlayer.error)}</Text>
-            <TouchableOpacity 
-              onPress={() => musicPlayer.stop()}
-              style={styles.errorButton}
-            >
-              <Text style={styles.errorButtonText}>{translateText("Retry")}</Text>
-            </TouchableOpacity>
+            <Text style={styles.errorText}>⚠️ {musicPlayer.error}</Text>
+            <View style={styles.errorActions}>
+              <TouchableOpacity 
+                onPress={() => {
+                  // Clear error and try to reload the page
+                  navigation.replace('SongPlayer', { song: song, songId: song?.id });
+                }}
+                style={styles.errorButton}
+              >
+                <Text style={styles.errorButtonText}>{translateText("Retry")}</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                onPress={() => {
+                  // Toggle background music and try again
+                  musicPlayer.toggleBackgroundMusic();
+                }}
+                style={[styles.errorButton, styles.errorButtonSecondary]}
+              >
+                <Text style={styles.errorButtonText}>
+                  {musicPlayer.backgroundMusicEnabled ? translateText("Disable Audio") : translateText("Enable Audio")}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            
+            {/* Help text for common issues */}
+            <Text style={styles.errorHelpText}>
+              {translateText("Try: 1) Retry button to reload, 2) Toggle audio on/off, 3) Refresh the app if problem persists")}
+            </Text>
+            
+            {/* Debug audio button in development */}
+            {__DEV__ && song?.audioFile && (
+              <View style={styles.debugSection}>
+                <Text style={styles.debugLabel}>🔧 Debug:</Text>
+                <AudioTestButton 
+                  audioFile={song.audioFile} 
+                  title={song.title || 'Song'} 
+                />
+              </View>
+            )}
           </View>
         )}
 
@@ -898,6 +932,12 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 14,
     color: '#c0392b',
+    marginBottom: 12,
+    lineHeight: 20,
+  },
+  errorActions: {
+    flexDirection: 'row',
+    gap: 8,
     marginBottom: 8,
   },
   errorButton: {
@@ -905,11 +945,33 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    alignSelf: 'flex-start',
+    flex: 1,
+  },
+  errorButtonSecondary: {
+    backgroundColor: '#7f8c8d',
   },
   errorButtonText: {
     fontSize: 12,
     color: '#fff',
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  errorHelpText: {
+    fontSize: 11,
+    color: '#7f8c8d',
+    fontStyle: 'italic',
+    lineHeight: 16,
+  },
+  debugSection: {
+    marginTop: 12,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
+  },
+  debugLabel: {
+    fontSize: 12,
+    color: '#7f8c8d',
+    marginBottom: 4,
     fontWeight: '600',
   },
   

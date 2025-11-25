@@ -6,7 +6,8 @@ export const STORY_CATEGORIES = {
   CLASSIC: { id: 'classic', name: 'Classic Tales', icon: '👑', color: '#ff6b8a' },
   ADVENTURE: { id: 'adventure', name: 'Adventure', icon: '🗺️', color: '#4ecdc4' },
   EDUCATIONAL: { id: 'educational', name: 'Educational', icon: '🧠', color: '#45b7d1' },
-  MODERN: { id: 'modern', name: 'Modern Tales', icon: '🚀', color: '#f9ca24' }
+  MODERN: { id: 'modern', name: 'Modern Tales', icon: '🚀', color: '#f9ca24' },
+  CHINESE_BEDTIME: { id: 'chinese-bedtime', name: 'Chinese Bedtime 中文睡前故事', icon: '🇨🇳', color: '#c0392b' }
 };
 
 export const STORY_LIBRARY = [
@@ -809,6 +810,296 @@ And he lived happily ever after, always remembering to be kind to others who mig
     moral: "Everyone is beautiful in their own way, and we all grow and change at our own pace.",
     nextStory: 1,
     previousStory: 10
+  },
+
+  // CHINESE BEDTIME STORIES - Traditional tales with cultural education
+  {
+    id: 12,
+    title: "神笔马良 (Shén Bǐ Mǎ Liáng) - Ma Liang and the Magic Brush",
+    category: STORY_CATEGORIES.CHINESE_BEDTIME.id,
+    rating: 4.9,
+    duration: "8 min",
+    ageGroup: "4-10 years",
+    language: "Chinese/English",
+    tags: ["creativity", "art", "justice", "helping others", "Chinese culture"],
+    summary: "A poor but kind-hearted boy receives a magical brush that brings his paintings to life, using it to help the poor and fight injustice.",
+    chineseTitle: "神笔马良",
+    pinyin: "Shén Bǐ Mǎ Liáng",
+    culturalContext: "This beloved Chinese folk tale emphasizes traditional values of using talents to help others and standing up against greed and corruption.",
+    content: `很久很久以前，有个叫马良的小男孩。他很穷，但是心地善良，热爱画画。
+(Hěn jiǔ hěn jiǔ yǐqián, yǒu gè jiào Mǎ Liáng de xiǎo nánhái. Tā hěn qióng, dànshì xīndì shànliáng, rè'ài huàhuà.)
+
+Long, long ago, there was a little boy named Ma Liang. He was very poor, but he had a kind heart and loved to draw.
+
+Every day, Ma Liang would draw pictures in the dirt with a stick because he couldn't afford a real brush and ink. He dreamed of having proper painting supplies so he could create beautiful art.
+
+One night, as Ma Liang slept under the stars, a kind fairy appeared to him in a dream.
+
+"马良，因为你心地善良，我要送给你一支神奇的画笔。" 
+(Mǎ Liáng, yīnwèi nǐ xīndì shànliáng, wǒ yào sòng gěi nǐ yī zhī shénqí de huàbǐ.)
+"Ma Liang, because you have a kind heart, I want to give you a magical brush."
+
+When Ma Liang woke up, there beside him was the most beautiful brush he had ever seen, glowing with gentle golden light.
+
+Excitedly, Ma Liang dipped the brush in water and painted a bird on a rock. Amazingly, the bird came to life and flew away, singing beautifully!
+
+"这支画笔真的有魔法！" (Zhè zhī huàbǐ zhēn de yǒu mófǎ!)
+"This brush really is magical!"
+
+Ma Liang was overjoyed, but he remembered the fairy's words about kindness. He decided to use his gift to help others.
+
+When he saw that old Mrs. Chen had no water for her crops, Ma Liang painted a stream. The water flowed and saved her garden.
+
+When little Liu was cold without warm clothes, Ma Liang painted a beautiful coat that appeared instantly, keeping the child cozy.
+
+Word spread about Ma Liang's magical brush. Soon, the greedy village magistrate heard about it and demanded that Ma Liang come to his palace.
+
+"小子，给我画一座金山！" (Xiǎozi, gěi wǒ huà yī zuò jīnshān!)
+"Boy, paint me a mountain of gold!" ordered the cruel magistrate.
+
+But Ma Liang was clever. Instead of gold, he painted a beautiful mountain far across a vast ocean.
+
+"金山在那里，但是你必须乘船才能到达。" 
+(Jīnshān zài nàlǐ, dànshì nǐ bìxū chéngchuán cái néng dàodá.)
+"The gold mountain is there, but you must take a ship to reach it."
+
+So Ma Liang painted a large ship. The greedy magistrate and his soldiers climbed aboard, eager to reach the gold.
+
+But as soon as they were far from shore, Ma Liang painted strong winds. The ship was blown far, far away, and the cruel magistrate could never return to bother the village again.
+
+From that day on, Ma Liang continued to use his magical brush to help the poor and protect the innocent. He painted tools for farmers, warm clothes for children, and medicine for the sick.
+
+The villagers loved Ma Liang not just for his magic, but for his generous heart and wise choices.
+
+每个人都有自己的天赋，最重要的是用它来帮助别人。
+(Měi gè rén dōu yǒu zìjǐ de tiānfù, zuì zhòngyào de shì yòng tā lái bāngzhù biérén.)
+"Everyone has their own talents. The most important thing is to use them to help others."
+
+And Ma Liang lived happily, knowing that the greatest magic of all is a kind and generous heart.`,
+    moral: "True power comes from using our talents to help others and stand up for what is right.",
+    vocabularyWords: [
+      { chinese: "画笔", pinyin: "huàbǐ", english: "brush" },
+      { chinese: "善良", pinyin: "shànliáng", english: "kind-hearted" },
+      { chinese: "魔法", pinyin: "mófǎ", english: "magic" },
+      { chinese: "帮助", pinyin: "bāngzhù", english: "to help" },
+      { chinese: "贪婪", pinyin: "tānlán", english: "greedy" }
+    ],
+    culturalLessons: [
+      "Traditional Chinese values emphasize using talents for social good",
+      "The story teaches about standing up to corrupt authority",
+      "Art and creativity are valued in Chinese culture",
+      "Helping the poor and weak is considered virtuous"
+    ],
+    nextStory: 13,
+    previousStory: 11
+  },
+
+  {
+    id: 13,
+    title: "小猫钓鱼 (Xiǎo Māo Diào Yú) - Little Cat Goes Fishing",
+    category: STORY_CATEGORIES.CHINESE_BEDTIME.id,
+    rating: 4.8,
+    duration: "5 min",
+    ageGroup: "2-6 years",
+    language: "Chinese/English",
+    tags: ["patience", "focus", "perseverance", "nature", "mindfulness"],
+    summary: "A little cat learns the importance of patience and focus when learning to fish with his mother.",
+    chineseTitle: "小猫钓鱼",
+    pinyin: "Xiǎo Māo Diào Yú",
+    culturalContext: "This popular children's story teaches traditional Chinese values of patience (耐心), focus (专心), and perseverance (坚持).",
+    content: `春天来了，天气很好。小猫咪咪要跟妈妈去河边钓鱼。
+(Chūntiān lái le, tiānqì hěn hǎo. Xiǎo māo Mīmī yào gēn māmā qù hé biān diào yú.)
+
+Spring has arrived, and the weather is beautiful. Little Cat Mimi wants to go fishing by the river with her mother.
+
+"妈妈，我们快去钓鱼吧！" 咪咪兴奋地说。
+(Māmā, wǒmen kuài qù diào yú ba!" Mīmī xīngfèn de shuō.)
+"Mama, let's go fishing quickly!" said Mimi excitedly.
+
+Cat Mother smiled and picked up their fishing poles. Together, they walked to the peaceful river where the water sparkled in the sunshine.
+
+"钓鱼需要耐心和专心。" 妈妈温柔地说。
+(Diào yú xūyào nàixīn hé zhuānxīn." Māmā wēnróu de shuō.)
+"Fishing requires patience and focus," said Mother gently.
+
+They sat by the water's edge. Mother Cat cast her line into the water and sat very still, watching her fishing rod carefully.
+
+Mimi also cast her line and tried to sit still like her mother. But soon, a beautiful butterfly with colorful wings flew by.
+
+"哇！多漂亮的蝴蝶！" (Wā! Duō piàoliang de húdié!)
+"Wow! What a beautiful butterfly!"
+
+Mimi forgot all about fishing and chased the butterfly around the meadow, laughing and playing.
+
+When she returned, Mother Cat had caught a big, silver fish.
+
+"妈妈真厉害！为什么我没有钓到鱼？" 咪咪疑惑地问。
+(Māmā zhēn lìhài! Wèishénme wǒ méiyǒu diào dào yú?" Mīmī yíhuò de wèn.)
+"Mama is so amazing! Why didn't I catch any fish?" asked Mimi, puzzled.
+
+"因为你没有专心。" 妈妈说。"让我们再试一次。"
+(Yīnwèi nǐ méiyǒu zhuānxīn." Māmā shuō. "Ràng wǒmen zài shì yīcì.)
+"Because you weren't focused," said Mother. "Let's try again."
+
+So they cast their lines again. This time, Mimi tried very hard to sit still and watch her fishing rod.
+
+But then a dragonfly with shimmering wings came dancing over the water.
+
+"蜻蜓真好看！" (Qīngtíng zhēn hǎokàn!)
+"The dragonfly is so pretty!"
+
+Once again, Mimi couldn't help herself. She put down her fishing rod and ran after the dragonfly, trying to catch it with her paws.
+
+When she came back, Mother Cat had caught another fish.
+
+Mimi felt sad. "我永远钓不到鱼！" (Wǒ yǒngyuǎn diào bù dào yú!)
+"I'll never catch a fish!"
+
+Mother Cat hugged her little kitten lovingly. "别担心，咪咪。耐心和练习很重要。"
+(Bié dānxīn, Mīmī. Nàixīn hé liànxí hěn zhòngyào.)
+"Don't worry, Mimi. Patience and practice are very important."
+
+"让我们最后试一次。这次，请专心看着你的鱼竿。"
+(Ràng wǒmen zuìhòu shì yīcì. Zhècì, qǐng zhuānxīn kàn zhe nǐ de yúgān.)
+"Let's try one last time. This time, please focus on watching your fishing rod."
+
+Mimi nodded seriously. She cast her line and sat very, very still. When the butterfly flew by again, Mimi just watched it with her eyes but didn't move.
+
+When the dragonfly came dancing, Mimi smiled at it but kept watching her fishing rod.
+
+Suddenly, her rod began to wiggle! "妈妈！我的鱼竿在动！" (Māmā! Wǒ de yúgān zài dòng!)
+"Mama! My fishing rod is moving!"
+
+"快拉！" (Kuài lā!) "Pull quickly!"
+
+Mimi pulled her rod and caught a beautiful golden fish! She was so happy she almost fell into the water.
+
+"我做到了！我钓到鱼了！" (Wǒ zuò dào le! Wǒ diào dào yú le!)
+"I did it! I caught a fish!"
+
+Mother Cat hugged her proudly. "你看，当你专心的时候，你就能成功。"
+(Nǐ kàn, dāng nǐ zhuānxīn de shíhòu, nǐ jiù néng chénggōng.)
+"You see, when you focus, you can succeed."
+
+As the sun set over the peaceful river, Mimi and her mother walked home happily, carrying their fish and a valuable lesson about patience and focus.
+
+From that day on, whenever Mimi wanted to learn something new, she remembered the fishing lesson and practiced being patient and focused.
+
+专心致志，就能成功！(Zhuānxīn zhìzhì, jiù néng chénggōng!)
+"With focus and dedication, you can succeed!"`,
+    moral: "Patience and focus help us achieve our goals and learn new skills.",
+    vocabularyWords: [
+      { chinese: "钓鱼", pinyin: "diào yú", english: "fishing" },
+      { chinese: "耐心", pinyin: "nàixīn", english: "patience" },
+      { chinese: "专心", pinyin: "zhuānxīn", english: "focus" },
+      { chinese: "蝴蝶", pinyin: "húdié", english: "butterfly" },
+      { chinese: "蜻蜓", pinyin: "qīngtíng", english: "dragonfly" }
+    ],
+    culturalLessons: [
+      "Chinese education emphasizes concentration and diligence",
+      "Nature appreciation is important in Chinese culture",
+      "Parent-child learning relationships are valued",
+      "Perseverance (坚持) is a key virtue in Chinese philosophy"
+    ],
+    nextStory: 14,
+    previousStory: 12
+  },
+
+  {
+    id: 14,
+    title: "嫦娥奔月 (Cháng'é Bēn Yuè) - Chang'e Flies to the Moon",
+    category: STORY_CATEGORIES.CHINESE_BEDTIME.id,
+    rating: 4.9,
+    duration: "7 min",
+    ageGroup: "5-10 years",
+    language: "Chinese/English",
+    tags: ["mythology", "moon", "sacrifice", "festivals", "celestial"],
+    summary: "The beautiful goddess Chang'e makes a great sacrifice to protect the world and ends up living on the moon with only a jade rabbit for company.",
+    chineseTitle: "嫦娥奔月",
+    pinyin: "Cháng'é Bēn Yuè",
+    culturalContext: "This ancient myth is central to Chinese Mid-Autumn Festival celebrations and teaches about sacrifice for the greater good.",
+    content: `很久很久以前，天空中有十个太阳，把大地烤得像火炉一样。
+(Hěn jiǔ hěn jiǔ yǐqián, tiānkōng zhōng yǒu shí gè tàiyáng, bǎ dàdì kǎo de xiàng huǒlú yīyàng.)
+
+Long, long ago, there were ten suns in the sky, making the earth as hot as a furnace.
+
+People suffered terribly from the heat. Plants died, rivers dried up, and no one could live peacefully.
+
+有一个勇敢的英雄叫后羿，他是最好的弓箭手。
+(Yǒu yīgè yǒnggǎn de yīngxióng jiào Hòu Yì, tā shì zuì hǎo de gōngjiàn shǒu.)
+There was a brave hero named Hou Yi, who was the best archer in the world.
+
+Hou Yi climbed to the top of the highest mountain, took out his magical bow, and shot down nine of the ten suns! He left only one sun to give light and warmth to the earth.
+
+The people cheered! "后羿救了我们！" (Hòu Yì jiù le wǒmen!)
+"Hou Yi saved us!"
+
+The Queen Mother of the West was so grateful that she gave Hou Yi a special gift - a pill of immortality.
+
+"吃了这颗药丸，你就能永远不死，飞到天上去。" 
+(Chī le zhè kē yàowán, nǐ jiù néng yǒngyuǎn bù sǐ, fēi dào tiānshàng qù.)
+"If you eat this pill, you will never die and can fly to the heavens."
+
+But Hou Yi didn't want to leave his beloved wife Chang'e alone on earth. So he gave the precious pill to Chang'e for safekeeping.
+
+嫦娥是世界上最美丽的女人，心地也很善良。
+(Cháng'é shì shìjiè shàng zuì měilì de nǚrén, xīndì yě hěn shànliáng.)
+Chang'e was the most beautiful woman in the world, and she had a very kind heart.
+
+They lived happily together until one day, when Hou Yi was away, his evil student Peng Meng broke into their house.
+
+"把仙药交给我！" (Bǎ xiānyào jiāo gěi wǒ!)
+"Give me the immortality pill!"
+
+Chang'e knew that if the evil Peng Meng got the pill, he would use his immortality to hurt innocent people.
+
+Thinking quickly, Chang'e grabbed the pill and swallowed it herself before Peng Meng could stop her.
+
+Immediately, Chang'e began to float upward! The magic pill was lifting her toward the sky!
+
+"我必须离开，但这是为了保护大家。" 
+(Wǒ bìxū líkāi, dàn zhè shì wèile bǎohù dàjiā.)
+"I must leave, but this is to protect everyone."
+
+Chang'e floated higher and higher until she reached the moon, the closest place to earth she could find.
+
+On the moon, Chang'e found only one companion - a gentle jade rabbit who lived there.
+
+玉兔很善良，陪伴着孤独的嫦娥。
+(Yùtù hěn shànliáng, péibàn zhe gūdú de Cháng'é.)
+The jade rabbit was very kind and kept lonely Chang'e company.
+
+When Hou Yi returned and learned what had happened, he was heartbroken but proud of his wife's sacrifice.
+
+Every night, he would look up at the moon and see Chang'e's silhouette, knowing she had saved the world from evil.
+
+The people on earth never forgot Chang'e's sacrifice. Every year during the full moon of the eighth lunar month, they would look up at the moon and remember her story.
+
+They would eat round mooncakes and reunion with their families, thinking of Chang'e alone on the moon with only the jade rabbit.
+
+现在，每当你看到圆月，你可以想象美丽的嫦娥和玉兔在那里。
+(Xiànzài, měi dāng nǐ kàn dào yuányuè, nǐ kěyǐ xiǎngxiàng měilì de Cháng'é hé yùtù zài nàlǐ.)
+Now, whenever you see the full moon, you can imagine beautiful Chang'e and the jade rabbit there.
+
+And remember that sometimes, the greatest love means making sacrifices to protect others.
+
+This is why Chinese families still celebrate the Mid-Autumn Festival, looking at the moon and thinking of Chang'e's love and sacrifice.`,
+    moral: "True love sometimes means making sacrifices to protect others and do what is right.",
+    vocabularyWords: [
+      { chinese: "月亮", pinyin: "yuèliàng", english: "moon" },
+      { chinese: "英雄", pinyin: "yīngxióng", english: "hero" },
+      { chinese: "仙药", pinyin: "xiānyào", english: "immortality pill" },
+      { chinese: "牺牲", pinyin: "xīshēng", english: "sacrifice" },
+      { chinese: "玉兔", pinyin: "yùtù", english: "jade rabbit" }
+    ],
+    culturalLessons: [
+      "Mid-Autumn Festival celebrates family reunion and Chang'e's story",
+      "The moon is central to Chinese calendar and cultural celebrations",
+      "Sacrifice for the greater good is a valued virtue",
+      "Traditional Chinese mythology connects nature with human values"
+    ],
+    nextStory: 12,
+    previousStory: 13
   }
 ];
 

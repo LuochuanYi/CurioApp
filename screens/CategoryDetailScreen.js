@@ -18,6 +18,7 @@ import {
   searchActivities
 } from '../data/learningCategories';
 import { SONG_CATEGORIES, getSongsByCategory } from '../data/songs';
+import { STORY_CATEGORIES, getStoriesByCategory } from '../data/stories';
 import { useDynamicTranslation } from '../hooks/useDynamicTranslation';
 import { logTranslation, logError } from '../utils/logger';
 import { GameActivityManager } from '../components';
@@ -26,6 +27,10 @@ const { width: screenWidth } = Dimensions.get('window');
 
 const CategoryDetailScreen = ({ route, navigation }) => {
   const { categoryId, categoryType = 'learning' } = route.params;
+  
+  // Debug logging
+  console.log('🔍 CategoryDetailScreen - categoryId:', categoryId, 'categoryType:', categoryType);
+  console.log('🔍 CategoryDetailScreen - route.params:', route.params);
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showGames, setShowGames] = useState(false);
@@ -51,9 +56,12 @@ const CategoryDetailScreen = ({ route, navigation }) => {
   
   const category = categoryType === 'songs' 
     ? Object.values(SONG_CATEGORIES).find(cat => cat.id === categoryId)
+    : categoryType === 'stories'
+    ? Object.values(STORY_CATEGORIES).find(cat => cat.id === categoryId)
     : Object.values(LEARNING_CATEGORIES).find(cat => cat.id === categoryId);
 
   const filteredActivities = useMemo(() => {
+    console.log('🔍 filteredActivities - categoryType:', categoryType, 'categoryId:', categoryId);
     if (categoryType === 'songs') {
       // For songs, get songs by category and filter by search query
       let songs = getSongsByCategory(categoryId) || [];
@@ -68,6 +76,22 @@ const CategoryDetailScreen = ({ route, navigation }) => {
       }
       
       return songs;
+    } else if (categoryType === 'stories') {
+      // For stories, get stories by category and filter by search query
+      console.log('🔍 Loading stories for categoryId:', categoryId);
+      let stories = getStoriesByCategory(categoryId) || [];
+      console.log('🔍 Found stories:', stories.length, stories.map(s => s.title));
+      
+      if (searchQuery.trim()) {
+        const lowerQuery = searchQuery.toLowerCase();
+        stories = stories.filter(story => 
+          story.title?.toLowerCase().includes(lowerQuery) ||
+          story.summary?.toLowerCase().includes(lowerQuery) ||
+          story.tags?.some(tag => tag?.toLowerCase().includes(lowerQuery))
+        );
+      }
+      
+      return stories;
     } else {
       // For learning activities
       let activities = getActivitiesByCategory(categoryId) || [];
@@ -102,6 +126,8 @@ const CategoryDetailScreen = ({ route, navigation }) => {
   const handleActivityPress = (activity) => {
     if (categoryType === 'songs') {
       navigation.navigate('SongPlayer', { song: activity });
+    } else if (categoryType === 'stories') {
+      navigation.navigate('StoryDetail', { story: activity });
     } else {
       navigation.navigate('ActivityDetail', { 
         activity,
@@ -332,7 +358,7 @@ const CategoryDetailScreen = ({ route, navigation }) => {
         </View>
 
         {/* Difficulty Filter - Only show for learning activities */}
-        {categoryType !== 'songs' && (
+        {categoryType !== 'songs' && categoryType !== 'stories' && (
           <View style={styles.filterSection}>
             <Text style={styles.filterTitle}>{translateText("Difficulty Level:")}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.difficultyScroll}>
@@ -382,11 +408,12 @@ const CategoryDetailScreen = ({ route, navigation }) => {
           <Text style={styles.resultsTitle}>
             {searchQuery ? translateText(`Search Results`) : 
              categoryType === 'songs' ? translateText('Songs') :
+             categoryType === 'stories' ? translateText('Stories') :
              selectedDifficulty === 'all' ? translateText('All Activities') : 
              `${translateText(DIFFICULTY_LEVELS[selectedDifficulty.toUpperCase()]?.name)} ${translateText('Activities')}`}
           </Text>
           <Text style={styles.resultsCount}>
-            {filteredActivities.length} {categoryType === 'songs' ? translateText("songs") : translateText("activities")}
+            {filteredActivities.length} {categoryType === 'songs' ? translateText("songs") : categoryType === 'stories' ? translateText("stories") : translateText("activities")}
           </Text>
         </View>
 
@@ -396,11 +423,12 @@ const CategoryDetailScreen = ({ route, navigation }) => {
             <View style={styles.emptyState}>
               <Text style={styles.emptyIcon}>🔍</Text>
               <Text style={styles.emptyTitle}>
-                {translateText(categoryType === 'songs' ? "No songs found" : "No activities found")}
+                {translateText(categoryType === 'songs' ? "No songs found" : categoryType === 'stories' ? "No stories found" : "No activities found")}
               </Text>
               <Text style={styles.emptySubtitle}>
                 {searchQuery ? translateText('Try a different search term') : 
                  categoryType === 'songs' ? translateText('No songs in this category') :
+                 categoryType === 'stories' ? translateText('No stories in this category') :
                  translateText('Try changing the difficulty filter')}
               </Text>
             </View>
@@ -410,19 +438,24 @@ const CategoryDetailScreen = ({ route, navigation }) => {
                 key={activity.id}
                 style={[
                   styles.activityCard,
-                  { borderLeftColor: categoryType === 'songs' ? (category?.color || '#6c5ce7') : getDifficultyColor(activity.difficulty) }
+                  { borderLeftColor: 
+                    categoryType === 'songs' ? (category?.color || '#6c5ce7') : 
+                    categoryType === 'stories' ? (category?.color || '#e74c3c') : 
+                    getDifficultyColor(activity.difficulty) 
+                  }
                 ]}
                 accessible={true}
                 accessibilityRole="button"
-                accessibilityLabel={categoryType === 'songs' 
-                  ? `${activity.title}, ${activity.duration}` 
-                  : `${activity.title}, ${activity.difficulty.name} difficulty, ${activity.duration}`
+                accessibilityLabel={
+                  categoryType === 'songs' ? `${activity.title}, ${activity.duration}` : 
+                  categoryType === 'stories' ? `${activity.title}, ${activity.duration}` :
+                  `${activity.title}, ${activity.difficulty.name} difficulty, ${activity.duration}`
                 }
               >
                 <View style={styles.activityHeader}>
                   <View style={styles.activityTitleContainer}>
                     <Text style={styles.activityTitle}>{activity.title}</Text>
-                    {categoryType !== 'songs' && (
+                    {categoryType !== 'songs' && categoryType !== 'stories' && (
                       <View style={[
                         styles.difficultyBadge,
                         { backgroundColor: getDifficultyColor(activity.difficulty) }
@@ -435,12 +468,20 @@ const CategoryDetailScreen = ({ route, navigation }) => {
                         <Text style={styles.difficultyBadgeText}>{activity.icon || '🎵'}</Text>
                       </View>
                     )}
+                    {categoryType === 'stories' && (
+                      <View style={[styles.difficultyBadge, { backgroundColor: category?.color || '#e74c3c' }]}>
+                        <Text style={styles.difficultyBadgeText}>📖</Text>
+                      </View>
+                    )}
                   </View>
                   <View style={styles.activityMeta}>
                     <Text style={styles.activityDuration}>⏱️ {activity.duration}</Text>
                     <Text style={styles.activityAgeGroup}>👶 {translateText(activity.ageGroup)}</Text>
                     {categoryType === 'songs' && (
                       <Text style={styles.activityCategory}>🎵 {translateText(activity.category)}</Text>
+                    )}
+                    {categoryType === 'stories' && (
+                      <Text style={styles.activityCategory}>📖 {translateText(activity.category)}</Text>
                     )}
                   </View>
                 </View>
@@ -464,7 +505,7 @@ const CategoryDetailScreen = ({ route, navigation }) => {
                   </View>
                   
                   <View style={styles.activityButtons}>
-                    {categoryType !== 'songs' && (
+                    {categoryType !== 'songs' && categoryType !== 'stories' && (
                       <TouchableOpacity 
                         style={styles.gamesButton}
                         onPress={(e) => {
@@ -480,16 +521,25 @@ const CategoryDetailScreen = ({ route, navigation }) => {
                     )}
                     
                     <TouchableOpacity 
-                      style={[styles.startButton, categoryType === 'songs' && { backgroundColor: '#6c5ce7' }]}
+                      style={[styles.startButton, 
+                        categoryType === 'songs' && { backgroundColor: '#6c5ce7' },
+                        categoryType === 'stories' && { backgroundColor: '#e74c3c' }
+                      ]}
                       onPress={(e) => {
                         e.stopPropagation();
                         handleActivityPress(activity);
                       }}
                       accessible={true}
                       accessibilityRole="button"
-                      accessibilityLabel={categoryType === 'songs' ? `Play ${activity.title}` : `Start ${activity.title}`}
+                      accessibilityLabel={
+                        categoryType === 'songs' ? `Play ${activity.title}` : 
+                        categoryType === 'stories' ? `Read ${activity.title}` :
+                        `Start ${activity.title}`
+                      }
                     >
-                      <Text style={styles.startIcon}>{categoryType === 'songs' ? '🎵' : '▶️'}</Text>
+                      <Text style={styles.startIcon}>
+                        {categoryType === 'songs' ? '🎵' : categoryType === 'stories' ? '📖' : '▶️'}
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 </View>

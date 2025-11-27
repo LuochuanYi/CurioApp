@@ -5,6 +5,44 @@ All notable changes to CurioApp will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2025-11-27
+
+### 🎯 Critical Bug Fixes & Bilingual Enhancement
+- **Story Navigation System Restored**: Fixed empty Chinese bedtime story category screen
+  - Resolved story loading and display issues across all categories
+  - Implemented hybrid story routing system for optimal content delivery
+  - Fixed React component structure errors causing blank screens
+- **Complete Bilingual Display System**: Enhanced language-aware content presentation
+  - Story category screens now show localized titles and descriptions
+  - Regular English stories fully translate to Chinese when language is set to Chinese
+  - Chinese bedtime stories maintain educational bilingual content (Chinese + English)
+  - Consistent language experience from category lists to story detail screens
+- **Text-to-Speech Integration**: Fully functional bilingual TTS with proper voice selection
+  - Chinese content uses Chinese voice synthesis
+  - English content uses English voice synthesis
+  - Mixed bilingual content handles language detection automatically
+
+### 🔧 Technical Architecture Improvements
+- **Hybrid Story Management**: Intelligent routing between regular and bilingual story systems
+  - `StoryCategoryScreen.js`: Added `getLocalizedStoryDisplay()` for dynamic content localization
+  - `StoryDetailScreen.js`: Implemented `useHybridStoryDetail()` hook for dual system support
+  - Smart navigation logic based on story type and content requirements
+- **React Component Optimization**: Resolved rendering errors and performance issues
+  - Fixed duplicate React keys in tag rendering
+  - Corrected malformed JSX structure in progress indicators
+  - Removed conflicting hooks and unused imports
+  - Implemented unique key generation for list items
+- **Bilingual Content Integration**: Seamless integration with existing translation systems
+  - Enhanced `useBilingualContent` hook utilization
+  - Proper integration with `getBilingualStoryById` and `getLocalizedStory` functions
+  - Maintained compatibility with existing translation caching
+
+### 🎨 User Experience Enhancements
+- **Language-Consistent Interface**: Complete localization across all story-related screens
+- **Educational Content Preservation**: Chinese bedtime stories maintain bilingual learning format
+- **Error-Free Navigation**: Eliminated React errors and blank screen issues
+- **Responsive Content Display**: Stories adapt to user language preference automatically
+
 ## [1.5.0] - 2025-11-20
 
 ### 🎯 Major Features Added

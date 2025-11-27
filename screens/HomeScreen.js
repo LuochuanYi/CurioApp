@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Image } from 'react-native';
-import { STORY_CATEGORIES, STORY_LIBRARY, getStoriesByCategory } from '../data/stories';
+import { STORY_CATEGORIES_BILINGUAL, getBilingualStories, getBilingualStoryById } from '../data/stories-bilingual';
+import { useBilingualContent } from '../hooks/useBilingualContent';
 import { SONGS_LIBRARY, getSongsByCategory, SONG_CATEGORIES } from '../data/songs';
+import { STORY_LIBRARY, STORY_CATEGORIES } from '../data/stories';
 import { useUserProgress } from '../hooks/useUserProgress';
 import { CurioHeader, CurioCard, CurioButton, CurioMascot, CURIO_THEME, TEXT_STYLES } from '../components';
 import { useTranslation } from 'react-i18next';
@@ -34,15 +36,18 @@ const useAirQualityData = () => {
   return { data, loading };
 };
 
-// Helper function to get featured content
+// Helper function to get featured content - Updated for bilingual system
 const getFeaturedContent = (userProgressHook) => {
   try {
     console.log('getFeaturedContent: Starting...');
     
+    // Get bilingual stories for featured content
+    const bilingualStories = getBilingualStories();
+    
     if (!userProgressHook) {
       console.log('getFeaturedContent: No userProgressHook, using fallback');
       return {
-        stories: STORY_LIBRARY.slice(0, 2).map(story => ({ storyId: story.id, isNew: true })),
+        stories: bilingualStories.slice(0, 2).map(story => ({ storyId: story.id, isNew: true })),
         songs: SONGS_LIBRARY.slice(0, 2).map(song => ({ songId: song.id, isNew: true })),
         inProgress: [],
         hasRecentActivity: false
@@ -56,7 +61,7 @@ const getFeaturedContent = (userProgressHook) => {
     console.log('getFeaturedContent: Recent data:', { recentStories, recentSongs, inProgressStories });
     
     const fallbackStories = recentStories.length === 0 
-      ? STORY_LIBRARY.slice(0, 2).map(story => ({ storyId: story.id, isNew: true }))
+      ? bilingualStories.slice(0, 2).map(story => ({ storyId: story.id, isNew: true }))
       : recentStories;
       
     const fallbackSongs = recentSongs.length === 0
@@ -71,8 +76,10 @@ const getFeaturedContent = (userProgressHook) => {
     };
   } catch (error) {
     console.error('getFeaturedContent error:', error);
+    // Fallback using bilingual stories
+    const bilingualStories = getBilingualStories();
     return {
-      stories: STORY_LIBRARY.slice(0, 2).map(story => ({ storyId: story.id, isNew: true })),
+      stories: bilingualStories.slice(0, 2).map(story => ({ storyId: story.id, isNew: true })),
       songs: SONGS_LIBRARY.slice(0, 2).map(song => ({ songId: song.id, isNew: true })),
       inProgress: [],
       hasRecentActivity: false
@@ -85,6 +92,7 @@ const HomeScreen = ({ navigation }) => {
   
   const { t } = useTranslation();
   const { data: airQualityData, loading: airQualityLoading } = useAirQualityData();
+  const { getLocalizedStory } = useBilingualContent();
   
   console.log('HomeScreen: About to call useUserProgress...');
   const userProgressHook = useUserProgress();
@@ -116,10 +124,11 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleStoryPress = (storyId) => {
-    const story = STORY_LIBRARY.find(s => s.id === storyId);
-    if (story) {
-      navigation?.navigate('StoryDetail', { story });
-      console.log(`Open story: ${story.title}`);
+    const bilingualStory = getBilingualStoryById(storyId);
+    const localizedStory = getLocalizedStory(bilingualStory);
+    if (localizedStory) {
+      navigation?.navigate('StoryDetail', { story: localizedStory });
+      console.log(`Open story: ${localizedStory.title}`);
     }
   };
 
@@ -149,7 +158,8 @@ const HomeScreen = ({ navigation }) => {
         }
         break;
       case 'surprise_me':
-        const allContent = [...STORY_LIBRARY, ...SONGS_LIBRARY];
+        const bilingualStories = getBilingualStories();
+        const allContent = [...bilingualStories, ...SONGS_LIBRARY];
         const randomContent = allContent[Math.floor(Math.random() * allContent.length)];
         if (randomContent.category) {
           if (randomContent.audioFile !== undefined) {
@@ -297,10 +307,11 @@ const HomeScreen = ({ navigation }) => {
         {featuredContent.stories.length > 0 ? (
           <View style={styles.gridContainer}>
             {featuredContent.stories.map((item, index) => {
-              const story = STORY_LIBRARY.find(s => s.id === item.storyId);
+              const bilingualStory = getBilingualStoryById(item.storyId);
+              const story = getLocalizedStory(bilingualStory);
               if (!story) return null;
               
-              const categoryInfo = STORY_CATEGORIES[story.category.toUpperCase()] || {};
+              const categoryInfo = STORY_CATEGORIES_BILINGUAL[story.category?.toUpperCase()] || {};
               const isInProgress = featuredContent.inProgress.some(p => p.storyId === story.id);
               const progressData = isInProgress ? featuredContent.inProgress.find(p => p.storyId === story.id) : null;
               
@@ -318,9 +329,9 @@ const HomeScreen = ({ navigation }) => {
                   })}
                   accessibilityRole="button"
                 >
-                  <View style={[styles.iconContainer, { backgroundColor: categoryInfo.color || CURIO_THEME.colors.skyBlue }]}>
+                  <View style={[styles.iconContainer, { backgroundColor: categoryInfo?.color || CURIO_THEME.colors.skyBlue }]}>
                     <Text style={styles.gridIcon}>
-                      {categoryInfo.icon || '📚'}
+                      {categoryInfo?.icon || '📚'}
                     </Text>
                     {isInProgress && (
                       <View style={styles.progressBadge}>

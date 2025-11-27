@@ -1,9 +1,9 @@
-// Translation API Configuration
-// Configure different translation providers (Google Translate, Azure Translator, etc.)
+// 🎉 BILINGUAL CONTENT SYSTEM - NO TRANSLATION SERVICES NEEDED!
+// Static bilingual content provides instant, accurate translations
 
 export const TRANSLATION_CONFIG = {
-  // Current provider: 'mock' | 'google' | 'azure' | 'aws'
-  provider: 'google',
+  // Translation services disabled - using static bilingual content now!
+  provider: 'disabled', // No longer needed with bilingual content system
   
   // API keys (keep these secure in real apps)
   apiKeys: {
@@ -16,7 +16,8 @@ export const TRANSLATION_CONFIG = {
   endpoints: {
     google: 'https://translation.googleapis.com/language/translate/v2',
     azure: 'https://api.cognitive.microsofttranslator.com/translate',
-    aws: 'https://translate.amazonaws.com'
+    aws: 'https://translate.amazonaws.com',
+    mymemory: 'https://api.mymemory.translated.net/get'
   },
   
   // Cache settings
@@ -73,6 +74,21 @@ export const translateWithAzure = async (text, targetLang, sourceLang = 'en') =>
   return data[0].translations[0].text;
 };
 
+// MyMemory API (free, no key required)
+export const translateWithMyMemory = async (text, targetLang, sourceLang = 'en') => {
+  const langPair = `${sourceLang}|${targetLang}`;
+  const url = `${TRANSLATION_CONFIG.endpoints.mymemory}?q=${encodeURIComponent(text)}&langpair=${langPair}`;
+  
+  const response = await fetch(url);
+  const data = await response.json();
+  
+  if (data.responseStatus === 200) {
+    return data.responseData.translatedText;
+  } else {
+    throw new Error(`Translation failed: ${data.responseDetails}`);
+  }
+};
+
 // Mock translations for development
 export const MOCK_TRANSLATIONS = {
   'en-zh': {
@@ -125,6 +141,7 @@ export const MOCK_TRANSLATIONS = {
     'Adventure': '冒险故事',
     'Educational': '教育故事',
     'Modern Tales': '现代故事',
+    'Chinese Bedtime 中文睡前故事': '中文睡前故事',
     
     // Songs (Real song names from data)
     'Twinkle, Twinkle, Little Star': '小星星',

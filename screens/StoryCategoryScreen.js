@@ -16,8 +16,16 @@ import { useTranslation } from 'react-i18next';
 
 import { CurioHeader } from '../components';
 import { CURIO_THEME } from '../theme';
-import { useDynamicTranslation } from '../hooks/useDynamicTranslation';
-import { STORY_CATEGORIES, getStoriesByCategory } from '../data/stories';
+import { 
+  STORY_CATEGORIES, 
+  getStoriesByCategory,
+  STORY_LIBRARY
+} from '../data/stories';
+import { 
+  getBilingualStoryById, 
+  getLocalizedStory 
+} from '../data/stories-bilingual';
+import { useBilingualContent } from '../hooks/useBilingualContent';
 
 // Helper function to add opacity to hex colors for React Native Web compatibility
 const addOpacityToColor = (color, opacity) => {
@@ -38,18 +46,52 @@ const { width } = Dimensions.get('window');
 const StoryCategoryScreen = ({ route }) => {
   const navigation = useNavigation();
   const { t } = useTranslation();
-  const { translateContent } = useDynamicTranslation();
+  const { currentLanguage, isChineseMode } = useBilingualContent();
   
   const categoryId = route.params?.categoryId;
   const [searchQuery, setSearchQuery] = useState('');
 
   // Get category information
   const category = Object.values(STORY_CATEGORIES || {}).find(cat => cat?.id === categoryId);
+  
+  // Function to get localized story content for display
+  const getLocalizedStoryDisplay = (story) => {
+    // For Chinese bedtime stories, return as-is (they're already bilingual)
+    if (story.category === 'chinese-bedtime') {
+      return story;
+    }
+    
+    // For regular stories, try to get bilingual version
+    const bilingualStory = getBilingualStoryById(story.id);
+    if (bilingualStory) {
+      const localizedStory = getLocalizedStory(bilingualStory, currentLanguage);
+      return {
+        ...story, // Keep original ID and other metadata
+        title: localizedStory.title,
+        summary: localizedStory.summary,
+        duration: localizedStory.duration || story.duration,
+        ageGroup: localizedStory.ageGroup || story.ageGroup
+      };
+    }
+    
+    // Fallback to original story
+    return story;
+  };
+  
+  console.log('🔍 StoryCategoryScreen - categoryId:', categoryId);
+  console.log('🔍 StoryCategoryScreen - found category:', category);
+  console.log('🌐 Current Language for Display:', currentLanguage);
 
-  // Get stories for this category with search filtering
+  // Get stories for this category with search filtering and localization
   const filteredStories = useMemo(() => {
     let stories = getStoriesByCategory(categoryId) || [];
     
+    console.log('🔍 StoryCategoryScreen - found stories:', stories.length, stories.map(s => s.title));
+    
+    // Apply localization to stories for display
+    stories = stories.map(story => getLocalizedStoryDisplay(story));
+    
+    // Apply search filter if needed
     if (searchQuery.trim()) {
       const lowerQuery = searchQuery.toLowerCase();
       stories = stories.filter(story => 
@@ -60,11 +102,20 @@ const StoryCategoryScreen = ({ route }) => {
     }
     
     return stories;
-  }, [categoryId, searchQuery]);
+  }, [categoryId, searchQuery, currentLanguage]);
 
   const handleStoryPress = (story) => {
     console.log(`Opening story: ${story.title}`);
-    navigation.navigate('StoryDetail', { story });
+    
+    // For Chinese bedtime stories, pass the full story object (they're already bilingual)
+    if (story.category === 'chinese-bedtime') {
+      console.log('📚 Chinese bedtime story - using regular story object');
+      navigation.navigate('StoryDetail', { story });
+    } else {
+      // For regular English stories, pass just the ID to use bilingual system
+      console.log('🔄 Regular story - using bilingual system with ID:', story.id);
+      navigation.navigate('StoryDetail', { story: { id: story.id } });
+    }
   };
 
   if (!category) {
@@ -120,7 +171,10 @@ const StoryCategoryScreen = ({ route }) => {
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyIcon}>📚</Text>
             <Text style={styles.emptyText}>
-              {searchQuery ? t("No stories found matching your search") : t("No stories available in this category")}
+              {searchQuery 
+                ? t("No stories found matching your search")
+                : t("No stories available in this category")
+              }
             </Text>
           </View>
         ) : (

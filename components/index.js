@@ -5,6 +5,10 @@ export { CurioMascot } from './CurioMascot';
 export { CurioHeader, CurioLogo } from './CurioHeader';
 export { default as SignLanguageAnimation } from './SignLanguageAnimation';
 
+// Development and Debug Components
+export { default as AudioTestButton } from './AudioTestButton';
+export { default as TranslationPerformanceMonitor } from './TranslationPerformanceMonitor';
+
 // Interactive Learning Game Components
 export {
   VocabularyMatchingGame,

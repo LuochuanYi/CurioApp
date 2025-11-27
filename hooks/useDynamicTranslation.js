@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import translationService from '../services/translationService';
-import { logTranslation, logWarn } from '../utils/logger';
+import { performanceTranslationService } from '../services/performanceTranslationService';
+import { logTranslation, logWarn, logInfo } from '../utils/logger';
 
 // Custom hook for dynamic content translation
 export const useDynamicTranslation = () => {
@@ -22,24 +23,46 @@ export const useDynamicTranslation = () => {
     return langMap[currentLang?.name] || 'en';
   };
 
-  // Translate a single text
-  const translateContent = async (text, sourceLanguage = 'en') => {
+  // Translate a single text using enhanced performance service
+  const translateContent = async (text, sourceLanguage = 'en', options = {}) => {
     const targetLang = getTargetLanguageCode();
     
+    console.log('🎯 TRANSLATION DEBUG in useDynamicTranslation:');
+    console.log('  Text to translate:', `"${text}"`);
+    console.log('  Target language code:', targetLang);
+    console.log('  Source language:', sourceLanguage);
+    console.log('  getCurrentLanguageInfo():', getCurrentLanguageInfo());
+    
     if (targetLang === 'en' || !text) {
+      console.log('  ⏭️ Skipping translation (target is English or no text)');
       return text;
     }
 
     setIsTranslating(true);
     try {
-      const translated = await translationService.translateText(text, targetLang, sourceLanguage);
+      // Use enhanced performance service with backward compatibility
+      const translated = await performanceTranslationService.translateContent(text, targetLang, {
+        priority: options.priority || 'medium',
+        fallbackToOriginal: true,
+        ...options
+      });
       return translated;
+    } catch (error) {
+      logWarn('Enhanced translation failed, falling back to original service:', error);
+      // Fallback to original service for compatibility
+      try {
+        const translated = await translationService.translateText(text, targetLang, sourceLanguage);
+        return translated;
+      } catch (fallbackError) {
+        logWarn('Fallback translation also failed:', fallbackError);
+        return text;
+      }
     } finally {
       setIsTranslating(false);
     }
   };
 
-  // Translate story with all its properties
+  // Translate story with all its properties using enhanced service
   const translateStory = async (story) => {
     const targetLang = getTargetLanguageCode();
     
@@ -49,8 +72,23 @@ export const useDynamicTranslation = () => {
 
     setIsTranslating(true);
     try {
-      const translated = await translationService.translateStory(story, targetLang);
+      // Use enhanced performance service for object translation
+      const translated = await performanceTranslationService.translateContent(story, targetLang, {
+        priority: 'medium',
+        showProgress: false,
+        fallbackToOriginal: true
+      });
       return translated;
+    } catch (error) {
+      logWarn('Enhanced story translation failed, falling back:', error);
+      // Fallback to original service
+      try {
+        const translated = await translationService.translateStory(story, targetLang);
+        return translated;
+      } catch (fallbackError) {
+        logWarn('Fallback story translation also failed:', fallbackError);
+        return story;
+      }
     } finally {
       setIsTranslating(false);
     }

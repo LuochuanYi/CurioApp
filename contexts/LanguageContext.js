@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { changeLanguage, getCurrentLanguage, getCurrentDisplayLanguage, LANGUAGE_MAPPING, DISPLAY_LANGUAGE_MAPPING } from '../i18n';
+import { performanceTranslationService } from '../services/performanceTranslationService';
 import { logInfo, logError } from '../utils/logger';
 
 const LanguageContext = createContext();
@@ -21,24 +22,40 @@ export const LanguageProvider = ({ children }) => {
   const [currentLanguage, setCurrentLanguage] = useState(getCurrentDisplayLanguage());
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load saved language preference on app start
+  // Load saved language preference on app start and initialize performance service
   useEffect(() => {
     const loadSavedLanguage = async () => {
       try {
         const savedLanguage = await AsyncStorage.getItem(LANGUAGE_STORAGE_KEY);
+        let finalLanguage = 'English';
+        
         if (savedLanguage && LANGUAGE_MAPPING[savedLanguage]) {
           await changeLanguage(LANGUAGE_MAPPING[savedLanguage]);
           setCurrentLanguage(savedLanguage);
-          console.log('Loaded saved language:', savedLanguage);
+          finalLanguage = savedLanguage;
+          logInfo('Loaded saved language:', savedLanguage);
         } else {
           // Use current i18n language as fallback
           const currentLang = getCurrentDisplayLanguage();
           setCurrentLanguage(currentLang);
-          console.log('Using default language:', currentLang);
+          finalLanguage = currentLang;
+          logInfo('Using default language:', currentLang);
         }
+
+        // Initialize performance translation service with user's language
+        const languageCode = LANGUAGE_MAPPING[finalLanguage] || 'en';
+        await performanceTranslationService.initialize(languageCode);
+        logInfo('Performance translation service initialized for:', languageCode);
+        
       } catch (error) {
-        console.error('Error loading saved language:', error);
+        logError('Error loading saved language:', error);
         setCurrentLanguage('English'); // Fallback
+        // Still try to initialize translation service
+        try {
+          await performanceTranslationService.initialize('en');
+        } catch (initError) {
+          logError('Failed to initialize translation service:', initError);
+        }
       } finally {
         setIsLoading(false);
       }

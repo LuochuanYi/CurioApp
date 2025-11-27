@@ -1,6 +1,6 @@
 // Dynamic Translation Service
 // Provides real-time translation for content while caching results for performance
-import { TRANSLATION_CONFIG, MOCK_TRANSLATIONS } from '../config/translationConfig';
+import { TRANSLATION_CONFIG, MOCK_TRANSLATIONS, translateWithMyMemory } from '../config/translationConfig';
 import alternativeTranslationService from './alternativeTranslationService';
 import { logTranslation, logError, logWarn } from '../utils/logger';
 
@@ -26,8 +26,41 @@ class TranslationService {
   // Translation API with configurable providers
   async translateWithAPI(text, fromLang = 'en', toLang = 'zh') {
     logTranslation(`Translating: "${text.substring(0, 50)}..." from ${fromLang} to ${toLang}`);
+    logTranslation(`Using provider: ${TRANSLATION_CONFIG.provider}`);
     
-    // Use enhanced alternative translation service as primary method (CORS-free)
+    // Check provider configuration
+    if (TRANSLATION_CONFIG.provider === 'mock') {
+      logTranslation('Using mock provider directly');
+      return this.getMockTranslation(text, fromLang, toLang);
+    }
+    
+    // Try MyMemory API (free, no key required)
+    if (TRANSLATION_CONFIG.provider === 'mymemory') {
+      try {
+        logTranslation('Using MyMemory API for translation');
+        const result = await translateWithMyMemory(text, toLang, fromLang);
+        logTranslation(`MyMemory translation successful: "${result.substring(0, 50)}..."`);
+        return result;
+      } catch (error) {
+        logWarn('MyMemory API failed:', error.message);
+        // Fall through to alternative service
+      }
+    }
+    
+    // Use alternative service (CORS-free)
+    if (TRANSLATION_CONFIG.provider === 'alternative') {
+      try {
+        logTranslation('Using alternative translation service');
+        const result = await alternativeTranslationService.translateWithBackup(text, toLang);
+        logTranslation(`Alternative translation successful: "${result.substring(0, 50)}..."`);
+        return result;
+      } catch (error) {
+        logWarn('Alternative service failed:', error.message);
+        // Fall through to mock
+      }
+    }
+    
+    // For other providers, use enhanced alternative translation service as primary method (CORS-free)
     try {
       logTranslation(`Calling alternative translation service...`);
       const alternativeResult = await alternativeTranslationService.translateWithBackup(text, toLang);
@@ -53,22 +86,40 @@ class TranslationService {
     const key = `${fromLang}-${toLang}`;
     const translations = MOCK_TRANSLATIONS[key] || {};
     
+    console.log('🔍 MOCK TRANSLATION DEBUG (StoryDetail):');
+    console.log('Text to translate:', `"${text}"`);
+    console.log('From language:', fromLang);
+    console.log('To language:', toLang);
+    console.log('Translation key:', key);
+    console.log('Available translations count:', Object.keys(translations).length);
+    console.log('First few available keys:', Object.keys(translations).slice(0, 5));
+    
     // Try exact match first
     if (translations[text]) {
+      console.log('✅ Found exact match:', translations[text]);
       logTranslation(`Using mock translation for: "${text.substring(0, 30)}..."`);
       return translations[text];
     }
     
-    // For longer text, try to find partial matches
-    if (text.length > 50) {
-      for (const [mockText, translation] of Object.entries(translations)) {
-        if (text.includes(mockText) && mockText.length > 10) {
-          logTranslation(`Using partial mock translation for: "${mockText}"`);
-          return translation;
-        }
+    // Try partial matches for any text length
+    for (const [mockText, translation] of Object.entries(translations)) {
+      if (text.includes(mockText) && mockText.length > 3) {
+        console.log('✅ Found partial match:', mockText, '→', translation);
+        logTranslation(`Using partial mock translation for: "${mockText}"`);
+        return translation;
       }
     }
     
+    // Try case-insensitive exact matches
+    const lowerText = text.toLowerCase();
+    for (const [mockText, translation] of Object.entries(translations)) {
+      if (lowerText === mockText.toLowerCase()) {
+        console.log('✅ Found case-insensitive match:', mockText, '→', translation);
+        return translation;
+      }
+    }
+    
+    console.log('❌ No translation found, returning original text');
     logTranslation(`No mock translation found for: "${text.substring(0, 30)}...", using original`);
     return text; // Return original if no translation found
   }

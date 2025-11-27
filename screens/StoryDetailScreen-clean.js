@@ -3,138 +3,96 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from
 import { useTranslation } from 'react-i18next';
 import { useTextToSpeech } from '../hooks/useTextToSpeech';
 import { getBilingualStoryById, getLocalizedStory, getLocalizedCategory } from '../data/stories-bilingual';
-import { STORY_CATEGORIES } from '../data/stories';
 import { useBilingualContent } from '../hooks/useBilingualContent';
+import { logInfo } from '../utils/logger';
 
 const { width: screenWidth } = Dimensions.get('window');
 
-// Hybrid approach: Handle both regular stories (from StoryCategoryScreen) and bilingual stories
-const useHybridStoryDetail = (storyParam) => {
+// Simple hook for bilingual story data
+const useBilingualStoryDetail = (storyId) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const { currentLanguage } = useBilingualContent();
 
   useEffect(() => {
     const fetchStoryDetail = async () => {
-      console.log('🔍 useHybridStoryDetail - Story param:', storyParam);
+      logInfo('🔍 useBilingualStoryDetail - Looking for story ID:', storyId);
       setLoading(true);
       
-      // Check if we received a full story object (from StoryCategoryScreen) or just an ID
-      if (storyParam && typeof storyParam === 'object' && storyParam.title) {
-        // We received a complete story object from StoryCategoryScreen - use it directly
-        console.log('✅ Using regular story object:', storyParam.title);
-        setData(storyParam);
-        setLoading(false);
-        return;
-      }
+      // Simulate network delay (remove in production)
+      await new Promise(resolve => setTimeout(resolve, 100));
       
-      // We received just an ID - try to find it in bilingual system
-      const storyId = storyParam?.id || storyParam;
-      if (storyId) {
-        console.log('🔍 Looking for bilingual story with ID:', storyId);
+      // Get bilingual story data
+      const bilingualStory = getBilingualStoryById(storyId);
+      
+      if (bilingualStory) {
+        // Get localized version based on current language
+        const localizedStory = getLocalizedStory(bilingualStory, currentLanguage);
+        const localizedCategory = getLocalizedCategory(bilingualStory.category, currentLanguage);
         
-        // Try bilingual system first
-        const bilingualStory = getBilingualStoryById(storyId);
+        setData({
+          ...localizedStory,
+          categoryName: localizedCategory?.name || bilingualStory.category,
+          categoryIcon: localizedCategory?.icon || '📚',
+          // Add navigation helpers (simplified)
+          nextStory: bilingualStory.nextStory ? { id: bilingualStory.nextStory } : null,
+          previousStory: bilingualStory.previousStory ? { id: bilingualStory.previousStory } : null
+        });
         
-        if (bilingualStory) {
-          // Get localized version based on current language
-          const localizedStory = getLocalizedStory(bilingualStory, currentLanguage);
-          const localizedCategory = getLocalizedCategory(bilingualStory.category, currentLanguage);
-          
-          setData({
-            ...localizedStory,
-            categoryName: localizedCategory?.name || bilingualStory.category,
-            categoryIcon: localizedCategory?.icon || '📚',
-            nextStory: bilingualStory.nextStory ? { id: bilingualStory.nextStory } : null,
-            previousStory: bilingualStory.previousStory ? { id: bilingualStory.previousStory } : null
-          });
-          
-          console.log('✅ Bilingual story loaded:', localizedStory.title);
-        } else {
-          console.log('❌ Story not found in any system');
-          setData({
-            id: storyId,
-            title: currentLanguage === 'zh' ? "找不到故事" : "Story Not Found",
-            category: "unknown",
-            categoryName: currentLanguage === 'zh' ? "未知" : "Unknown",
-            categoryIcon: "❓",
-            rating: 0,
-            duration: currentLanguage === 'zh' ? "0分钟" : "0 min",
-            content: currentLanguage === 'zh' ? "抱歉，找不到这个故事。" : "Sorry, this story could not be found.",
-            moral: "",
-            nextStory: null,
-            previousStory: null
-          });
-        }
+        logInfo('✅ Bilingual story loaded:', localizedStory.title);
+      } else {
+        logInfo('❌ Story not found');
+        setData({
+          id: storyId,
+          title: currentLanguage === 'zh' ? "找不到故事" : "Story Not Found",
+          category: "unknown",
+          categoryName: currentLanguage === 'zh' ? "未知" : "Unknown",
+          categoryIcon: "❓",
+          rating: 0,
+          duration: currentLanguage === 'zh' ? "0分钟" : "0 min",
+          language: currentLanguage === 'zh' ? "Chinese" : "English",
+          content: currentLanguage === 'zh' ? "抱歉，找不到这个故事。" : "Sorry, this story could not be found.",
+          moral: "",
+          nextStory: null,
+          previousStory: null
+        });
       }
       setLoading(false);
     };
 
-    if (storyParam) {
+    if (storyId) {
       fetchStoryDetail();
     }
-  }, [storyParam, currentLanguage]);
+  }, [storyId, currentLanguage]); // Re-fetch when language changes
 
   return { data, loading };
 };
 
 const StoryDetailScreen = ({ navigation, route }) => {
   const { story } = route.params || {};
-  console.log('🎯 Route params:', route.params);
-  console.log('📖 Story from params:', story);
-  console.log('🔢 Story ID:', story?.id);
+  logInfo('🎯 Route params:', route.params);
+  logInfo('📖 Story from params:', story);
+  logInfo('🔢 Story ID:', story?.id);
   
-  const { data, loading } = useHybridStoryDetail(story);
+  const { data, loading } = useBilingualStoryDetail(story?.id);
   const { t } = useTranslation();
   const { currentLanguage, isChineseMode } = useBilingualContent();
   
-  // Debug logging
-  console.log('🔄 StoryDetailScreen render - Loading:', loading);
-  console.log('📚 Story data available:', !!data);
-  console.log('🌐 Current Language:', currentLanguage);
-  
-  // Text-to-speech with bilingual support
-  const {
-    playPause,
-    stopStory,
-    isPlaying,
-    isLoading,
-    progress,
-    formatProgress
-  } = useTextToSpeech(data?.content);
+  // Text-to-speech
+  const { speak, speaking: isPlaying, stop: stopStory } = useTextToSpeech();
 
-  // Force re-render when TTS state changes
-  const [renderKey, setRenderKey] = useState(0);
-  useEffect(() => {
-    setRenderKey(prev => prev + 1); // Force re-render
-  }, [isLoading, isPlaying]);
-
-  // Smart content display function - works with both regular and bilingual stories
+  // Simple content display function - no translation needed!
   const getDisplayContent = (field) => {
     if (!data) return '';
-    
-    // For regular Chinese stories, use Chinese-specific fields when available and in Chinese mode
-    if (isChineseMode && field === 'title' && data.chineseTitle) {
-      return data.chineseTitle;
-    }
-    
     return data[field] || '';
-  };
-  
-  // Get the best title - works with both story systems
-  const getTitle = () => {
-    if (!data) return '';
-    
-    // For regular Chinese stories in Chinese mode, show Chinese title prominently
-    if (isChineseMode && data.chineseTitle) {
-      return `${data.chineseTitle}\n(${data.title})`;
-    }
-    
-    return data.title;
   };
 
   const handleSpeak = () => {
-    playPause();
+    if (isPlaying) {
+      stopStory();
+    } else if (data?.content) {
+      speak(data.content);
+    }
   };
 
   const handleNavigation = (targetStory) => {
@@ -153,24 +111,20 @@ const StoryDetailScreen = ({ navigation, route }) => {
   }, []);
 
   if (loading) {
-    console.log('🔄 Showing loading screen');
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>{t('common.loading')}</Text>
+        <Text style={styles.loadingText}>{t('loading')}</Text>
       </View>
     );
   }
 
   if (!data) {
-    console.log('❌ No data - showing error screen');
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Story Not Found</Text>
+        <Text style={styles.errorText}>{t('storyNotFound')}</Text>
       </View>
     );
   }
-
-  console.log('✅ Rendering story content');
 
   return (
     <View style={styles.container}>
@@ -190,28 +144,14 @@ const StoryDetailScreen = ({ navigation, route }) => {
           </Text>
         </View>
         
-        <TouchableOpacity
-          key={`speaker-${renderKey}`}
-          style={styles.speakButton}
+        <TouchableOpacity 
+          style={styles.speakButton} 
           onPress={handleSpeak}
-          disabled={isLoading}
         >
           <Text style={styles.speakButtonText}>
-            {isLoading ? '⏳' : isPlaying ? '⏹️' : '🔊'}
+            {isPlaying ? '⏹️' : '🔊'}
           </Text>
         </TouchableOpacity>
-        
-        {/* Progress indicator when playing */}
-        {(isPlaying || progress > 0) && (
-          <View style={styles.progressContainer}>
-            <Text style={styles.progressText}>
-              {formatProgress ? formatProgress() : `${Math.round(progress)}%`}
-            </Text>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${progress}%` }]} />
-            </View>
-          </View>
-        )}
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
@@ -224,7 +164,7 @@ const StoryDetailScreen = ({ navigation, route }) => {
         </View>
 
         {/* Story Title */}
-        <Text style={styles.title}>{getTitle()}</Text>
+        <Text style={styles.title}>{getDisplayContent('title')}</Text>
 
         {/* Story Info */}
         <View style={styles.infoContainer}>
@@ -245,29 +185,11 @@ const StoryDetailScreen = ({ navigation, route }) => {
             <Text style={styles.sectionTitle}>{t('tags')}</Text>
             <View style={styles.tagsContainer}>
               {data.tags.map((tag, index) => (
-                <View key={`tag-${tag}-${index}`} style={styles.tag}>
+                <View key={index} style={styles.tag}>
                   <Text style={styles.tagText}>{tag}</Text>
                 </View>
               ))}
             </View>
-          </View>
-        )}
-
-        {/* Cultural Context - for Chinese stories */}
-        {data.culturalContext && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>
-              {isChineseMode ? '文化背景' : 'Cultural Context'}
-            </Text>
-            <Text style={styles.culturalContext}>{data.culturalContext}</Text>
-          </View>
-        )}
-
-        {/* Pinyin Guide - for Chinese stories */}
-        {data.pinyin && isChineseMode && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>拼音 (Pinyin)</Text>
-            <Text style={styles.pinyin}>{data.pinyin}</Text>
           </View>
         )}
 
@@ -277,7 +199,6 @@ const StoryDetailScreen = ({ navigation, route }) => {
           <Text style={styles.content}>{getDisplayContent('content')}</Text>
         </View>
 
-        {/* Debug TTS - TEMPORARY */}
         {/* Moral */}
         {data.moral && (
           <View style={styles.section}>
@@ -469,27 +390,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#2e7d32',
   },
-  culturalContext: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: '#4a4a4a',
-    fontStyle: 'italic',
-    backgroundColor: '#f0f8ff',
-    padding: 12,
-    borderRadius: 8,
-    borderLeftWidth: 3,
-    borderLeftColor: '#2196f3',
-  },
-  pinyin: {
-    fontSize: 18,
-    lineHeight: 26,
-    color: '#d32f2f',
-    fontWeight: '500',
-    textAlign: 'center',
-    backgroundColor: '#fef7f0',
-    padding: 12,
-    borderRadius: 8,
-  },
   navigationContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -510,28 +410,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     textAlign: 'center',
     fontWeight: '600',
-  },
-  // Text-to-Speech Progress Styles
-  progressContainer: {
-    marginTop: 8,
-    paddingHorizontal: 4,
-  },
-  progressText: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 4,
-    textAlign: 'center',
-  },
-  progressBar: {
-    height: 4,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#4caf50',
-    borderRadius: 2,
   },
 });
 

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from
 import { useTranslation } from 'react-i18next';
 import { useTextToSpeech } from '../hooks/useTextToSpeech';
 import { getBilingualStoryById, getLocalizedStory, getLocalizedCategory } from '../data/stories-bilingual';
-import { STORY_CATEGORIES } from '../data/stories';
+import { STORY_CATEGORIES, getStoryById } from '../data/stories';
 import { useBilingualContent } from '../hooks/useBilingualContent';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -34,7 +34,7 @@ const useHybridStoryDetail = (storyParam) => {
         console.log('🔍 Looking for bilingual story with ID:', storyId);
         
         // Try bilingual system first
-        const bilingualStory = getBilingualStoryById(storyId);
+        let bilingualStory = getBilingualStoryById(storyId);
         
         if (bilingualStory) {
           // Get localized version based on current language
@@ -51,20 +51,40 @@ const useHybridStoryDetail = (storyParam) => {
           
           console.log('✅ Bilingual story loaded:', localizedStory.title);
         } else {
-          console.log('❌ Story not found in any system');
-          setData({
-            id: storyId,
-            title: currentLanguage === 'zh' ? "找不到故事" : "Story Not Found",
-            category: "unknown",
-            categoryName: currentLanguage === 'zh' ? "未知" : "Unknown",
-            categoryIcon: "❓",
-            rating: 0,
-            duration: currentLanguage === 'zh' ? "0分钟" : "0 min",
-            content: currentLanguage === 'zh' ? "抱歉，找不到这个故事。" : "Sorry, this story could not be found.",
-            moral: "",
-            nextStory: null,
-            previousStory: null
-          });
+          // Fallback to regular story library
+          console.log('⚠️ Bilingual story not found, trying regular story library...');
+          const regularStory = getStoryById(storyId);
+          
+          if (regularStory) {
+            // Use regular story as-is (already in English)
+            const categoryData = Object.values(STORY_CATEGORIES).find(c => c.id === regularStory.category);
+            
+            setData({
+              ...regularStory,
+              categoryName: categoryData?.name || regularStory.category,
+              categoryIcon: categoryData?.icon || '📚',
+              nextStory: regularStory.nextStory ? { id: regularStory.nextStory } : null,
+              previousStory: regularStory.previousStory ? { id: regularStory.previousStory } : null
+            });
+            
+            console.log('✅ Regular story loaded:', regularStory.title);
+          } else {
+            // Story not found in either system
+            console.log('❌ Story not found in any system');
+            setData({
+              id: storyId,
+              title: currentLanguage === 'zh' ? "找不到故事" : "Story Not Found",
+              category: "unknown",
+              categoryName: currentLanguage === 'zh' ? "未知" : "Unknown",
+              categoryIcon: "❓",
+              rating: 0,
+              duration: currentLanguage === 'zh' ? "0分钟" : "0 min",
+              content: currentLanguage === 'zh' ? "抱歉，找不到这个故事。" : "Sorry, this story could not be found.",
+              moral: "",
+              nextStory: null,
+              previousStory: null
+            });
+          }
         }
       }
       setLoading(false);

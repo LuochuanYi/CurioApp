@@ -623,7 +623,7 @@ And she never went into someone else's house uninvited again.`,
   },
 
   {
-    id: 9,
+    id: 12,
     title: "Little Red Riding Hood",
     category: STORY_CATEGORIES.CLASSIC.id,
     rating: 4.6,
@@ -695,7 +695,7 @@ And grandmother felt much better after eating the delicious food Little Red Ridi
   },
 
   {
-    id: 10,
+    id: 13,
     title: "The Tortoise and the Hare",
     category: STORY_CATEGORIES.CLASSIC.id,
     rating: 4.8,
@@ -749,7 +749,7 @@ From that day on, the hare and tortoise became the best of friends. The hare lea
   },
 
   {
-    id: 11,
+    id: 14,
     title: "The Ugly Duckling", 
     category: STORY_CATEGORIES.BEDTIME.id,
     rating: 4.9,

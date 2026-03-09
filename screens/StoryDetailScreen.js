@@ -122,47 +122,63 @@ const StoryDetailScreen = ({ navigation, route }) => {
   
   // Translate regular English stories to Chinese when needed
   useEffect(() => {
+    // Skip if data is not loaded or still loading
+    if (!data || loading) {
+      setTranslatedData(null);
+      return;
+    }
+    
+    // Check if this is a regular English story (not a Chinese bedtime story with mixed content)
+    const hasMixedContent = data.content && isMixedBilingualContent(data.content);
+    const hasChineseTitle = !!data.chineseTitle;
+    const isChinesesBedtimeStory = hasMixedContent || hasChineseTitle;
+    
+    // Only translate non-Chinese bedtime stories when in Chinese mode
+    if (!isChineseMode || isChinesesBedtimeStory) {
+      // Not in Chinese mode or is a Chinese bedtime story - no translation needed
+      setTranslatedData(null);
+      return;
+    }
+    
+    // Start translation for English stories in Chinese mode
     const translateStory = async () => {
-      if (!data || loading) return;
-      
-      // Check if this is a regular English story (not a Chinese bedtime story with mixed content)
-      const hasMixedContent = data.content && isMixedBilingualContent(data.content);
-      const hasChineseTitle = !!data.chineseTitle;
-      const isChinesesBedtimeStory = hasMixedContent || hasChineseTitle;
-      
-      // Only translate non-Chinese bedtime stories when in Chinese mode
-      if (isChineseMode && !isChinesesBedtimeStory) {
-        console.log('📖 Translating regular English story to Chinese:', data.title);
-        setIsTranslating(true);
-        try {
-          // Translate the main content fields
-          const translatedTitle = await translateContent(data.title, 'en');
-          const translatedSummary = await translateContent(data.summary, 'en');
-          const translatedContent = await translateContent(data.content, 'en');
-          const translatedMoral = data.moral ? await translateContent(data.moral, 'en') : '';
-          
-          setTranslatedData({
-            ...data,
-            title: translatedTitle,
-            summary: translatedSummary,
-            content: translatedContent,
-            moral: translatedMoral
-          });
-          console.log('✅ Story translated successfully');
-        } catch (error) {
-          console.warn('⚠️ Translation failed, using original English:', error);
-          setTranslatedData(null); // Fall back to original
-        } finally {
-          setIsTranslating(false);
-        }
-      } else {
-        // Not in Chinese mode or is a Chinese bedtime story - no translation needed
-        setTranslatedData(null);
+      console.log('📖 Translating regular English story to Chinese:', data.title);
+      setIsTranslating(true);
+      try {
+        // Translate the main content fields with a timeout
+        const translationPromise = Promise.all([
+          translateContent(data.title, 'en'),
+          translateContent(data.summary, 'en'),
+          translateContent(data.content, 'en'),
+          data.moral ? translateContent(data.moral, 'en') : Promise.resolve('')
+        ]);
+        
+        // Add timeout to prevent hanging
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Translation timeout')), 30000)
+        );
+        
+        const [translatedTitle, translatedSummary, translatedContent, translatedMoral] = 
+          await Promise.race([translationPromise, timeoutPromise]);
+        
+        setTranslatedData({
+          ...data,
+          title: translatedTitle,
+          summary: translatedSummary,
+          content: translatedContent,
+          moral: translatedMoral || ''
+        });
+        console.log('✅ Story translated successfully');
+      } catch (error) {
+        console.warn('⚠️ Translation failed, using original English:', error.message);
+        setTranslatedData(null); // Fall back to original
+      } finally {
+        setIsTranslating(false);
       }
     };
     
     translateStory();
-  }, [data, loading, isChineseMode, currentLanguage, translateContent]);
+  }, [data, loading, isChineseMode, currentLanguage]);
   
   // Text-to-speech with bilingual support
   const {

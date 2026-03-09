@@ -499,8 +499,9 @@ const EngageScreen = ({ navigation }) => {
       }}>
         {[
           { key: 'Home', icon: '🏠', label: t('common.home'), active: false, color: CURIO_THEME.colors.skyBlue },
-          { key: 'Monitor', icon: '📊', label: t('common.monitor'), active: false, color: CURIO_THEME.colors.deepNavy },
+          { key: 'ParentalGuidance', icon: '👨‍👩‍👧', label: 'Parental Guidance', active: false, color: CURIO_THEME.colors.pink },
           { key: 'Engage', icon: '💡', label: t('common.engage'), active: true, color: CURIO_THEME.colors.goldenYellow },
+          { key: 'Monitor', icon: '📊', label: t('common.monitor'), active: false, color: CURIO_THEME.colors.deepNavy },
           { key: 'Personalize', icon: '👤', label: t('common.personalize'), active: false, color: CURIO_THEME.colors.deepNavy }
         ].map((navItem) => (
           <TouchableOpacity

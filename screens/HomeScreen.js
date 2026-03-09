@@ -592,6 +592,7 @@ const HomeScreen = ({ navigation }) => {
                 color: navItem.active ? navItem.color : '#757575',
                 fontWeight: navItem.active ? '800' : '600',
                 fontSize: 9,
+                textAlign: 'center',
               }
             ]}>
               {navItem.label}

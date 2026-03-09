@@ -484,8 +484,9 @@ const PersonalizeScreen = ({ navigation }) => {
       <View style={styles.bottomNav}>
         {[
           { key: 'Home', icon: '🏠', label: t('common.home'), active: false },
-          { key: 'Monitor', icon: '📊', label: t('common.monitor'), active: false },
+          { key: 'ParentalGuidance', icon: '👨‍👩‍👧', label: 'Parental Guidance', active: false },
           { key: 'Engage', icon: '💡', label: t('common.engage'), active: false },
+          { key: 'Monitor', icon: '📊', label: t('common.monitor'), active: false },
           { key: 'Personalize', icon: '👤', label: t('common.personalize'), active: true }
         ].map((navItem) => (
           <TouchableOpacity

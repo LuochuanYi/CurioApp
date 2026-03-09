@@ -102,6 +102,8 @@ const ParentalGuidanceScreen = ({ navigation }) => {
     );
   };
 
+  const [expandedConcern, setExpandedConcern] = React.useState(null);
+
   const renderCommonConcerns = () => (
     <View style={styles.concernsContainer}>
       <Text style={[TEXT_STYLES.heading2, styles.sectionTitle]}>
@@ -111,34 +113,53 @@ const ParentalGuidanceScreen = ({ navigation }) => {
         Universal parenting challenges & solutions for all ages 0-12 months
       </Text>
       <View style={styles.verticalConcernsContainer}>
-        {Object.values(COMMON_CONCERNS).map((concern, idx) => (
-          <View
-            key={idx}
-            style={styles.concernCard}
-          >
-            <View style={styles.concernHeader}>
-              <Text style={styles.concernIcon}>{concern.icon}</Text>
-              <View style={styles.concernHeaderText}>
-                <Text style={[TEXT_STYLES.heading3, styles.concernTitle]}>{concern.title}</Text>
+        {Object.values(COMMON_CONCERNS).map((concern, idx) => {
+          const isExpanded = expandedConcern === idx;
+          const visibleSolutions = isExpanded ? concern.solutions : concern.solutions.slice(0, 3);
+          return (
+            <View
+              key={idx}
+              style={styles.concernCard}
+            >
+              <View style={styles.concernHeader}>
+                <Text style={styles.concernIcon}>{concern.icon}</Text>
+                <View style={styles.concernHeaderText}>
+                  <Text style={[TEXT_STYLES.heading3, styles.concernTitle]}>{concern.title}</Text>
+                </View>
+              </View>
+              <View style={styles.concernSolutions}>
+                {visibleSolutions.map((solution, sIdx) => (
+                  <View key={sIdx} style={styles.solutionItem}>
+                    <Text style={styles.solutionBullet}>•</Text>
+                    <Text style={[TEXT_STYLES.body, styles.concernSolution]}>
+                      {solution}
+                    </Text>
+                  </View>
+                ))}
+                {!isExpanded && concern.solutions.length > 3 && (
+                  <TouchableOpacity
+                    style={styles.moreInfoButton}
+                    onPress={() => setExpandedConcern(idx)}
+                  >
+                    <Text style={[TEXT_STYLES.small, styles.moreInfoText]}>
+                      +{concern.solutions.length - 3} more solutions
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                {isExpanded && concern.solutions.length > 3 && (
+                  <TouchableOpacity
+                    style={styles.moreInfoButton}
+                    onPress={() => setExpandedConcern(null)}
+                  >
+                    <Text style={[TEXT_STYLES.small, styles.moreInfoText]}>
+                      Show less
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
-            <View style={styles.concernSolutions}>
-              {concern.solutions.slice(0, 3).map((solution, sIdx) => (
-                <View key={sIdx} style={styles.solutionItem}>
-                  <Text style={styles.solutionBullet}>•</Text>
-                  <Text style={[TEXT_STYLES.body, styles.concernSolution]}>
-                    {solution}
-                  </Text>
-                </View>
-              ))}
-              {concern.solutions.length > 3 && (
-                <Text style={[TEXT_STYLES.small, styles.moreInfo]}>
-                  +{concern.solutions.length - 3} more solutions
-                </Text>
-              )}
-            </View>
-          </View>
-        ))}
+          );
+        })}
       </View>
     </View>
   );
@@ -192,7 +213,18 @@ const ParentalGuidanceScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <CurioHeader title={t('parentalGuidance.title', 'Parental Guidance')} />
+      <View style={styles.headerContainer}>
+        <TouchableOpacity 
+          style={styles.headerBackButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.headerBackIcon}>← Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>
+          {t('parentalGuidance.title', 'Parental Guidance')}
+        </Text>
+        <View style={styles.headerPlaceholder} />
+      </View>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -209,6 +241,41 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: CURIO_THEME.colors.background,
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: CURIO_THEME.colors.primary,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+  },
+  headerBackButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    minWidth: 60,
+  },
+  headerBackIcon: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  headerTitle: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '700',
+    flex: 1,
+    textAlign: 'center',
+  },
+  headerPlaceholder: {
+    width: 60,
   },
   scrollView: {
     flex: 1,
@@ -493,6 +560,18 @@ const styles = StyleSheet.create({
     flex: 1,
     color: CURIO_THEME.colors.text,
     lineHeight: 20,
+  },
+  moreInfoButton: {
+    marginTop: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: 'rgba(33, 150, 243, 0.1)',
+    alignSelf: 'flex-start',
+  },
+  moreInfoText: {
+    color: CURIO_THEME.colors.primary,
+    fontWeight: '600',
   },
   moreInfo: {
     color: CURIO_THEME.colors.primary,

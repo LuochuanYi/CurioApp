@@ -547,8 +547,9 @@ const HomeScreen = ({ navigation }) => {
       }}>
         {[
           { key: 'Home', icon: '🏠', label: t('common.home'), active: true, color: '#FF6B6B', bgColor: '#FFEBEE' },
-          { key: 'Monitor', icon: '📊', label: t('common.monitor'), active: false, color: '#FFEAA7', bgColor: '#FFFDE7' },
+          { key: 'ParentalGuidance', icon: '👨‍👩‍👧', label: 'Parental Guidance', active: false, color: '#FF69B4', bgColor: '#FCE4EC' },
           { key: 'Engage', icon: '💡', label: t('common.engage'), active: false, color: '#DDA0DD', bgColor: '#F3E5F5' },
+          { key: 'Monitor', icon: '📊', label: t('common.monitor'), active: false, color: '#FFEAA7', bgColor: '#FFFDE7' },
           { key: 'Personalize', icon: '👤', label: t('common.personalize'), active: false, color: '#9C27B0', bgColor: '#F8BBD9' }
         ].map((navItem) => (
           <TouchableOpacity

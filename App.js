@@ -15,6 +15,7 @@ import StoryCategoryScreen from './screens/StoryCategoryScreen';
 import SongCategoryScreen from './screens/SongCategoryScreen';
 import LearningCategoryScreen from './screens/LearningCategoryScreen';
 import ActivityDetailScreen from './screens/ActivityDetailScreen';
+import ParentalGuidanceScreen from './screens/ParentalGuidanceScreen';
 
 
 const Stack = createNativeStackNavigator();
@@ -92,6 +93,13 @@ export default function App() {
             component={ActivityDetailScreen}
             options={{
               title: 'Activity',
+            }}
+          />
+          <Stack.Screen 
+            name="ParentalGuidance" 
+            component={ParentalGuidanceScreen}
+            options={{
+              title: 'Parental Guidance',
             }}
           />
 

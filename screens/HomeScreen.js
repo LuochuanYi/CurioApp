@@ -281,6 +281,24 @@ const HomeScreen = ({ navigation }) => {
               </Text>
             </View>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionItem}
+            onPress={() => navigation?.navigate('ParentalGuidance')}
+            accessible={true}
+            accessibilityLabel={t('accessibility.quickActionButton', { 
+              action: 'Parental Guidance'
+            })}
+            accessibilityRole="button"
+          >
+            <Text style={styles.actionIcon}>👨‍👩‍👧</Text>
+            <View style={styles.actionTextContainer}>
+              <Text style={styles.actionText}>Parental Guidance</Text>
+              <Text style={styles.actionSubtitle}>
+                Development tips & milestones
+              </Text>
+            </View>
+          </TouchableOpacity>
         </View>
       </View>
 

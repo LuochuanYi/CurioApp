@@ -315,5 +315,12 @@
     "enabled": "enabled",
     "disabled": "disabled",
     "currentlySelected": ", currently selected"
+  },
+  "parentalGuidance": {
+    "title": "Parental Guidance",
+    "selectAgeRange": "Select Baby's Age Range",
+    "commonConcerns": "Common Concerns",
+    "developmentMilestones": "Development Milestones",
+    "parentTips": "Parent Tips & Strategies"
   }
 }

@@ -19,14 +19,24 @@ const ParentalGuidanceScreen = ({ navigation }) => {
       <Text style={[TEXT_STYLES.heading2, styles.sectionTitle]}>
         {t('parentalGuidance.selectAgeRange', 'Select Baby\'s Age Range')}
       </Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
-        {guidanceSections.map((section) => (
+      <Text style={[TEXT_STYLES.small, styles.selectorDescription]}>
+        Tap to view developmental milestones and parenting tips for each stage
+      </Text>
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={true}
+        scrollEventThrottle={16}
+        style={styles.horizontalScroll}
+        contentContainerStyle={styles.scrollViewContent}
+      >
+        {guidanceSections.map((section, idx) => (
           <TouchableOpacity
             key={section.id}
             style={[
               styles.ageCard,
               { backgroundColor: section.backgroundColor },
-              selectedGuidance?.id === section.id && styles.ageCardSelected
+              selectedGuidance?.id === section.id && styles.ageCardSelected,
+              idx === guidanceSections.length - 1 && styles.lastAgeCard
             ]}
             onPress={() => setSelectedGuidance(section)}
           >
@@ -100,7 +110,16 @@ const ParentalGuidanceScreen = ({ navigation }) => {
       <Text style={[TEXT_STYLES.heading2, styles.sectionTitle]}>
         {t('parentalGuidance.commonConcerns', 'Common Concerns')}
       </Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.concernsScroll}>
+      <Text style={[TEXT_STYLES.small, styles.concernsDescription]}>
+        Universal parenting challenges & solutions for all ages 0-12 months
+      </Text>
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={true}
+        scrollEventThrottle={16}
+        style={styles.concernsScroll}
+        contentContainerStyle={styles.scrollViewContent}
+      >
         {Object.values(COMMON_CONCERNS).map((concern, idx) => (
           <TouchableOpacity
             key={idx}
@@ -200,22 +219,40 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   sectionTitle: {
-    marginBottom: 16,
+    marginBottom: 8,
     color: CURIO_THEME.colors.primary,
     textAlign: 'center',
+  },
+  selectorDescription: {
+    marginBottom: 12,
+    color: CURIO_THEME.colors.textSecondary,
+    textAlign: 'center',
+  },
+  concernsDescription: {
+    marginBottom: 12,
+    color: CURIO_THEME.colors.textSecondary,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  scrollViewContent: {
+    paddingHorizontal: 8,
   },
   horizontalScroll: {
     marginBottom: 16,
   },
   ageCard: {
-    width: width * 0.35,
-    marginRight: 12,
+    width: width * 0.28,
+    marginHorizontal: 8,
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
     borderColor: 'transparent',
+    minHeight: 140,
+  },
+  lastAgeCard: {
+    marginRight: 8,
   },
   ageCardSelected: {
     borderColor: CURIO_THEME.colors.primary,

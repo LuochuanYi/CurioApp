@@ -22,13 +22,7 @@ const ParentalGuidanceScreen = ({ navigation }) => {
       <Text style={[TEXT_STYLES.small, styles.selectorDescription]}>
         Tap to view developmental milestones and parenting tips for each stage
       </Text>
-      <ScrollView 
-        horizontal 
-        showsHorizontalScrollIndicator={true}
-        scrollEventThrottle={16}
-        style={styles.horizontalScroll}
-        contentContainerStyle={styles.scrollViewContent}
-      >
+      <View style={styles.verticalAgeCardsContainer}>
         {guidanceSections.map((section, idx) => (
           <TouchableOpacity
             key={section.id}
@@ -36,15 +30,18 @@ const ParentalGuidanceScreen = ({ navigation }) => {
               styles.ageCard,
               { backgroundColor: section.backgroundColor },
               selectedGuidance?.id === section.id && styles.ageCardSelected,
-              idx === guidanceSections.length - 1 && styles.lastAgeCard
             ]}
             onPress={() => setSelectedGuidance(section)}
           >
             <Text style={styles.ageCardIcon}>{section.icon}</Text>
-            <Text style={styles.ageCardText}>{section.ageRange}</Text>
+            <View style={styles.ageCardTextContainer}>
+              <Text style={styles.ageCardText}>{section.ageRange}</Text>
+              <Text style={styles.ageCardSubtext}>{section.title}</Text>
+            </View>
+            <Text style={styles.ageCardArrow}>→</Text>
           </TouchableOpacity>
         ))}
-      </ScrollView>
+      </View>
     </View>
   );
 
@@ -113,32 +110,36 @@ const ParentalGuidanceScreen = ({ navigation }) => {
       <Text style={[TEXT_STYLES.small, styles.concernsDescription]}>
         Universal parenting challenges & solutions for all ages 0-12 months
       </Text>
-      <ScrollView 
-        horizontal 
-        showsHorizontalScrollIndicator={true}
-        scrollEventThrottle={16}
-        style={styles.concernsScroll}
-        contentContainerStyle={styles.scrollViewContent}
-      >
+      <View style={styles.verticalConcernsContainer}>
         {Object.values(COMMON_CONCERNS).map((concern, idx) => (
-          <TouchableOpacity
+          <View
             key={idx}
             style={styles.concernCard}
-            onPress={() => setSelectedGuidance(null)}
           >
-            <Text style={styles.concernIcon}>{concern.icon}</Text>
-            <Text style={[TEXT_STYLES.heading3, styles.concernTitle]}>{concern.title}</Text>
-            <View style={styles.concernSolutions}>
-              {concern.solutions.slice(0, 2).map((solution, sIdx) => (
-                <Text key={sIdx} style={[TEXT_STYLES.small, styles.concernSolution]}>
-                  • {solution}
-                </Text>
-              ))}
-              <Text style={[TEXT_STYLES.small, styles.moreInfo]}>+{concern.solutions.length - 2} more</Text>
+            <View style={styles.concernHeader}>
+              <Text style={styles.concernIcon}>{concern.icon}</Text>
+              <View style={styles.concernHeaderText}>
+                <Text style={[TEXT_STYLES.heading3, styles.concernTitle]}>{concern.title}</Text>
+              </View>
             </View>
-          </TouchableOpacity>
+            <View style={styles.concernSolutions}>
+              {concern.solutions.slice(0, 3).map((solution, sIdx) => (
+                <View key={sIdx} style={styles.solutionItem}>
+                  <Text style={styles.solutionBullet}>•</Text>
+                  <Text style={[TEXT_STYLES.body, styles.concernSolution]}>
+                    {solution}
+                  </Text>
+                </View>
+              ))}
+              {concern.solutions.length > 3 && (
+                <Text style={[TEXT_STYLES.small, styles.moreInfo]}>
+                  +{concern.solutions.length - 3} more solutions
+                </Text>
+              )}
+            </View>
+          </View>
         ))}
-      </ScrollView>
+      </View>
     </View>
   );
 
@@ -216,104 +217,133 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   selectorContainer: {
-    padding: 16,
+    padding: 20,
   },
   sectionTitle: {
     marginBottom: 8,
     color: CURIO_THEME.colors.primary,
     textAlign: 'center',
+    fontSize: 24,
+    fontWeight: '600',
   },
   selectorDescription: {
-    marginBottom: 12,
+    marginBottom: 20,
     color: CURIO_THEME.colors.textSecondary,
     textAlign: 'center',
+    fontSize: 14,
   },
   concernsDescription: {
-    marginBottom: 12,
+    marginBottom: 20,
     color: CURIO_THEME.colors.textSecondary,
     textAlign: 'center',
     fontStyle: 'italic',
+    fontSize: 14,
   },
-  scrollViewContent: {
-    paddingHorizontal: 8,
-  },
-  horizontalScroll: {
-    marginBottom: 16,
+  // Vertical Age Cards Layout
+  verticalAgeCardsContainer: {
+    gap: 12,
   },
   ageCard: {
-    width: width * 0.28,
-    marginHorizontal: 8,
-    padding: 16,
-    borderRadius: 12,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    padding: 16,
+    borderRadius: 16,
     borderWidth: 2,
     borderColor: 'transparent',
-    minHeight: 140,
-  },
-  lastAgeCard: {
-    marginRight: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   ageCardSelected: {
     borderColor: CURIO_THEME.colors.primary,
-    elevation: 4,
+    elevation: 6,
     shadowColor: CURIO_THEME.colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
   },
   ageCardIcon: {
-    fontSize: 32,
-    marginBottom: 8,
+    fontSize: 36,
+    marginRight: 16,
+  },
+  ageCardTextContainer: {
+    flex: 1,
+    justifyContent: 'center',
   },
   ageCardText: {
     ...TEXT_STYLES.heading3,
-    textAlign: 'center',
+    color: CURIO_THEME.colors.text,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  ageCardSubtext: {
+    ...TEXT_STYLES.small,
+    color: CURIO_THEME.colors.textSecondary,
+  },
+  ageCardArrow: {
+    fontSize: 20,
+    color: CURIO_THEME.colors.primary,
+    fontWeight: 'bold',
+    marginLeft: 8,
   },
   detailContainer: {
     marginTop: 0,
   },
   guidanceHeader: {
-    padding: 20,
+    padding: 24,
     borderRadius: 0,
     alignItems: 'center',
   },
   backButton: {
     alignSelf: 'flex-start',
-    paddingBottom: 8,
+    paddingBottom: 12,
+    paddingHorizontal: 0,
   },
   backButtonText: {
     ...TEXT_STYLES.heading3,
     color: CURIO_THEME.colors.primary,
+    fontWeight: '600',
   },
   guidanceIcon: {
-    fontSize: 48,
-    marginVertical: 12,
+    fontSize: 56,
+    marginVertical: 16,
   },
   guidanceTitle: {
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
     color: CURIO_THEME.colors.text,
+    fontSize: 24,
+    fontWeight: '600',
   },
   guidanceDescription: {
     textAlign: 'center',
     color: CURIO_THEME.colors.textSecondary,
-    marginTop: 8,
+    marginTop: 12,
+    lineHeight: 20,
   },
   contentContainer: {
-    padding: 16,
+    padding: 20,
   },
   subsectionTitle: {
-    marginBottom: 12,
+    marginBottom: 16,
     color: CURIO_THEME.colors.primary,
+    fontSize: 18,
+    fontWeight: '600',
   },
   milestoneCard: {
     backgroundColor: '#F8F9FA',
     borderRadius: 12,
-    padding: 12,
+    padding: 14,
     marginBottom: 12,
     borderLeftWidth: 4,
     borderLeftColor: CURIO_THEME.colors.primary,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
   },
   milestoneCardExpanded: {
     backgroundColor: '#E8F4F8',
@@ -326,11 +356,13 @@ const styles = StyleSheet.create({
   milestoneTitle: {
     flex: 1,
     color: CURIO_THEME.colors.text,
+    fontWeight: '500',
   },
   expandIcon: {
     fontSize: 14,
     color: CURIO_THEME.colors.primary,
-    marginLeft: 8,
+    marginLeft: 12,
+    fontWeight: '600',
   },
   milestoneContent: {
     marginTop: 12,
@@ -340,7 +372,7 @@ const styles = StyleSheet.create({
   },
   milestoneItem: {
     flexDirection: 'row',
-    marginBottom: 8,
+    marginBottom: 10,
     alignItems: 'flex-start',
   },
   bulletPoint: {
@@ -348,22 +380,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginRight: 12,
     fontWeight: 'bold',
+    marginTop: 2,
   },
   milestoneItemText: {
     flex: 1,
     color: CURIO_THEME.colors.text,
+    lineHeight: 20,
   },
   tipSection: {
     marginBottom: 12,
     backgroundColor: '#FFF9E6',
     borderRadius: 12,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
   },
   tipHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 12,
+    padding: 14,
   },
   tipHeaderExpanded: {
     backgroundColor: '#FFF3CC',
@@ -371,16 +410,17 @@ const styles = StyleSheet.create({
   tipCategory: {
     flex: 1,
     color: CURIO_THEME.colors.text,
+    fontWeight: '500',
   },
   tipContent: {
-    paddingHorizontal: 12,
-    paddingBottom: 12,
+    paddingHorizontal: 14,
+    paddingBottom: 14,
     borderTopWidth: 1,
     borderTopColor: 'rgba(0, 0, 0, 0.1)',
   },
   tipItem: {
     flexDirection: 'row',
-    marginBottom: 8,
+    marginBottom: 10,
     alignItems: 'flex-start',
   },
   tipBullet: {
@@ -388,45 +428,77 @@ const styles = StyleSheet.create({
     color: CURIO_THEME.colors.primary,
     marginRight: 12,
     marginTop: 2,
+    fontWeight: '600',
   },
   tipText: {
     flex: 1,
     color: CURIO_THEME.colors.text,
+    lineHeight: 20,
   },
   concernsContainer: {
-    padding: 16,
+    padding: 20,
   },
-  concernsScroll: {
-    marginTop: 12,
+  // Vertical Concerns Layout
+  verticalConcernsContainer: {
+    gap: 14,
+    marginTop: 8,
   },
   concernCard: {
-    width: width * 0.42,
-    marginRight: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
     padding: 16,
-    backgroundColor: CURIO_THEME.colors.accent,
-    borderRadius: 12,
-    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: CURIO_THEME.colors.accent,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  concernHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 14,
   },
   concernIcon: {
     fontSize: 32,
-    marginBottom: 8,
+    marginRight: 12,
+    marginTop: 2,
+  },
+  concernHeaderText: {
+    flex: 1,
   },
   concernTitle: {
-    textAlign: 'center',
-    marginBottom: 12,
     color: CURIO_THEME.colors.text,
+    fontWeight: '600',
+    fontSize: 16,
   },
   concernSolutions: {
-    width: '100%',
+    marginTop: 8,
+  },
+  solutionItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 10,
+    paddingLeft: 0,
+  },
+  solutionBullet: {
+    fontSize: 14,
+    color: CURIO_THEME.colors.primary,
+    marginRight: 10,
+    marginTop: 2,
+    fontWeight: '600',
   },
   concernSolution: {
-    color: CURIO_THEME.colors.textSecondary,
-    marginBottom: 4,
+    flex: 1,
+    color: CURIO_THEME.colors.text,
+    lineHeight: 20,
   },
   moreInfo: {
     color: CURIO_THEME.colors.primary,
     fontWeight: '600',
-    marginTop: 8,
+    marginTop: 10,
+    paddingLeft: 24,
   },
 });
 

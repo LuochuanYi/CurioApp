@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTextToSpeech } from '../hooks/useTextToSpeech';
+import { useDynamicTranslation } from '../hooks/useDynamicTranslation';
 import { getBilingualStoryById, getLocalizedStory, getLocalizedCategory } from '../data/stories-bilingual';
 import { STORY_CATEGORIES, getStoryById } from '../data/stories';
 import { useBilingualContent } from '../hooks/useBilingualContent';
-import { getLocalizedStoryContent, isMixedBilingualContent } from '../utils/storyContentFilter';
+const { getLocalizedStoryContent, isMixedBilingualContent } = require('../utils/storyContentFilter');
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -108,11 +109,60 @@ const StoryDetailScreen = ({ navigation, route }) => {
   const { data, loading } = useHybridStoryDetail(story);
   const { t } = useTranslation();
   const { currentLanguage, isChineseMode } = useBilingualContent();
+  const { translateContent } = useDynamicTranslation();
+  
+  // State for translated content
+  const [translatedData, setTranslatedData] = useState(null);
+  const [isTranslating, setIsTranslating] = useState(false);
   
   // Debug logging
   console.log('🔄 StoryDetailScreen render - Loading:', loading);
   console.log('📚 Story data available:', !!data);
   console.log('🌐 Current Language:', currentLanguage);
+  
+  // Translate regular English stories to Chinese when needed
+  useEffect(() => {
+    const translateStory = async () => {
+      if (!data || loading) return;
+      
+      // Check if this is a regular English story (not a Chinese bedtime story with mixed content)
+      const hasMixedContent = data.content && isMixedBilingualContent(data.content);
+      const hasChineseTitle = !!data.chineseTitle;
+      const isChinesesBedtimeStory = hasMixedContent || hasChineseTitle;
+      
+      // Only translate non-Chinese bedtime stories when in Chinese mode
+      if (isChineseMode && !isChinesesBedtimeStory) {
+        console.log('📖 Translating regular English story to Chinese:', data.title);
+        setIsTranslating(true);
+        try {
+          // Translate the main content fields
+          const translatedTitle = await translateContent(data.title, 'en');
+          const translatedSummary = await translateContent(data.summary, 'en');
+          const translatedContent = await translateContent(data.content, 'en');
+          const translatedMoral = data.moral ? await translateContent(data.moral, 'en') : '';
+          
+          setTranslatedData({
+            ...data,
+            title: translatedTitle,
+            summary: translatedSummary,
+            content: translatedContent,
+            moral: translatedMoral
+          });
+          console.log('✅ Story translated successfully');
+        } catch (error) {
+          console.warn('⚠️ Translation failed, using original English:', error);
+          setTranslatedData(null); // Fall back to original
+        } finally {
+          setIsTranslating(false);
+        }
+      } else {
+        // Not in Chinese mode or is a Chinese bedtime story - no translation needed
+        setTranslatedData(null);
+      }
+    };
+    
+    translateStory();
+  }, [data, loading, isChineseMode, currentLanguage, translateContent]);
   
   // Text-to-speech with bilingual support
   const {
@@ -122,7 +172,7 @@ const StoryDetailScreen = ({ navigation, route }) => {
     isLoading,
     progress,
     formatProgress
-  } = useTextToSpeech(data?.content);
+  } = useTextToSpeech(translatedData?.content || data?.content);
 
   // Force re-render when TTS state changes
   const [renderKey, setRenderKey] = useState(0);
@@ -132,36 +182,39 @@ const StoryDetailScreen = ({ navigation, route }) => {
 
   // Smart content display function - works with both regular and bilingual stories
   const getDisplayContent = (field) => {
-    if (!data) return '';
+    // Use translated data if available
+    const displayData = translatedData || data;
+    if (!displayData) return '';
     
     // For regular Chinese stories, use Chinese-specific fields when available and in Chinese mode
-    if (isChineseMode && field === 'title' && data.chineseTitle) {
-      return data.chineseTitle;
+    if (isChineseMode && field === 'title' && displayData.chineseTitle) {
+      return displayData.chineseTitle;
     }
     
     // For story content, filter based on language setting if it's mixed bilingual
-    if (field === 'content' && data.content) {
+    if (field === 'content' && displayData.content) {
       // Check if this is a Chinese bedtime story with mixed language content
-      if (isMixedBilingualContent(data.content)) {
+      if (isMixedBilingualContent(displayData.content)) {
         console.log('🌐 Filtering mixed bilingual content for language:', currentLanguage);
         // Filter content based on current language setting
-        return getLocalizedStoryContent(data.content, currentLanguage, true);
+        return getLocalizedStoryContent(displayData.content, currentLanguage, true);
       }
     }
     
-    return data[field] || '';
+    return displayData[field] || '';
   };
   
   // Get the best title - works with both story systems
   const getTitle = () => {
-    if (!data) return '';
+    const displayData = translatedData || data;
+    if (!displayData) return '';
     
     // For regular Chinese stories in Chinese mode, show Chinese title prominently
-    if (isChineseMode && data.chineseTitle) {
-      return `${data.chineseTitle}\n(${data.title})`;
+    if (isChineseMode && displayData.chineseTitle) {
+      return `${displayData.chineseTitle}\n(${displayData.title})`;
     }
     
-    return data.title;
+    return displayData.title;
   };
 
   const handleSpeak = () => {

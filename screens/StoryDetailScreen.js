@@ -5,6 +5,7 @@ import { useTextToSpeech } from '../hooks/useTextToSpeech';
 import { getBilingualStoryById, getLocalizedStory, getLocalizedCategory } from '../data/stories-bilingual';
 import { STORY_CATEGORIES, getStoryById } from '../data/stories';
 import { useBilingualContent } from '../hooks/useBilingualContent';
+import { getLocalizedStoryContent, isMixedBilingualContent } from '../utils/storyContentFilter';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -136,6 +137,16 @@ const StoryDetailScreen = ({ navigation, route }) => {
     // For regular Chinese stories, use Chinese-specific fields when available and in Chinese mode
     if (isChineseMode && field === 'title' && data.chineseTitle) {
       return data.chineseTitle;
+    }
+    
+    // For story content, filter based on language setting if it's mixed bilingual
+    if (field === 'content' && data.content) {
+      // Check if this is a Chinese bedtime story with mixed language content
+      if (isMixedBilingualContent(data.content)) {
+        console.log('🌐 Filtering mixed bilingual content for language:', currentLanguage);
+        // Filter content based on current language setting
+        return getLocalizedStoryContent(data.content, currentLanguage, true);
+      }
     }
     
     return data[field] || '';

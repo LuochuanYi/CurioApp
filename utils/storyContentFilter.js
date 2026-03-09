@@ -10,7 +10,7 @@
  * @param {string} mixedContent - The raw story content with mixed languages
  * @returns {string} - English-only content
  */
-export const extractEnglishContent = (mixedContent) => {
+const extractEnglishContent = (mixedContent) => {
   if (!mixedContent) return '';
   
   const lines = mixedContent.split('\n');
@@ -77,7 +77,7 @@ export const extractEnglishContent = (mixedContent) => {
  * @param {boolean} includePinyin - Whether to include Pinyin in output (default: true)
  * @returns {string} - Chinese-only content
  */
-export const extractChineseContent = (mixedContent, includePinyin = true) => {
+const extractChineseContent = (mixedContent, includePinyin = true) => {
   if (!mixedContent) return '';
 
   const lines = mixedContent.split('\n');
@@ -149,7 +149,7 @@ export const extractChineseContent = (mixedContent, includePinyin = true) => {
  * @param {boolean} includePinyin - Whether to include Pinyin for Chinese (default: true)
  * @returns {string} - Language-appropriate story content
  */
-export const getLocalizedStoryContent = (content, language = 'en', includePinyin = true) => {
+const getLocalizedStoryContent = (content, language = 'en', includePinyin = true) => {
   if (!content) return '';
 
   // If content contains Chinese/mixed languages and language is set to English
@@ -172,7 +172,7 @@ export const getLocalizedStoryContent = (content, language = 'en', includePinyin
  * @param {string} content - The story content to check
  * @returns {boolean} - True if content contains mixed languages
  */
-export const isMixedBilingualContent = (content) => {
+const isMixedBilingualContent = (content) => {
   if (!content) return false;
 
   const chineseRegex = /[\u4E00-\u9FFF]/;
@@ -184,4 +184,12 @@ export const isMixedBilingualContent = (content) => {
     englishRegex.test(content) &&
     pinyinRegex.test(content)
   );
+};
+
+// Export functions for use in React Native/Expo
+module.exports = {
+  extractEnglishContent,
+  extractChineseContent,
+  getLocalizedStoryContent,
+  isMixedBilingualContent,
 };

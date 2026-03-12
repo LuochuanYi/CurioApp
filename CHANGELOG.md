@@ -5,6 +5,27 @@ All notable changes to CurioApp will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.1] - 2026-03-12
+
+### 🎯 Translation Completeness & Audio Continuity Fixes
+- **Chinese Story Translation Completeness**: Fixed mixed English/Chinese output in Chinese mode for long-form story content.
+  - Added translation quality guardrails to reject low-quality mixed Chinese fallback output.
+  - Updated provider behavior to prioritize full-sentence translation (`mymemory`) for dynamic content.
+  - Improved Chinese mode handling for story metadata (`title`, `summary`, `moral`) in bedtime content paths.
+- **Chinese Bedtime Content Filtering**: Improved Chinese-only extraction to remove English-only leakage while preserving intended Chinese and optional pinyin lines.
+- **Text-to-Speech Continuity**: Fixed narration stopping mid-story for long stories.
+  - Added robust segmentation for both English and Chinese punctuation (`. ! ? 。 ！ ？`).
+  - Added long-segment chunking to prevent Web/native TTS truncation on large paragraphs.
+
+### 🔧 Technical Fixes
+- **Performance Translation Service Import Fix**: Corrected `translationService` import in `services/performanceTranslationService.js` to restore translation pipeline reliability.
+- **Story Translation Priority**: Upgraded critical StoryDetail translation calls to high-priority execution for complete rendering in Chinese mode.
+
+### 🚀 Deployment
+- **Production Deploy**: Released to Netlify production site.
+  - URL: `https://curio-family-app.netlify.app`
+  - Commit: `6188c42`
+
 ## [1.6.0] - 2025-11-27
 
 ### 🎯 Critical Bug Fixes & Bilingual Enhancement

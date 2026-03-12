@@ -4,7 +4,7 @@
 
 > *Nurture imagination, together!* - A React Native educational app with advanced internationalization and dynamic content translation.
 
-[![Version](https://img.shields.io/badge/version-1.5.0-blue.svg)](https://github.com/LuochuanYi/CurioApp)
+[![Version](https://img.shields.io/badge/version-1.6.1-blue.svg)](https://github.com/LuochuanYi/CurioApp)
 [![React Native](https://img.shields.io/badge/React%20Native-0.81.5-green.svg)](https://reactnative.dev/)
 [![Expo](https://img.shields.io/badge/Expo-54+-black.svg)](https://expo.dev/)
 [![i18next](https://img.shields.io/badge/i18next-25.6+-orange.svg)](https://www.i18next.com/)
@@ -13,6 +13,13 @@
 ## 🌟 Overview
 
 CurioApp is a cutting-edge multilingual educational platform designed for children and families. It combines **static UI internationalization** with **dynamic content translation** to deliver a seamless experience across 6 languages while maintaining optimal performance through intelligent caching and fallback systems.
+
+### 🆕 Latest Update (2026-03-12)
+
+- Fixed incomplete Chinese translation in long English stories (removed mixed English/Chinese rendering in Chinese mode).
+- Improved Chinese bedtime story handling so metadata translation is complete while preserving Chinese story body filtering behavior.
+- Fixed text-to-speech stopping mid-story by adding robust bilingual sentence segmentation and long-paragraph chunking.
+- Shipped to production: `https://curio-family-app.netlify.app`
 
 ### ✨ Key Features
 

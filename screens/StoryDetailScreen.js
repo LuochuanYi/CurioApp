@@ -5,6 +5,7 @@ import { useTextToSpeech } from '../hooks/useTextToSpeech';
 import { useDynamicTranslation } from '../hooks/useDynamicTranslation';
 import { getBilingualStoryById, getLocalizedStory, getLocalizedCategory } from '../data/stories-bilingual';
 import { STORY_CATEGORIES, getStoryById } from '../data/stories';
+import { getStaticChineseStoryTranslation } from '../data/storyStaticChinese';
 import { useBilingualContent } from '../hooks/useBilingualContent';
 const { getLocalizedStoryContent, isMixedBilingualContent, filterMixedTitle } = require('../utils/storyContentFilter');
 
@@ -140,6 +141,18 @@ const StoryDetailScreen = ({ navigation, route }) => {
     // Only translate while in Chinese mode and for supported story types.
     if (!isChineseMode || (!shouldTranslateEnglishStory && !shouldTranslateChineseBedtimeMeta)) {
       setTranslatedData(null); // clear any previous translation
+      return;
+    }
+
+    // Prefer deterministic static Chinese translations when available.
+    // This prevents output drift across navigations caused by runtime provider variability.
+    const staticChinese = getStaticChineseStoryTranslation(data);
+    if (staticChinese) {
+      setTranslatedData({
+        ...data,
+        ...staticChinese,
+        language: 'Chinese'
+      });
       return;
     }
     

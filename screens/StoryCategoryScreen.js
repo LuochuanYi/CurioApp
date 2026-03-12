@@ -24,6 +24,7 @@ import {
   getBilingualStoryById, 
   getLocalizedStory 
 } from '../data/stories-bilingual';
+import { getStaticChineseStoryTranslation } from '../data/storyStaticChinese';
 import { useDynamicTranslation } from '../hooks/useDynamicTranslation';
 import { getLocalizedStoryContent, filterMixedTitle } from '../utils/storyContentFilter';
 import { useBilingualContent } from '../hooks/useBilingualContent';
@@ -74,6 +75,18 @@ const StoryCategoryScreen = ({ route }) => {
 
       const results = await Promise.all(stories.map(async story => {
         let display = { ...story };
+
+        // Pin known high-importance stories to deterministic Chinese copy.
+        if (currentLanguage === 'zh') {
+          const staticChinese = getStaticChineseStoryTranslation(display);
+          if (staticChinese) {
+            display = {
+              ...display,
+              ...staticChinese
+            };
+            return display;
+          }
+        }
 
         if (story.category === 'chinese-bedtime') {
           // filter title and summary for selected language

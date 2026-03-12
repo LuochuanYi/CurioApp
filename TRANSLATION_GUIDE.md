@@ -25,6 +25,14 @@ CurioApp implements a **dual-layer translation architecture** that combines:
 - **Static UI Internationalization**: Traditional i18next-based translation for UI elements
 - **Dynamic Content Translation**: Real-time translation service for stories, songs, and activities
 
+### Latest Stability Update (2026-03-12)
+
+- Dynamic provider default is now `mymemory` for improved sentence-level Chinese story translation quality.
+- Translation pipeline now includes a Chinese quality gate to reject mixed/low-quality fallback output.
+- Story detail flow now prioritizes high-priority translation for long story fields to prevent partial translation rendering.
+- Chinese bedtime story metadata (`summary`, `moral`) is translated in Chinese mode while bilingual story body filtering remains language-aware.
+- Text-to-speech segmentation now supports both English and Chinese punctuation and chunks long paragraphs to prevent mid-story cutoff.
+
 ### Key Benefits
 
 ✅ **Flexibility**: Switch between static and dynamic translations based on content type  
@@ -266,6 +274,16 @@ class TranslationService {
   }
 }
 ```
+
+### Translation Quality Guard (Chinese)
+
+When target language is Chinese (`zh`), the service validates translation quality before accepting a result:
+
+- Rejects outputs with no Chinese characters.
+- Rejects outputs where English dominates significantly over Chinese.
+- Falls through to alternate provider/fallback path instead of returning mixed output directly.
+
+This guard is implemented in `services/translationService.js` and is designed to reduce mixed-language story bodies in Chinese mode.
 
 ### Caching Implementation
 

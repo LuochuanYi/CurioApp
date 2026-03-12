@@ -1,5 +1,5 @@
 import { enhancedTranslationCache } from './enhancedTranslationCache';
-import { translationService } from './translationService';
+import translationService from './translationService';
 import { logTranslation, logError, logInfo } from '../utils/logger';
 
 /**

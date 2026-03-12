@@ -142,6 +142,13 @@ const extractChineseContent = (mixedContent, includePinyin = true) => {
       continue;
     }
 
+    // For Chinese mode, drop plain English lines aggressively.
+    // This prevents mixed bilingual story bodies from showing untranslated
+    // English paragraphs in the Chinese reading view.
+    if (/[A-Za-z]/.test(line) && !chineseRegex.test(line)) {
+      continue;
+    }
+
     // Skip English-only lines and quoted English text
     if (line.match(/^[""]/)) {
       continue;

@@ -3,6 +3,51 @@ import * as Speech from 'expo-speech';
 import { Platform } from 'react-native';
 import { logSpeech, logError, logWarn } from '../utils/logger';
 
+const MAX_SEGMENT_LENGTH = 180;
+
+const splitLongSegment = (segment) => {
+  const text = (segment || '').trim();
+  if (!text) return [];
+  if (text.length <= MAX_SEGMENT_LENGTH) return [text];
+
+  const parts = [];
+  let remaining = text;
+  while (remaining.length > MAX_SEGMENT_LENGTH) {
+    const slice = remaining.slice(0, MAX_SEGMENT_LENGTH);
+    // Prefer breaking on whitespace to avoid abrupt word splits in long English segments.
+    const breakAt = Math.max(slice.lastIndexOf(' '), slice.lastIndexOf('\n'));
+    const cut = breakAt > 40 ? breakAt : MAX_SEGMENT_LENGTH;
+    parts.push(remaining.slice(0, cut).trim());
+    remaining = remaining.slice(cut).trim();
+  }
+  if (remaining) parts.push(remaining);
+  return parts;
+};
+
+const splitStoryIntoSegments = (storyContent = '') => {
+  const normalized = String(storyContent)
+    .replace(/\r\n/g, '\n')
+    .replace(/\u2026/g, '。');
+
+  const rawSegments = normalized
+    // Split on English and Chinese sentence-ending punctuation plus line breaks.
+    .split(/(?<=[.!?。！？])\s*|\n+/)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+
+  const segments = [];
+  rawSegments.forEach((segment) => {
+    const chunks = splitLongSegment(segment);
+    chunks.forEach((chunk) => {
+      if (!chunk) return;
+      const normalizedChunk = /[.!?。！？]$/.test(chunk) ? chunk : `${chunk}.`;
+      segments.push(normalizedChunk);
+    });
+  });
+
+  return segments;
+};
+
 // Ensure voices are loaded
 const ensureVoicesLoaded = () => {
   return new Promise((resolve) => {
@@ -182,18 +227,9 @@ export const useTextToSpeech = (storyContent) => {
     if (storyContent) {
       logSpeech('Processing story content:', storyContent.substring(0, 100) + '...');
       
-      // Split by periods, exclamation marks, and question marks, but keep the punctuation
-      const sentenceArray = storyContent
-        .split(/(?<=[.!?])\s+/)
-        .map(s => s.trim())
-        .filter(s => s.length > 3) // Filter out very short fragments
-        .map(s => {
-          // Add period if sentence doesn't end with punctuation
-          if (!/[.!?]$/.test(s)) {
-            return s + '.';
-          }
-          return s;
-        });
+      // Segment narration using both English and Chinese punctuation,
+      // then hard-limit segment size to avoid browser/native TTS truncation.
+      const sentenceArray = splitStoryIntoSegments(storyContent);
       
       sentences.current = sentenceArray;
       totalSentences.current = sentenceArray.length;

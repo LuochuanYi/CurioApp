@@ -128,15 +128,17 @@ const StoryDetailScreen = ({ navigation, route }) => {
       return;
     }
     
-    // Check if this is a regular English story (not a Chinese bedtime story with mixed content)
     // Determine the original language of the story (set by bilingual lookup or static data)
     const storyLanguage = data.language || 'English'; // default to English if unspecified
+    const isChineseBedtimeStory = data.category === STORY_CATEGORIES.CHINESE_BEDTIME.id;
+    const shouldTranslateEnglishStory = storyLanguage === 'English';
 
-    // Only translate when the app is in Chinese mode AND the story is originally English
-    // This prevents re-translating content that is already in Chinese (including bilingual
-    // stories imported from the bilingual library) and also skips Chinese-bedtime stories
-    // which already manage their own bilingual content.
-    if (!isChineseMode || storyLanguage !== 'English') {
+    // Chinese bedtime stories already contain bilingual body content, but summary/moral
+    // are often English-only metadata and still need translation in Chinese mode.
+    const shouldTranslateChineseBedtimeMeta = isChineseBedtimeStory;
+
+    // Only translate while in Chinese mode and for supported story types.
+    if (!isChineseMode || (!shouldTranslateEnglishStory && !shouldTranslateChineseBedtimeMeta)) {
       setTranslatedData(null); // clear any previous translation
       return;
     }
@@ -147,12 +149,19 @@ const StoryDetailScreen = ({ navigation, route }) => {
       setIsTranslating(true);
       try {
         // Translate the main content fields with a timeout
-        const translationPromise = Promise.all([
-          translateContent(data.title, 'en'),
-          translateContent(data.summary, 'en'),
-          translateContent(data.content, 'en'),
-          data.moral ? translateContent(data.moral, 'en') : Promise.resolve('')
-        ]);
+        const translationPromise = shouldTranslateEnglishStory
+          ? Promise.all([
+              translateContent(data.title, 'en', { priority: 'high' }),
+              translateContent(data.summary, 'en', { priority: 'high' }),
+              translateContent(data.content, 'en', { priority: 'high' }),
+              data.moral ? translateContent(data.moral, 'en', { priority: 'high' }) : Promise.resolve('')
+            ])
+          : Promise.all([
+              Promise.resolve(filterMixedTitle(data.title, 'zh')),
+              data.summary ? translateContent(data.summary, 'en', { priority: 'high' }) : Promise.resolve(''),
+              Promise.resolve(data.content),
+              data.moral ? translateContent(data.moral, 'en', { priority: 'high' }) : Promise.resolve('')
+            ]);
         
         // Add timeout to prevent hanging
         const timeoutPromise = new Promise((_, reject) => 

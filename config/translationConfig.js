@@ -2,8 +2,8 @@
 // Static bilingual content provides instant, accurate translations
 
 export const TRANSLATION_CONFIG = {
-  // Translation services disabled - using static bilingual content now!
-  provider: 'disabled', // No longer needed with bilingual content system
+  // Prefer free sentence-level API for dynamic story translation quality.
+  provider: 'mymemory',
   
   // API keys (keep these secure in real apps)
   apiKeys: {

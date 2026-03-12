@@ -18,6 +18,17 @@ class TranslationService {
     };
   }
 
+  // Guard against mixed/failed Chinese output from weak fallback translators
+  isLowQualityChineseTranslation(translatedText, originalText) {
+    if (!translatedText || translatedText === originalText) return true;
+
+    const chineseChars = (translatedText.match(/[\u4e00-\u9fff]/g) || []).length;
+    const englishChars = (translatedText.match(/[A-Za-z]/g) || []).length;
+
+    // If there's no Chinese, or English dominates heavily, treat as low quality.
+    return chineseChars === 0 || englishChars > chineseChars * 1.2;
+  }
+
   // Generate cache key for translations
   getCacheKey(text, fromLang, toLang) {
     return `${fromLang}-${toLang}-${text.substring(0, 50)}`;
@@ -34,11 +45,15 @@ class TranslationService {
       return this.getMockTranslation(text, fromLang, toLang);
     }
     
-    // Try MyMemory API (free, no key required)
-    if (TRANSLATION_CONFIG.provider === 'mymemory') {
+    // Try MyMemory API (free, no key required).
+    // Also use it as the first real attempt when provider is disabled for Chinese.
+    if (TRANSLATION_CONFIG.provider === 'mymemory' || (TRANSLATION_CONFIG.provider === 'disabled' && toLang === 'zh')) {
       try {
         logTranslation('Using MyMemory API for translation');
         const result = await translateWithMyMemory(text, toLang, fromLang);
+        if (toLang === 'zh' && this.isLowQualityChineseTranslation(result, text)) {
+          throw new Error('MyMemory returned low-quality Chinese translation');
+        }
         logTranslation(`MyMemory translation successful: "${result.substring(0, 50)}..."`);
         return result;
       } catch (error) {
@@ -65,6 +80,10 @@ class TranslationService {
       logTranslation(`Calling alternative translation service...`);
       const alternativeResult = await alternativeTranslationService.translateWithBackup(text, toLang);
       logTranslation(`Alternative service returned: "${alternativeResult.substring(0, 50)}..."`);
+
+      if (toLang === 'zh' && this.isLowQualityChineseTranslation(alternativeResult, text)) {
+        throw new Error('Alternative service returned mixed/low-quality Chinese output');
+      }
       
       if (alternativeResult && alternativeResult !== text) {
         logTranslation(`Alternative translation successful: "${alternativeResult.substring(0, 50)}..."`);

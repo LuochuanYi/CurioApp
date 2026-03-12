@@ -3,6 +3,22 @@
  * Handles Chinese bedtime stories with mixed Chinese/Pinyin/English format
  */
 
+// Helper to clean up titles that contain both Chinese and English segments
+const filterMixedTitle = (text = '', language = 'en') => {
+  if (!text) return '';
+  if (language === 'en') {
+    return text
+      .replace(/[\u4E00-\u9FFF]/g, '')        // remove Chinese characters
+      .replace(/\([^)]*\)/g, '')              // remove pinyin in parentheses
+      .replace(/\s*[-–—]\s*/g, '')            // drop hyphen separators
+      .trim();
+  }
+  if (language === 'zh') {
+    return text.split(' - ')[0].trim();
+  }
+  return text;
+};
+
 /**
  * Extracts English-only content from mixed bilingual story format
  * Removes Chinese text and Pinyin lines, keeps only English
@@ -119,6 +135,13 @@ const extractChineseContent = (mixedContent, includePinyin = true) => {
       continue;
     }
 
+    // If the line contains only pinyin (diacritics) and we are including pinyin,
+    // this should also be kept so pronunciation guidance remains available.
+    if (includePinyin && line.match(/[āáǎàēéěèīíǐìōóǒòūúǔù]/) && !chineseRegex.test(line)) {
+      chineseLines.push(line);
+      continue;
+    }
+
     // Skip English-only lines and quoted English text
     if (line.match(/^[""]/)) {
       continue;
@@ -172,6 +195,22 @@ const getLocalizedStoryContent = (content, language = 'en', includePinyin = true
  * @param {string} content - The story content to check
  * @returns {boolean} - True if content contains mixed languages
  */
+// Helper to clean up titles that contain both languages
+const filterMixedTitle = (text = '', language = 'en') => {
+  if (!text) return '';
+  if (language === 'en') {
+    return text
+      .replace(/[\u4E00-\u9FFF]/g, '')        // remove Chinese chars
+      .replace(/\([^)]*\)/g, '')              // remove pinyin parentheses
+      .replace(/\s*[-–—]\s*/g, '')            // remove separator hyphen
+      .trim();
+  }
+  if (language === 'zh') {
+    return text.split(' - ')[0].trim();
+  }
+  return text;
+};
+
 const isMixedBilingualContent = (content) => {
   if (!content) return false;
 
@@ -192,4 +231,5 @@ module.exports = {
   extractChineseContent,
   getLocalizedStoryContent,
   isMixedBilingualContent,
+  filterMixedTitle,
 };

@@ -6,7 +6,7 @@ import { useDynamicTranslation } from '../hooks/useDynamicTranslation';
 import { getBilingualStoryById, getLocalizedStory, getLocalizedCategory } from '../data/stories-bilingual';
 import { STORY_CATEGORIES, getStoryById } from '../data/stories';
 import { useBilingualContent } from '../hooks/useBilingualContent';
-const { getLocalizedStoryContent, isMixedBilingualContent } = require('../utils/storyContentFilter');
+const { getLocalizedStoryContent, isMixedBilingualContent, filterMixedTitle } = require('../utils/storyContentFilter');
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -129,14 +129,15 @@ const StoryDetailScreen = ({ navigation, route }) => {
     }
     
     // Check if this is a regular English story (not a Chinese bedtime story with mixed content)
-    const hasMixedContent = data.content && isMixedBilingualContent(data.content);
-    const hasChineseTitle = !!data.chineseTitle;
-    const isChinesesBedtimeStory = hasMixedContent || hasChineseTitle;
-    
-    // Only translate non-Chinese bedtime stories when in Chinese mode
-    if (!isChineseMode || isChinesesBedtimeStory) {
-      // Not in Chinese mode or is a Chinese bedtime story - no translation needed
-      setTranslatedData(null);
+    // Determine the original language of the story (set by bilingual lookup or static data)
+    const storyLanguage = data.language || 'English'; // default to English if unspecified
+
+    // Only translate when the app is in Chinese mode AND the story is originally English
+    // This prevents re-translating content that is already in Chinese (including bilingual
+    // stories imported from the bilingual library) and also skips Chinese-bedtime stories
+    // which already manage their own bilingual content.
+    if (!isChineseMode || storyLanguage !== 'English') {
+      setTranslatedData(null); // clear any previous translation
       return;
     }
     
@@ -166,7 +167,8 @@ const StoryDetailScreen = ({ navigation, route }) => {
           title: translatedTitle,
           summary: translatedSummary,
           content: translatedContent,
-          moral: translatedMoral || ''
+          moral: translatedMoral || '',
+          language: 'Chinese' // mark as translated so we don't re-translate again
         });
         console.log('✅ Story translated successfully');
       } catch (error) {
@@ -181,6 +183,17 @@ const StoryDetailScreen = ({ navigation, route }) => {
   }, [data, loading, isChineseMode, currentLanguage]);
   
   // Text-to-speech with bilingual support
+  // always feed the TTS engine the content that the user actually sees;
+  // this ensures Chinese bedtime stories are stripped of the unwanted language
+  // before being spoken (fixes the mixed Chinese/Pinyin/English audio bug)
+  let ttsText = getDisplayContent('content');
+  // for Chinese mode we don't want the pinyin text read aloud, just the core
+  if (isChineseMode && (translatedData || data)?.category === STORY_CATEGORIES.CHINESE_BEDTIME.id) {
+    // prefer translated copy if available
+    const source = translatedData?.content || data.content;
+    ttsText = getLocalizedStoryContent(source, 'zh', false);
+  }
+
   const {
     playPause,
     stopStory,
@@ -188,7 +201,7 @@ const StoryDetailScreen = ({ navigation, route }) => {
     isLoading,
     progress,
     formatProgress
-  } = useTextToSpeech(translatedData?.content || data?.content);
+  } = useTextToSpeech(ttsText);
 
   // Force re-render when TTS state changes
   const [renderKey, setRenderKey] = useState(0);
@@ -224,12 +237,17 @@ const StoryDetailScreen = ({ navigation, route }) => {
   const getTitle = () => {
     const displayData = translatedData || data;
     if (!displayData) return '';
-    
+
+    // Chinese bedtime stories use filterMixedTitle to strip the unwanted portion
+    if (displayData.category === STORY_CATEGORIES.CHINESE_BEDTIME.id) {
+      return filterMixedTitle(displayData.title, currentLanguage);
+    }
+
     // For regular Chinese stories in Chinese mode, show Chinese title prominently
     if (isChineseMode && displayData.chineseTitle) {
       return `${displayData.chineseTitle}\n(${displayData.title})`;
     }
-    
+
     return displayData.title;
   };
 

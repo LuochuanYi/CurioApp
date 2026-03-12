@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -25,6 +25,8 @@ import {
   getBilingualStoryById, 
   getLocalizedStory 
 } from '../data/stories-bilingual';
+import { useDynamicTranslation } from '../hooks/useDynamicTranslation';
+import { getLocalizedStoryContent, filterMixedTitle } from '../utils/storyContentFilter';
 import { useBilingualContent } from '../hooks/useBilingualContent';
 
 // Helper function to add opacity to hex colors for React Native Web compatibility
@@ -41,6 +43,24 @@ const addOpacityToColor = (color, opacity) => {
   return color;
 };
 
+
+// Helper to strip/choose appropriate title segments for Chinese bedtime stories
+const filterMixedTitle = (text = '', language = 'en') => {
+  if (language === 'en') {
+    // for English mode we want to remove any Chinese characters or pinyin segments
+    return text
+      .replace(/[\u4E00-\u9FFF]/g, '')        // strip Chinese characters
+      .replace(/\([^)]*\)/g, '')              // strip anything inside parentheses (pinyin)
+      .replace(/\s*[-–—]\s*/g, '')            // remove hyphen separators
+      .trim();
+  }
+  if (language === 'zh') {
+    // Chinese mode: keep the first portion before the English hyphen
+    return text.split(' - ')[0].trim();
+  }
+  return text;
+};
+
 const { width } = Dimensions.get('window');
 
 const StoryCategoryScreen = ({ route }) => {
@@ -54,55 +74,73 @@ const StoryCategoryScreen = ({ route }) => {
   // Get category information
   const category = Object.values(STORY_CATEGORIES || {}).find(cat => cat?.id === categoryId);
   
-  // Function to get localized story content for display
-  const getLocalizedStoryDisplay = (story) => {
-    // For Chinese bedtime stories, return as-is (they're already bilingual)
-    if (story.category === 'chinese-bedtime') {
-      return story;
-    }
-    
-    // For regular stories, try to get bilingual version
-    const bilingualStory = getBilingualStoryById(story.id);
-    if (bilingualStory) {
-      const localizedStory = getLocalizedStory(bilingualStory, currentLanguage);
-      return {
-        ...story, // Keep original ID and other metadata
-        title: localizedStory.title,
-        summary: localizedStory.summary,
-        duration: localizedStory.duration || story.duration,
-        ageGroup: localizedStory.ageGroup || story.ageGroup
-      };
-    }
-    
-    // Fallback to original story
-    return story;
-  };
-  
   console.log('🔍 StoryCategoryScreen - categoryId:', categoryId);
   console.log('🔍 StoryCategoryScreen - found category:', category);
   console.log('🌐 Current Language for Display:', currentLanguage);
 
   // Get stories for this category with search filtering and localization
+  const [localizedStories, setLocalizedStories] = useState([]);
+
+  const { translateContent } = useDynamicTranslation();
+
+  // asynchronously load and localize stories whenever category or language changes
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      let stories = getStoriesByCategory(categoryId) || [];
+      console.log('🔍 StoryCategoryScreen - found stories count:', stories.length);
+
+      const results = await Promise.all(stories.map(async story => {
+        let display = { ...story };
+
+        if (story.category === 'chinese-bedtime') {
+          // filter title and summary for selected language
+          display.title = filterMixedTitle(display.title, currentLanguage);
+          display.summary = getLocalizedStoryContent(display.summary, currentLanguage);
+        } else {
+          const bilingualStory = getBilingualStoryById(story.id);
+          if (bilingualStory) {
+            const localized = getLocalizedStory(bilingualStory, currentLanguage);
+            display = {
+              ...display,
+              title: localized.title,
+              summary: localized.summary,
+              duration: localized.duration || story.duration,
+              ageGroup: localized.ageGroup || story.ageGroup
+            };
+          } else if (currentLanguage === 'zh') {
+            // dynamic fallback translation for stories without pretranslated copy
+            try {
+              display.title = await translateContent(display.title, 'en');
+              display.summary = await translateContent(display.summary, 'en');
+            } catch (e) {
+              console.warn('Translation fallback failed for story', story.id, e?.message);
+            }
+          }
+        }
+
+        return display;
+      }));
+
+      if (active) setLocalizedStories(results);
+    };
+
+    load();
+    return () => { active = false; };
+  }, [categoryId, currentLanguage]);
+
   const filteredStories = useMemo(() => {
-    let stories = getStoriesByCategory(categoryId) || [];
-    
-    console.log('🔍 StoryCategoryScreen - found stories:', stories.length, stories.map(s => s.title));
-    
-    // Apply localization to stories for display
-    stories = stories.map(story => getLocalizedStoryDisplay(story));
-    
-    // Apply search filter if needed
+    let stories = localizedStories.slice();
     if (searchQuery.trim()) {
       const lowerQuery = searchQuery.toLowerCase();
-      stories = stories.filter(story => 
+      stories = stories.filter(story =>
         story.title?.toLowerCase().includes(lowerQuery) ||
         story.summary?.toLowerCase().includes(lowerQuery) ||
         story.tags?.some(tag => tag.toLowerCase().includes(lowerQuery))
       );
     }
-    
     return stories;
-  }, [categoryId, searchQuery, currentLanguage]);
+  }, [localizedStories, searchQuery]);
 
   const handleStoryPress = (story) => {
     console.log(`Opening story: ${story.title}`);

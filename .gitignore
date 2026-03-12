@@ -133,3 +133,5 @@ tmp/
 /assets/assets/
 /assets/translations/
 *.zip
+# Local Netlify folder
+.netlify

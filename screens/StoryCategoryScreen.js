@@ -18,8 +18,7 @@ import { CurioHeader } from '../components';
 import { CURIO_THEME } from '../theme';
 import { 
   STORY_CATEGORIES, 
-  getStoriesByCategory,
-  STORY_LIBRARY
+  getStoriesByCategory
 } from '../data/stories';
 import { 
   getBilingualStoryById, 
@@ -44,29 +43,12 @@ const addOpacityToColor = (color, opacity) => {
 };
 
 
-// Helper to strip/choose appropriate title segments for Chinese bedtime stories
-const filterMixedTitle = (text = '', language = 'en') => {
-  if (language === 'en') {
-    // for English mode we want to remove any Chinese characters or pinyin segments
-    return text
-      .replace(/[\u4E00-\u9FFF]/g, '')        // strip Chinese characters
-      .replace(/\([^)]*\)/g, '')              // strip anything inside parentheses (pinyin)
-      .replace(/\s*[-–—]\s*/g, '')            // remove hyphen separators
-      .trim();
-  }
-  if (language === 'zh') {
-    // Chinese mode: keep the first portion before the English hyphen
-    return text.split(' - ')[0].trim();
-  }
-  return text;
-};
-
 const { width } = Dimensions.get('window');
 
 const StoryCategoryScreen = ({ route }) => {
   const navigation = useNavigation();
   const { t } = useTranslation();
-  const { currentLanguage, isChineseMode } = useBilingualContent();
+  const { currentLanguage } = useBilingualContent();
   
   const categoryId = route.params?.categoryId;
   const [searchQuery, setSearchQuery] = useState('');

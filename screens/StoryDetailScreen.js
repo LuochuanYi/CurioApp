@@ -210,7 +210,7 @@ const StoryDetailScreen = ({ navigation, route }) => {
   }, [isLoading, isPlaying]);
 
   // Smart content display function - works with both regular and bilingual stories
-  const getDisplayContent = (field) => {
+  function getDisplayContent(field) {
     // Use translated data if available
     const displayData = translatedData || data;
     if (!displayData) return '';
@@ -231,7 +231,7 @@ const StoryDetailScreen = ({ navigation, route }) => {
     }
     
     return displayData[field] || '';
-  };
+  }
   
   // Get the best title - works with both story systems
   const getTitle = () => {
